@@ -12,7 +12,7 @@ namespace schemaforge.Crucible.Extensions
     /// <param name="str">String to check for emptiness.</param>
     public static bool IsNullOrEmpty(this string str)
     {
-      return string.IsNullOrEmpty(str) || string.IsNullOrWhiteSpace(str);
+      return string.IsNullOrWhiteSpace(str);
     }
 
     /// <summary>
@@ -94,16 +94,19 @@ namespace schemaforge.Crucible.Extensions
       {
         throw new ArgumentException("String to search must not be null or empty.");
       }
+
       char[] charArray = input.ToCharArray();
       int length = charArray.Length;
       int count = 0;
-      for (int i = length - 1; i >= 0; i--)
+
+      for (int i = length - 1; i-- > 0;)
       {
         if (charArray[i] == target)
         {
           count++;
         }
       }
+
       return count;
     }
   }
