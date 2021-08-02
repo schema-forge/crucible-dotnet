@@ -22,7 +22,7 @@ namespace SchemaControllerTests
     [Fact]
     public void ConfigTokenValidConfiguration()
     {
-      var token = new ConfigToken("TestToken", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!", ApplyConstraints<string>());
+      ConfigToken token = new ConfigToken("TestToken", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!", ApplyConstraints<string>());
       Assert.Equal("TestToken", token.TokenName);
       Assert.Equal("Hi, this is what this value does and hopefully what you did wrong in order to see this message!", token.HelpString);
     }
@@ -42,7 +42,7 @@ namespace SchemaControllerTests
     [Fact]
     public void ConfigTokenValidConfigurationWithOptional()
     {
-      var token = new ConfigToken("TestToken", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!", "This is what you get if you don't put anything in for TestToken!", ApplyConstraints<string>());
+      ConfigToken token = new ConfigToken("TestToken", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!", "This is what you get if you don't put anything in for TestToken!", ApplyConstraints<string>());
       Assert.Equal("TestToken", token.TokenName);
       Assert.Equal("Hi, this is what this value does and hopefully what you did wrong in order to see this message!", token.HelpString);
       Assert.Equal("This is what you get if you don't put anything in for TestToken!", token.DefaultValue);

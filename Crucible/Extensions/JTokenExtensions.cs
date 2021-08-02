@@ -84,9 +84,9 @@ namespace schemaforge.Crucible.Extensions
         }
       }
       List<T> newList = new();
-      foreach (var i in input)
+      foreach (JToken i in input)
       {
-        var result = TryConvert(i);
+        (bool, T) result = TryConvert(i);
         if (result.Item1)
         {
           newList.Add(result.Item2);

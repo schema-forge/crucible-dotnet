@@ -69,7 +69,7 @@ namespace schemaforge.Crucible
       {
         message = $"Validation for {type} {name} failed.";
       }
-      foreach (var token in required)
+      foreach (ConfigToken token in required)
       {
         if (!config.ContainsKey(token.TokenName))
         {
@@ -94,7 +94,7 @@ namespace schemaforge.Crucible
           Valid = false;
         }
       }
-      foreach (var token in optional)
+      foreach (ConfigToken token in optional)
       {
         if (!config.ContainsKey(token.TokenName) && token.DefaultValue != null)
         {
@@ -118,7 +118,7 @@ namespace schemaforge.Crucible
           therefore, we invalidate the config file if there are any tokens that are not accounted for in Required and Optional put together.
 
       */
-      foreach (var property in config)
+      foreach (KeyValuePair<string, JToken> property in config)
       {
         if (!required.Select(x => x.TokenName).Contains(property.Key) && !optional.Select(x => x.TokenName).Contains(property.Key))
         {
@@ -147,11 +147,11 @@ namespace schemaforge.Crucible
     public override string ToString()
     {
       JObject configJson = new();
-      foreach (var token in RequiredConfigTokens)
+      foreach (ConfigToken token in RequiredConfigTokens)
       {
         configJson.Add(token.TokenName, UserConfig.ContainsKey(token.TokenName) ? UserConfig[token.TokenName].ToString() : "");
       }
-      foreach (var token in OptionalConfigTokens)
+      foreach (ConfigToken token in OptionalConfigTokens)
       {
         configJson.Add(token.TokenName, UserConfig.ContainsKey(token.TokenName) ? UserConfig[token.TokenName].ToString() : token.DefaultValue ?? "");
       }
@@ -166,11 +166,11 @@ namespace schemaforge.Crucible
     public JObject GenerateEmptyConfig()
     {
       JObject newConfig = new();
-      foreach (var token in RequiredConfigTokens)
+      foreach (ConfigToken token in RequiredConfigTokens)
       {
         newConfig.Add(token.TokenName, token.HelpString);
       }
-      foreach (var token in OptionalConfigTokens)
+      foreach (ConfigToken token in OptionalConfigTokens)
       {
         newConfig.Add(token.TokenName, "Optional - " + token.HelpString);
       }
@@ -205,7 +205,7 @@ namespace schemaforge.Crucible
         try
         {
           T castValue = inputToken.Value<T>();
-          foreach (var constraint in constraints)
+          foreach (Func<JToken, string, bool> constraint in constraints)
           {
             if (!constraint(inputToken, tokenName))
             {
@@ -249,7 +249,7 @@ namespace schemaforge.Crucible
           T1 castValue = inputToken.Value<T1>();
           if (!(constraintsIfT1 == null))
           {
-            foreach (var constraint in constraintsIfT1)
+            foreach (Func<JToken, string, bool> constraint in constraintsIfT1)
             {
               if (!constraint(inputToken, tokenName))
               {
@@ -270,7 +270,7 @@ namespace schemaforge.Crucible
             T2 castValue = inputToken.Value<T2>();
             if (!(constraintsIfT2 == null))
             {
-              foreach (var constraint in constraintsIfT2)
+              foreach (Func<JToken, string, bool> constraint in constraintsIfT2)
               {
                 if (!constraint(inputToken, tokenName))
                 {
@@ -322,7 +322,7 @@ namespace schemaforge.Crucible
       {
         string inputString = inputToken.ToString();
         bool matchesAtLeastOne = false;
-        foreach (var pattern in patterns)
+        foreach (Regex pattern in patterns)
         {
           if (pattern.IsMatch(inputString))
           {
@@ -411,7 +411,7 @@ namespace schemaforge.Crucible
       {
         string inputString = inputToken.ToString();
         bool containsForbidden = false;
-        foreach (var forbiddenCharacter in forbiddenCharacters)
+        foreach (char forbiddenCharacter in forbiddenCharacters)
         {
           if (inputString.IndexOf(forbiddenCharacter) != -1)
           {
@@ -483,7 +483,7 @@ namespace schemaforge.Crucible
     /// <returns>Function checking to ensure that the value of the passed JToken is within at least one of the provided domains.</returns>
     protected Func<JToken, string, bool> ConstrainNumericValue(params (double, double)[] domains)
     {
-      foreach (var domain in domains)
+      foreach ((double, double) domain in domains)
       {
         if (domain.Item1 > domain.Item2)
         {
@@ -494,7 +494,7 @@ namespace schemaforge.Crucible
       {
         double inputValue = (double)inputToken;
         bool matchesAtLeastOne = false;
-        foreach (var domain in domains)
+        foreach ((double, double) domain in domains)
         {
           if (inputValue >= domain.Item1 && inputValue <= domain.Item2)
           {
@@ -518,7 +518,7 @@ namespace schemaforge.Crucible
     /// <returns>Function checking to ensure that the value of the passed JToken is within at least one of the provided domains.</returns>
     protected Func<JToken, string, bool> ConstrainNumericValue(params (int, int)[] domains)
     {
-      foreach (var domain in domains)
+      foreach ((int, int) domain in domains)
       {
         if (domain.Item1 > domain.Item2)
         {
@@ -529,7 +529,7 @@ namespace schemaforge.Crucible
       {
         double inputValue = (double)inputToken;
         bool matchesAtLeastOne = false;
-        foreach (var domain in domains)
+        foreach ((int, int) domain in domains)
         {
           if (inputValue >= domain.Item1 && inputValue <= domain.Item2)
           {
@@ -692,12 +692,12 @@ namespace schemaforge.Crucible
       {
         JArray inputArray = (JArray)inputToken;
         bool allPassed = true;
-        foreach (var value in inputArray)
+        foreach (JToken value in inputArray)
         {
           try
           {
             T castValue = value.Value<T>();
-            foreach (var constraint in constraints)
+            foreach (Func<JToken, string, bool> constraint in constraints)
             {
               if (!constraint(value, "in array " + inputName))
               {
