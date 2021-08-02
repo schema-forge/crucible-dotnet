@@ -99,6 +99,7 @@ namespace schemaforge.Crucible.Extensions
     /// <summary>
     /// Attempts to add passed item to the given JToken. If the JToken is not an array, throws an exception.
     /// </summary>
+    /// <exception cref="ArgumentException">Throws ArgumentException if type of token is not JTokenType.Array</exception>
     /// <param name="token">JToken to add to if it is an array.</param>
     /// <param name="item">Item to add to the array.</param>
     public static void Add<T>(this JToken token, T item)
@@ -114,10 +115,12 @@ namespace schemaforge.Crucible.Extensions
     }
 
     /// <summary>
-    /// Attempts to add passed item to the given JToken. If the JToken is not an array, throws an exception.
+    /// Attempts to add passed item to the given JToken. If the JToken is not an object, throws an exception.
     /// </summary>
+    /// <exception cref="ArgumentException">Throws ArgumentException if type of token is not JTokenType.Object or if name is null, empty, or whitespace.</exception>
     /// <param name="token">JToken to add to if it is an array.</param>
-    /// <param name="item">Item to add to the array.</param>
+    /// <param name="name">Name of the new property to add to the object.</param>
+    /// <param name="value">Value of the new property to add to the object.</param>
     public static void Add(this JToken token, string name, JToken value)
     {
       if (name.IsNullOrEmpty())

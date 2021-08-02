@@ -13,11 +13,26 @@ namespace schemaforge.Crucible
     public string DefaultValue { get; private set; } // If the DefaultValue is set and the user's config does not contain a value for this token, the UserConfig JObject stored in the JsonConfig parent will be modified to contain the token with the default value set.
     protected Func<JToken, string, bool> ValidationFunction { get; private set; } // This function will be executed on the value found in the user config for this token, if a value exists.
 
+    /// <summary>
+    /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
+    /// </summary>
+    /// <exception cref="ArgumentException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
+    /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
+    /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config.</param>
     public ConfigToken(string inputName, string inputHelpString, Func<JToken, string, bool> inputValidationFunction)
     {
       BuildConfigToken(inputName, inputHelpString, null, inputValidationFunction);
     }
 
+    /// <summary>
+    /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
+    /// </summary>
+    /// <exception cref="ArgumentException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
+    /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
+    /// <param name="inputDefaultValue">String that will be inserted into the user config if an optional token is not provided.</param>
+    /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config.</param>
     public ConfigToken(string inputName, string inputHelpString, string inputDefaultValue, Func<JToken, string, bool> inputValidationFunction)
     {
       BuildConfigToken(inputName, inputHelpString, inputDefaultValue, inputValidationFunction);

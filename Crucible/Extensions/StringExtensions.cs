@@ -20,6 +20,7 @@ namespace schemaforge.Crucible.Extensions
     /// </summary>
     /// <param name="str">String to search.</param>
     /// <param name="value">String to search for.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if str or value is null, empty, or whitespace.</exception>
     /// <returns>List of all indices of the search value within the target string.</returns>
     public static List<int> AllIndexesOf(this string str, string value)
     {
@@ -53,6 +54,7 @@ namespace schemaforge.Crucible.Extensions
     /// </summary>
     /// <param name="str">String to search.</param>
     /// <param name="value">Char to search for.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if str is null, empty, or whitespace.</exception>
     /// <returns>List of all indices of the search value within the target string.</returns>
     public static List<int> AllIndexesOf(this string str, char value)
     {
@@ -84,6 +86,7 @@ namespace schemaforge.Crucible.Extensions
     /// </summary>
     /// <param name="input">Input string to search.</param>
     /// <param name="target">Char to search for.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if input is null, empty, or whitespace.</exception>
     /// <returns>Number of times char occurs in input.</returns>
     public static int CountOfChar(this string input, char target)
     {

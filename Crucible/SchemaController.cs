@@ -374,6 +374,7 @@ namespace schemaforge.Crucible
     /// </summary>
     /// <param name="lowerBound">Minimum length of passed string.</param>
     /// <param name="upperBound">Maximum length of passed string.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if lowerBound is greater than upperBound.</exception>
     /// <returns>Function that ensures the length of a string is at least lowerBound and at most upperBound.</returns>
     protected Func<JToken, string, bool> ConstrainStringLength(int lowerBound, int upperBound)
     {
@@ -398,6 +399,7 @@ namespace schemaforge.Crucible
     /// Forbids characters from a string.
     /// </summary>
     /// <param name="forbiddenCharacters">Characters that cannot occur in the input string.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if no chars are passed.</exception>
     /// <returns>Function that ensures the input string does not contain any of the passed characters.</returns>
     protected Func<JToken, string, bool> ForbidStringCharacters(params char[] forbiddenCharacters)
     {
@@ -453,6 +455,7 @@ namespace schemaforge.Crucible
     /// </summary>
     /// <param name="lowerBound">Double used as the lower bound in the returned function, inclusive.</param>
     /// <param name="upperBound">Double used as the upper bound in the returned function, inclusive.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if upperBound is greater than lowerBound.</exception>
     /// <returns>Function checking to ensure that the value of the passed JToken is greater than the provided lower bound.</returns>
     protected Func<JToken, string, bool> ConstrainNumericValue(double lowerBound, double upperBound)
     {
@@ -476,6 +479,7 @@ namespace schemaforge.Crucible
     /// Constrains numeric values using any number of provided domains as tuples in format (lowerBound, upperBound)
     /// </summary>
     /// <param name="domains">(double, double) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if the first item of any passed tuple is greater than the second item.</exception>
     /// <returns>Function checking to ensure that the value of the passed JToken is within at least one of the provided domains.</returns>
     protected Func<JToken, string, bool> ConstrainNumericValue(params (double, double)[] domains)
     {
@@ -510,6 +514,7 @@ namespace schemaforge.Crucible
     /// Constrains numeric values using any number of provided domains as tuples in format (lowerBound, upperBound)
     /// </summary>
     /// <param name="domains">(int, int) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if the first item of any passed tuple is greater than the second item.</exception>
     /// <returns>Function checking to ensure that the value of the passed JToken is within at least one of the provided domains.</returns>
     protected Func<JToken, string, bool> ConstrainNumericValue(params (int, int)[] domains)
     {
@@ -654,6 +659,7 @@ namespace schemaforge.Crucible
     /// </summary>
     /// <param name="lowerBound">Minimum number of items in the target JArray.</param>
     /// <param name="upperBound">Maximum number of items in the target JArray.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if lowerBound is greater than upperBound.</exception>
     /// <returns>Function ensuring a JArray has at least lowerBound and at most upperBound items.</returns>
     protected Func<JToken, string, bool> ConstrainArrayCount(int lowerBound, int upperBound)
     {
