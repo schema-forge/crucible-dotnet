@@ -31,7 +31,7 @@ namespace schemaforge.Crucible
       }
       if (inputHelpString.IsNullOrEmpty())
       {
-        throw new ArgumentException("HelpString of config token " + inputName + " is null or empty.");
+        throw new ArgumentException($"HelpString of config token {inputName} is null or empty.");
       }
       TokenName = inputName;
       ValidationFunction = inputValidationFunction;

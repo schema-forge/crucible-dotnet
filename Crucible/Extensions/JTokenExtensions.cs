@@ -9,7 +9,8 @@ namespace schemaforge.Crucible.Extensions
   public static class JTokenExtensions
   {
     /// <summary>
-    /// Checks if the given JToken is an empty string, contains no array values, has no properties, is null or undefined, or has a JProperty value matching these conditions, depending on type.
+    /// Checks if the given JToken is an empty string, contains no array values, has no properties,
+    /// is null or undefined, or has a JProperty value matching these conditions, depending on type.
     /// </summary>
     /// <param name="token">JToken to check. If it is a JProperty, the method will be executed on the name and the value of the JProperty.</param>
     /// <returns></returns>
@@ -108,7 +109,7 @@ namespace schemaforge.Crucible.Extensions
           ((JArray)token).Add(item);
           break;
         default:
-          throw new ArgumentException("Attempted to add item " + item + " to non-array JToken.");
+          throw new ArgumentException($"Attempted to add item {item} to non-array JToken.");
       }
     }
 
@@ -121,7 +122,7 @@ namespace schemaforge.Crucible.Extensions
     {
       if (name.IsNullOrEmpty())
       {
-        throw new ArgumentException("Tried to add a property with a null or empty name to JObject " + token.ToString());
+        throw new ArgumentException($"Tried to add a property with a null or empty name to JObject {token}");
       }
       switch (token.Type)
       {
@@ -129,7 +130,7 @@ namespace schemaforge.Crucible.Extensions
           ((JObject)token).Add(name, value);
           break;
         default:
-          throw new ArgumentException("Attempted to add property " + name + ": " + value + " to non-object JToken.");
+          throw new ArgumentException($"Attempted to add property {name}: {value} to non-object JToken.");
       }
     }
   }

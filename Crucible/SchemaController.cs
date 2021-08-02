@@ -67,7 +67,7 @@ namespace schemaforge.Crucible
       // Name is usually the token name of the sub-configuration.
       if (!(string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(type)))
       {
-        message = "Validation for " + type + " " + name + " failed.";
+        message = $"Validation for {type} {name} failed.";
       }
       foreach (var token in required)
       {
@@ -75,17 +75,17 @@ namespace schemaforge.Crucible
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add("User config is missing required token " + token.TokenName + "\n" + token.HelpString);
+            ErrorList.Add($"User config is missing required token {token.TokenName}\n{token.HelpString}");
           }
           else
           {
-            ErrorList.Add(type + " " + name + " is missing required token " + token.TokenName + "\n" + token.HelpString);
+            ErrorList.Add($"{type} {name} is missing required token {token.TokenName}\n{token.HelpString}");
           }
           Valid = false;
         }
         else if (config[token.TokenName].IsNullOrEmpty())
         {
-          ErrorList.Add("Value of token " + token.TokenName + " is null or empty.");
+          ErrorList.Add($"Value of token {token.TokenName} is null or empty.");
           Valid = false;
         }
         else if (!token.Validate(config[token.TokenName]))
@@ -124,11 +124,11 @@ namespace schemaforge.Crucible
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add("User config file contains unrecognized token: " + property.Key);
+            ErrorList.Add($"User config file contains unrecognized token: {property.Key}");
           }
           else
           {
-            ErrorList.Add(type + " " + name + " contains unrecognized token: " + property.Key);
+            ErrorList.Add($"{type} {name} contains unrecognized token: {property.Key}");
           }
           Valid = false;
         }
@@ -198,7 +198,7 @@ namespace schemaforge.Crucible
       {
         if (inputToken.IsNullOrEmpty())
         {
-          ErrorList.Add("The value of token " + tokenName + " is empty or null.");
+          ErrorList.Add($"The value of token {tokenName} is empty or null.");
           return false;
         }
         bool validToken = true;
@@ -216,7 +216,7 @@ namespace schemaforge.Crucible
         }
         catch
         {
-          ErrorList.Add("Token " + tokenName + " with value " + inputToken.ToString() + " is an incorrect type. Expected value type: " + typeof(T).ToString());
+          ErrorList.Add($"Token {tokenName} with value {inputToken} is an incorrect type. Expected value type: {typeof(T)}");
           return false;
         }
       }
@@ -240,7 +240,7 @@ namespace schemaforge.Crucible
       {
         if (inputToken.IsNullOrEmpty())
         {
-          ErrorList.Add("The value of token " + tokenName + " is empty or null.");
+          ErrorList.Add($"The value of token {tokenName} is empty or null.");
           return false;
         }
         bool validToken = true;
@@ -286,7 +286,7 @@ namespace schemaforge.Crucible
           }
           catch
           {
-            ErrorList.Add("Token " + tokenName + " with value " + inputToken.ToString() + " is an incorrect type. Expected one of: " + typeof(T1).ToString() + ", " + typeof(T2).ToString());
+            ErrorList.Add($"Token {tokenName} with value {inputToken} is an incorrect type. Expected one of: {typeof(T1)}, {typeof(T2)}");
             return false;
           }
         }
@@ -306,7 +306,7 @@ namespace schemaforge.Crucible
       {
         if (!acceptableValues.Contains(inputToken.ToString())) //Returns false if inputString is not in provided list
         {
-          ErrorList.Add("Input " + inputName + " with value " + inputToken.ToString() + " is not valid. Valid values: " + string.Join(", ", acceptableValues)); // Tell the user what's wrong and how to fix it.
+          ErrorList.Add($"Input {inputName} with value {inputToken} is not valid. Valid values: {string.Join(", ", acceptableValues)}"); // Tell the user what's wrong and how to fix it.
           return false;
         }
         return true;
@@ -336,11 +336,11 @@ namespace schemaforge.Crucible
         {
           if (patterns.Length == 1)
           {
-            ErrorList.Add("Token " + inputName + " with value " + inputToken + " is not an exact match to pattern " + patterns[0]);
+            ErrorList.Add($"Token {inputName} with value {inputToken} is not an exact match to pattern {patterns[0]}");
           }
           else
           {
-            ErrorList.Add("Token " + inputName + " with value " + inputToken + " is not an exact match to any pattern: " + string.Join<Regex>(" ", patterns));
+            ErrorList.Add($"Token {inputName} with value {inputToken} is not an exact match to any pattern: {string.Join<Regex>(" ", patterns)}");
           }
           return false;
         }
@@ -361,7 +361,7 @@ namespace schemaforge.Crucible
         string inputString = inputToken.ToString();
         if (inputString.Length < lowerBound)
         {
-          ErrorList.Add("Token " + inputName + " with value " + inputToken + " must have a length of at least " + lowerBound + ". Actual length: " + inputString.Length);
+          ErrorList.Add($"Token {inputName} with value {inputToken} must have a length of at least {lowerBound}. Actual length: {inputString.Length}");
           return false;
         }
         return true;
@@ -379,14 +379,14 @@ namespace schemaforge.Crucible
     {
       if (lowerBound > upperBound)
       {
-        throw new ArgumentException("ConstrainStringLength lowerBound must be less than or equal to upperBound. Passed lowerBound: " + lowerBound + " Passed upperBound: " + upperBound);
+        throw new ArgumentException($"ConstrainStringLength lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
       bool InnerMethod(JToken inputToken, string inputName)
       {
         string inputString = inputToken.ToString();
         if (inputString.Length < lowerBound || inputString.Length > upperBound)
         {
-          ErrorList.Add("Token " + inputName + " with value " + inputToken + " must have a length of at least " + lowerBound + " and at most " + upperBound + ". Actual length: " + inputString.Length);
+          ErrorList.Add($"Token {inputName} with value {inputToken} must have a length of at least {lowerBound} and at most {upperBound}. Actual length: {inputString.Length}");
           return false;
         }
         return true;
@@ -418,7 +418,7 @@ namespace schemaforge.Crucible
         }
         if (containsForbidden)
         {
-          ErrorList.Add("Token " + inputName + " with value " + inputToken + " contains at least one of a forbidden character: " + string.Join(" ", forbiddenCharacters));
+          ErrorList.Add($"Token {inputName} with value {inputToken} contains at least one of a forbidden character: {string.Join(" ", forbiddenCharacters)}");
         }
         return !containsForbidden;
       }
@@ -440,7 +440,7 @@ namespace schemaforge.Crucible
       {
         if ((double)inputToken < lowerBound)
         {
-          ErrorList.Add("Token " + inputName + " with value " + inputToken.ToString() + " is less than enforced lower bound " + lowerBound);
+          ErrorList.Add($"Token {inputName} with value {inputToken} is less than enforced lower bound {lowerBound}");
           return false;
         }
         return true;
@@ -458,13 +458,13 @@ namespace schemaforge.Crucible
     {
       if (lowerBound > upperBound)
       {
-        throw new ArgumentException("ConstrainNumericValue lower bound must be less than or equal to upper bound. Passed lowerBound: " + lowerBound + " Passed upperBound: " + upperBound);
+        throw new ArgumentException($"ConstrainNumericValue lower bound must be less than or equal to upper bound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
       bool InnerMethod(JToken inputToken, string inputName)
       {
         if ((double)inputToken < lowerBound || (double)inputToken > upperBound)
         {
-          ErrorList.Add("Token " + inputName + " with value " + inputToken.ToString() + " is invalid. Value must be greater than or equal to " + lowerBound + " and less than or equal to " + upperBound);
+          ErrorList.Add($"Token {inputName} with value {inputToken} is invalid. Value must be greater than or equal to {lowerBound} and less than or equal to {upperBound}");
           return false;
         }
         return true;
@@ -483,7 +483,7 @@ namespace schemaforge.Crucible
       {
         if (domain.Item1 > domain.Item2)
         {
-          throw new ArgumentException("Domain " + domain.ToString() + " is invalid: Item 1 (lower bound) must be less than Item 2 (upper bound)");
+          throw new ArgumentException($"Domain {domain} is invalid: Item 1 (lower bound) must be less than Item 2 (upper bound)");
         }
       }
       bool InnerMethod(JToken inputToken, string inputName)
@@ -499,7 +499,7 @@ namespace schemaforge.Crucible
         }
         if (!matchesAtLeastOne)
         {
-          ErrorList.Add("Token " + inputName + " with value " + inputValue.ToString() + " is invalid. Value must fall within one of the following domains, inclusive: " + string.Join(" ", domains.Select(x => x.ToString())));
+          ErrorList.Add($"Token {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}");
         }
         return matchesAtLeastOne;
       }
@@ -517,7 +517,7 @@ namespace schemaforge.Crucible
       {
         if (domain.Item1 > domain.Item2)
         {
-          throw new ArgumentException("Domain " + domain.ToString() + " is invalid: Item 1 (lower bound) must be less than Item 2 (upper bound).");
+          throw new ArgumentException($"Domain {domain} is invalid: Item 1 (lower bound) must be less than Item 2 (upper bound).");
         }
       }
       bool InnerMethod(JToken inputToken, string inputName)
@@ -533,7 +533,7 @@ namespace schemaforge.Crucible
         }
         if (!matchesAtLeastOne)
         {
-          ErrorList.Add("Token " + inputName + " with value " + inputValue.ToString() + " is invalid. Value must fall within one of the following domains, inclusive: " + string.Join(" ", domains.Select(x => x.ToString())));
+          ErrorList.Add($"Token {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}");
         }
         return matchesAtLeastOne;
       }
@@ -592,7 +592,7 @@ namespace schemaforge.Crucible
         JObject inputJson = (JObject)inputToken;
         if (inputJson.Count < lowerBound)
         {
-          ErrorList.Add("Value of token " + inputName + " is invalid. Value has " + inputJson.Count + " properties, but must have at least " + lowerBound + " properties.");
+          ErrorList.Add($"Value of token {inputName} is invalid. Value has {inputJson.Count} properties, but must have at least {lowerBound} properties.");
           return false;
         }
         return true;
@@ -610,14 +610,14 @@ namespace schemaforge.Crucible
     {
       if (lowerBound > upperBound)
       {
-        throw new ArgumentException("ConstrainPropertyCount lowerBound must be less than upperBound. Passed lowerBound: " + lowerBound + " Passed upperBound: " + upperBound);
+        throw new ArgumentException($"ConstrainPropertyCount lowerBound must be less than upperBound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
       bool InnerMethod(JToken inputToken, string inputName)
       {
         JObject inputJson = (JObject)inputToken;
         if (inputJson.Count < lowerBound || inputJson.Count > upperBound)
         {
-          ErrorList.Add("Value of token " + inputName + " is invalid. Value has " + inputJson.Count + " properties, but must have at least " + lowerBound + " properties and at most " + upperBound + " properties.");
+          ErrorList.Add($"Value of token {inputName} is invalid. Value has {inputJson.Count} properties, but must have at least {lowerBound} properties and at most {upperBound} properties.");
           return false;
         }
         return true;
@@ -641,7 +641,7 @@ namespace schemaforge.Crucible
         JArray inputArray = (JArray)inputToken;
         if (inputArray.Count < lowerBound)
         {
-          ErrorList.Add("Value of token " + inputName + " contains " + inputArray.Count + " values, but must contain at least " + lowerBound + " values.");
+          ErrorList.Add($"Value of token {inputName} contains {inputArray.Count} values, but must contain at least {lowerBound} values.");
           return false;
         }
         return true;
@@ -659,14 +659,14 @@ namespace schemaforge.Crucible
     {
       if (lowerBound > upperBound)
       {
-        throw new ArgumentException("ConstrainArrayCount lowerBound must be less than or equal to upperBound. Passed lowerBound: " + lowerBound + " Passed upperBound: " + upperBound);
+        throw new ArgumentException($"ConstrainArrayCount lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: " + upperBound);
       }
       bool InnerMethod(JToken inputToken, string inputName)
       {
         JArray inputArray = (JArray)inputToken;
         if (inputArray.Count < lowerBound || inputArray.Count > upperBound)
         {
-          ErrorList.Add("Value of token " + inputName + " contains " + inputArray.Count + " values, but must contain between " + lowerBound + " and " + upperBound + " values.");
+          ErrorList.Add($"Value of token {inputName} contains {inputArray.Count} values, but must contain between {lowerBound} and {upperBound} values.");
           return false;
         }
         return true;
@@ -701,7 +701,7 @@ namespace schemaforge.Crucible
           }
           catch
           {
-            ErrorList.Add("Value " + value + " in array " + inputName + " is an incorrect type. Expected value type: " + typeof(T).ToString());
+            ErrorList.Add($"Value {value} in array {inputName} is an incorrect type. Expected value type: {typeof(T)}");
             allPassed = false;
           }
         }
