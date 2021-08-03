@@ -23,15 +23,15 @@ namespace schemaforge.Crucible
     /// Contains all errors generated during validation and the associated HelpStrings of each token that was marked invalid.
     /// Should be printed to console or returned as part of an HTTP 400 response.
     /// </summary>
-    public List<string> ErrorList { get; set; } = new List<string>();
+    public List<Error> ErrorList { get; } = new();
     /// <summary>
     /// Should be populated with the JObject that is being checked with RequiredConfigTokens and OptionalConfigTokens.
     /// </summary>
-    public JObject UserConfig { get; set; }
+    public JObject UserConfig { get; protected set; }
     /// <summary>
     /// Indicates if any step of validation failed.
     /// </summary>
-    public bool Valid { get; set; } = true;
+    public bool Valid { get; protected set; } = true;
 
     /// <summary>
     /// Checks UserConfig against RequiredConfigTokens and OptionalConfigTokens.
@@ -75,22 +75,23 @@ namespace schemaforge.Crucible
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add($"User config is missing required token {token.TokenName}\n{token.HelpString}");
+            ErrorList.Add(new Error($"User config is missing required token {token.TokenName}\n{token.HelpString}"));
           }
           else
           {
-            ErrorList.Add($"{type} {name} is missing required token {token.TokenName}\n{token.HelpString}");
+            ErrorList.Add(new Error($"{type} {name} is missing required token {token.TokenName}\n{token.HelpString}"));
           }
           Valid = false;
         }
         else if (config[token.TokenName].IsNullOrEmpty())
         {
-          ErrorList.Add($"Value of token {token.TokenName} is null or empty.");
+          ErrorList.Add(new Error($"Value of token {token.TokenName} is null or empty.",Severity.NullOrEmpty));
           Valid = false;
         }
         else if (!token.Validate(config[token.TokenName]))
         {
-          ErrorList.Add(token.HelpString);
+          ErrorList.AddRange(token.ErrorList);
+          ErrorList.Add(new Error(token.HelpString,Severity.Info));
           Valid = false;
         }
       }
@@ -102,7 +103,8 @@ namespace schemaforge.Crucible
         }
         else if (config.ContainsKey(token.TokenName) && !token.Validate(config[token.TokenName]))
         {
-          ErrorList.Add(token.HelpString);
+          ErrorList.AddRange(token.ErrorList);
+          ErrorList.Add(new Error(token.HelpString, Severity.Info));
           Valid = false;
         }
       }
@@ -124,18 +126,18 @@ namespace schemaforge.Crucible
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add($"User config file contains unrecognized token: {property.Key}");
+            ErrorList.Add(new Error($"User config file contains unrecognized token: {property.Key}"));
           }
           else
           {
-            ErrorList.Add($"{type} {name} contains unrecognized token: {property.Key}");
+            ErrorList.Add(new Error($"{type} {name} contains unrecognized token: {property.Key}"));
           }
           Valid = false;
         }
       }
       if (!Valid && !string.IsNullOrWhiteSpace(message))
       {
-        ErrorList.Add(message);
+        ErrorList.Add(new Error(message,Severity.Info));
       }
     }
 
@@ -192,32 +194,29 @@ namespace schemaforge.Crucible
     /// <typeparam name="T">Type that the token value will be cast to.</typeparam>
     /// <param name="constraints">Functions to execute on the token value after cast is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public Func<JToken, string, bool> ApplyConstraints<T>(params Func<JToken, string, bool>[] constraints)
+    public Func<JToken, string, List<Error>> ApplyConstraints<T>(params Func<JToken, string, List<Error>>[] constraints)
     {
-      bool ValidationFunction(JToken inputToken, string tokenName)
+      List<Error> ValidationFunction(JToken inputToken, string tokenName)
       {
+        List<Error> internalErrorList = new();
         if (inputToken.IsNullOrEmpty())
         {
-          ErrorList.Add($"The value of token {tokenName} is empty or null.");
-          return false;
+          internalErrorList.Add(new Error($"The value of token {tokenName} is empty or null.",Severity.NullOrEmpty));
+          return internalErrorList;
         }
-        bool validToken = true;
         try
         {
           T castValue = inputToken.Value<T>();
-          foreach (Func<JToken, string, bool> constraint in constraints)
+          foreach (Func<JToken, string, List<Error>> constraint in constraints)
           {
-            if (!constraint(inputToken, tokenName))
-            {
-              validToken = false;
-            }
+            internalErrorList.AddRange(constraint(inputToken, tokenName));
           }
-          return validToken;
+          return internalErrorList;
         }
         catch
         {
-          ErrorList.Add($"Token {tokenName} with value {inputToken} is an incorrect type. Expected value type: {typeof(T)}");
-          return false;
+          internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected value type: {typeof(T)}"));
+          return internalErrorList;
         }
       }
       return ValidationFunction;
@@ -234,33 +233,30 @@ namespace schemaforge.Crucible
     /// <param name="constraintsIfT1">Functions to execute on the token value if casting to T1 is successful.</param>
     /// <param name="constraintsIfT2">Functions to execute on the token value if casting to T2 is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public Func<JToken, string, bool> ApplyConstraints<T1, T2>(Func<JToken, string, bool>[] constraintsIfT1 = null, Func<JToken, string, bool>[] constraintsIfT2 = null)
+    public Func<JToken, string, List<Error>> ApplyConstraints<T1, T2>(Func<JToken, string, List<Error>>[] constraintsIfT1 = null, Func<JToken, string, List<Error>>[] constraintsIfT2 = null)
     {
-      bool ValidationFunction(JToken inputToken, string tokenName)
+      List<Error> ValidationFunction(JToken inputToken, string tokenName)
       {
+        List<Error> internalErrorList = new();
         if (inputToken.IsNullOrEmpty())
         {
-          ErrorList.Add($"The value of token {tokenName} is empty or null.");
-          return false;
+          internalErrorList.Add(new Error($"The value of token {tokenName} is empty or null.", Severity.NullOrEmpty));
+          return internalErrorList;
         }
-        bool validToken = true;
         try
         {
           T1 castValue = inputToken.Value<T1>();
           if (!(constraintsIfT1 == null))
           {
-            foreach (Func<JToken, string, bool> constraint in constraintsIfT1)
+            foreach (Func<JToken, string, List<Error>> constraint in constraintsIfT1)
             {
-              if (!constraint(inputToken, tokenName))
-              {
-                validToken = false;
-              }
+              internalErrorList.AddRange(constraint(inputToken, tokenName));
             }
-            return validToken;
+            return internalErrorList;
           }
           else
           {
-            return true;
+            return internalErrorList;
           }
         }
         catch
@@ -270,24 +266,21 @@ namespace schemaforge.Crucible
             T2 castValue = inputToken.Value<T2>();
             if (!(constraintsIfT2 == null))
             {
-              foreach (Func<JToken, string, bool> constraint in constraintsIfT2)
+              foreach (Func<JToken, string, List<Error>> constraint in constraintsIfT2)
               {
-                if (!constraint(inputToken, tokenName))
-                {
-                  validToken = false;
-                }
+                internalErrorList.AddRange(constraint(inputToken, tokenName));
               }
-              return validToken;
+              return internalErrorList;
             }
             else
             {
-              return true;
+              return internalErrorList;
             }
           }
           catch
           {
-            ErrorList.Add($"Token {tokenName} with value {inputToken} is an incorrect type. Expected one of: {typeof(T1)}, {typeof(T2)}");
-            return false;
+            internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected one of: {typeof(T1)}, {typeof(T2)}"));
+            return internalErrorList;
           }
         }
       }
@@ -300,26 +293,28 @@ namespace schemaforge.Crucible
 
     /// <param name="acceptableValues">List of values used to build the returned function.</param>
     /// <returns>Function checking to ensure that the value of the passed JToken is one of acceptableValues.</returns>
-    protected Func<JToken, string, bool> ConstrainStringValues(params string[] acceptableValues)
+    protected Func<JToken, string, List<Error>> ConstrainStringValues(params string[] acceptableValues)
     {
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         if (!acceptableValues.Contains(inputToken.ToString())) //Returns false if inputString is not in provided list
         {
-          ErrorList.Add($"Input {inputName} with value {inputToken} is not valid. Valid values: {string.Join(", ", acceptableValues)}"); // Tell the user what's wrong and how to fix it.
-          return false;
+          internalErrorList.Add(new Error($"Input {inputName} with value {inputToken} is not valid. Valid values: {string.Join(", ", acceptableValues)}")); // Tell the user what's wrong and how to fix it.
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
 
     /// <param name="pattern">Valid Regex pattern(s) used in the returned function.</param>
     /// <returns>Function checking to ensure that the whole JToken matches at least one of the provided pattern strings.</returns>
-    protected Func<JToken, string, bool> ConstrainStringWithRegexExact(params Regex[] patterns)
+    protected Func<JToken, string, List<Error>> ConstrainStringWithRegexExact(params Regex[] patterns)
     {
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         string inputString = inputToken.ToString();
         bool matchesAtLeastOne = false;
         foreach (Regex pattern in patterns)
@@ -336,15 +331,15 @@ namespace schemaforge.Crucible
         {
           if (patterns.Length == 1)
           {
-            ErrorList.Add($"Token {inputName} with value {inputToken} is not an exact match to pattern {patterns[0]}");
+            internalErrorList.Add(new Error($"Token {inputName} with value {inputToken} is not an exact match to pattern {patterns[0]}"));
           }
           else
           {
-            ErrorList.Add($"Token {inputName} with value {inputToken} is not an exact match to any pattern: {string.Join<Regex>(" ", patterns)}");
+            internalErrorList.Add(new Error($"Token {inputName} with value {inputToken} is not an exact match to any pattern: {string.Join<Regex>(" ", patterns)}"));
           }
-          return false;
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -354,17 +349,18 @@ namespace schemaforge.Crucible
     /// </summary>
     /// <param name="lowerBound">Minimum length of passed string.</param>
     /// <returns>Function that ensures the length of a string is at least lowerBound.</returns>
-    protected Func<JToken, string, bool> ConstrainStringLength(int lowerBound)
+    protected Func<JToken, string, List<Error>> ConstrainStringLength(int lowerBound)
     {
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         string inputString = inputToken.ToString();
         if (inputString.Length < lowerBound)
         {
-          ErrorList.Add($"Token {inputName} with value {inputToken} must have a length of at least {lowerBound}. Actual length: {inputString.Length}");
-          return false;
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputToken} must have a length of at least {lowerBound}. Actual length: {inputString.Length}"));
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -376,21 +372,22 @@ namespace schemaforge.Crucible
     /// <param name="upperBound">Maximum length of passed string.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if lowerBound is greater than upperBound.</exception>
     /// <returns>Function that ensures the length of a string is at least lowerBound and at most upperBound.</returns>
-    protected Func<JToken, string, bool> ConstrainStringLength(int lowerBound, int upperBound)
+    protected Func<JToken, string, List<Error>> ConstrainStringLength(int lowerBound, int upperBound)
     {
       if (lowerBound > upperBound)
       {
         throw new ArgumentException($"ConstrainStringLength lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         string inputString = inputToken.ToString();
         if (inputString.Length < lowerBound || inputString.Length > upperBound)
         {
-          ErrorList.Add($"Token {inputName} with value {inputToken} must have a length of at least {lowerBound} and at most {upperBound}. Actual length: {inputString.Length}");
-          return false;
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputToken} must have a length of at least {lowerBound} and at most {upperBound}. Actual length: {inputString.Length}"));
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -401,14 +398,15 @@ namespace schemaforge.Crucible
     /// <param name="forbiddenCharacters">Characters that cannot occur in the input string.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if no chars are passed.</exception>
     /// <returns>Function that ensures the input string does not contain any of the passed characters.</returns>
-    protected Func<JToken, string, bool> ForbidStringCharacters(params char[] forbiddenCharacters)
+    protected Func<JToken, string, List<Error>> ForbidStringCharacters(params char[] forbiddenCharacters)
     {
       if (forbiddenCharacters.Length == 0)
       {
         throw new ArgumentException("ForbidStringCharacters must have at least one parameter.");
       }
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         string inputString = inputToken.ToString();
         bool containsForbidden = false;
         foreach (char forbiddenCharacter in forbiddenCharacters)
@@ -420,9 +418,9 @@ namespace schemaforge.Crucible
         }
         if (containsForbidden)
         {
-          ErrorList.Add($"Token {inputName} with value {inputToken} contains at least one of a forbidden character: {string.Join(" ", forbiddenCharacters)}");
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputToken} contains at least one of a forbidden character: {string.Join(" ", forbiddenCharacters)}"));
         }
-        return !containsForbidden;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -436,16 +434,17 @@ namespace schemaforge.Crucible
     /// </summary>
     /// <param name="lowerBound">Double used as the lower bound in the returned function, inclusive.</param>
     /// <returns>Function checking to ensure that the value of the passed JToken is greater than the provided lower bound.</returns>
-    protected Func<JToken, string, bool> ConstrainNumericValue(double lowerBound)
+    protected Func<JToken, string, List<Error>> ConstrainNumericValue(double lowerBound)
     {
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         if ((double)inputToken < lowerBound)
         {
-          ErrorList.Add($"Token {inputName} with value {inputToken} is less than enforced lower bound {lowerBound}");
-          return false;
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputToken} is less than enforced lower bound {lowerBound}"));
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -457,20 +456,21 @@ namespace schemaforge.Crucible
     /// <param name="upperBound">Double used as the upper bound in the returned function, inclusive.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if upperBound is greater than lowerBound.</exception>
     /// <returns>Function checking to ensure that the value of the passed JToken is greater than the provided lower bound.</returns>
-    protected Func<JToken, string, bool> ConstrainNumericValue(double lowerBound, double upperBound)
+    protected Func<JToken, string, List<Error>> ConstrainNumericValue(double lowerBound, double upperBound)
     {
       if (lowerBound > upperBound)
       {
         throw new ArgumentException($"ConstrainNumericValue lower bound must be less than or equal to upper bound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         if ((double)inputToken < lowerBound || (double)inputToken > upperBound)
         {
-          ErrorList.Add($"Token {inputName} with value {inputToken} is invalid. Value must be greater than or equal to {lowerBound} and less than or equal to {upperBound}");
-          return false;
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputToken} is invalid. Value must be greater than or equal to {lowerBound} and less than or equal to {upperBound}"));
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -481,7 +481,7 @@ namespace schemaforge.Crucible
     /// <param name="domains">(double, double) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if the first item of any passed tuple is greater than the second item.</exception>
     /// <returns>Function checking to ensure that the value of the passed JToken is within at least one of the provided domains.</returns>
-    protected Func<JToken, string, bool> ConstrainNumericValue(params (double, double)[] domains)
+    protected Func<JToken, string, List<Error>> ConstrainNumericValue(params (double, double)[] domains)
     {
       foreach ((double, double) domain in domains)
       {
@@ -490,8 +490,9 @@ namespace schemaforge.Crucible
           throw new ArgumentException($"Domain {domain} is invalid: Item 1 (lower bound) must be less than Item 2 (upper bound)");
         }
       }
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         double inputValue = (double)inputToken;
         bool matchesAtLeastOne = false;
         foreach ((double, double) domain in domains)
@@ -503,9 +504,9 @@ namespace schemaforge.Crucible
         }
         if (!matchesAtLeastOne)
         {
-          ErrorList.Add($"Token {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}");
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}"));
         }
-        return matchesAtLeastOne;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -516,7 +517,7 @@ namespace schemaforge.Crucible
     /// <param name="domains">(int, int) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if the first item of any passed tuple is greater than the second item.</exception>
     /// <returns>Function checking to ensure that the value of the passed JToken is within at least one of the provided domains.</returns>
-    protected Func<JToken, string, bool> ConstrainNumericValue(params (int, int)[] domains)
+    protected Func<JToken, string, List<Error>> ConstrainNumericValue(params (int, int)[] domains)
     {
       foreach ((int, int) domain in domains)
       {
@@ -525,8 +526,9 @@ namespace schemaforge.Crucible
           throw new ArgumentException($"Domain {domain} is invalid: Item 1 (lower bound) must be less than Item 2 (upper bound).");
         }
       }
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         double inputValue = (double)inputToken;
         bool matchesAtLeastOne = false;
         foreach ((int, int) domain in domains)
@@ -538,9 +540,9 @@ namespace schemaforge.Crucible
         }
         if (!matchesAtLeastOne)
         {
-          ErrorList.Add($"Token {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}");
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}"));
         }
-        return matchesAtLeastOne;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -556,13 +558,13 @@ namespace schemaforge.Crucible
     /// </summary>
     /// <param name="requiredTokens">Array of required ConfigToken objects that will be applied to the passed Json object.</param>
     /// <returns>Function ensuring the passed JObject contains all tokens in requiredTokens and all validation functions are passed.</returns>
-    protected Func<JToken, string, bool> ConstrainJsonTokens(params ConfigToken[] requiredTokens)
+    protected Func<JToken, string, List<Error>> ConstrainJsonTokens(params ConfigToken[] requiredTokens)
     {
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
         JObject inputJson = (JObject)inputToken;
         Initialize(requiredTokens.ToHashSet(), new HashSet<ConfigToken>(), inputJson, inputName, "Value of token");
-        return Valid;
+        return ErrorList;
       }
       return InnerMethod;
     }
@@ -574,13 +576,13 @@ namespace schemaforge.Crucible
     /// <param name="requiredTokens">Array of required ConfigToken objects that will be applied to the passed Json object.</param>
     /// <param name="optionalTokens">Array of optional ConfigToken objects that will be applied to the passed Json object.</param>
     /// <returns>Function ensuring the passed JObject contains all tokens in requiredTokens and all validation functions are passed for both token arrays.</returns>
-    protected Func<JToken, string, bool> ConstrainJsonTokens(ConfigToken[] requiredTokens, ConfigToken[] optionalTokens)
+    protected Func<JToken, string, List<Error>> ConstrainJsonTokens(ConfigToken[] requiredTokens, ConfigToken[] optionalTokens)
     {
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
         JObject inputJson = (JObject)inputToken;
         Initialize(requiredTokens.ToHashSet(), optionalTokens.ToHashSet(), inputJson, inputName, "Value of token");
-        return Valid;
+        return ErrorList;
       }
       return InnerMethod;
     }
@@ -590,17 +592,18 @@ namespace schemaforge.Crucible
     /// </summary>
     /// <param name="lowerBound">Minimum number of properties the target JObject must contain.</param>
     /// <returns>Function ensuring a JObject has at least lowerBound properties.</returns>
-    protected Func<JToken, string, bool> ConstrainPropertyCount(int lowerBound)
+    protected Func<JToken, string, List<Error>> ConstrainPropertyCount(int lowerBound)
     {
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         JObject inputJson = (JObject)inputToken;
         if (inputJson.Count < lowerBound)
         {
-          ErrorList.Add($"Value of token {inputName} is invalid. Value has {inputJson.Count} properties, but must have at least {lowerBound} properties.");
-          return false;
+          internalErrorList.Add(new Error($"Value of token {inputName} is invalid. Value has {inputJson.Count} properties, but must have at least {lowerBound} properties."));
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -611,21 +614,22 @@ namespace schemaforge.Crucible
     /// <param name="lowerBound">Minimum number of properties the target JObject must contain.</param>
     /// <param name="upperBound">Maximum number of properties the target JObject can contain.</param>
     /// <returns>Function ensuring a JObject has at least lowerBound and at most upperBound properties.</returns>
-    protected Func<JToken, string, bool> ConstrainPropertyCount(int lowerBound, int upperBound)
+    protected Func<JToken, string, List<Error>> ConstrainPropertyCount(int lowerBound, int upperBound)
     {
       if (lowerBound > upperBound)
       {
         throw new ArgumentException($"ConstrainPropertyCount lowerBound must be less than upperBound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         JObject inputJson = (JObject)inputToken;
         if (inputJson.Count < lowerBound || inputJson.Count > upperBound)
         {
-          ErrorList.Add($"Value of token {inputName} is invalid. Value has {inputJson.Count} properties, but must have at least {lowerBound} properties and at most {upperBound} properties.");
-          return false;
+          internalErrorList.Add(new Error($"Value of token {inputName} is invalid. Value has {inputJson.Count} properties, but must have at least {lowerBound} properties and at most {upperBound} properties."));
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -639,17 +643,18 @@ namespace schemaforge.Crucible
     /// </summary>
     /// <param name="lowerBound">Minimum number of items in the target JArray.</param>
     /// <returns>Function ensuring a JArray has at least lowerBound items.</returns>
-    protected Func<JToken, string, bool> ConstrainArrayCount(int lowerBound)
+    protected Func<JToken, string, List<Error>> ConstrainArrayCount(int lowerBound)
     {
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         JArray inputArray = (JArray)inputToken;
         if (inputArray.Count < lowerBound)
         {
-          ErrorList.Add($"Value of token {inputName} contains {inputArray.Count} values, but must contain at least {lowerBound} values.");
-          return false;
+          internalErrorList.Add(new Error($"Value of token {inputName} contains {inputArray.Count} values, but must contain at least {lowerBound} values."));
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -661,21 +666,22 @@ namespace schemaforge.Crucible
     /// <param name="upperBound">Maximum number of items in the target JArray.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if lowerBound is greater than upperBound.</exception>
     /// <returns>Function ensuring a JArray has at least lowerBound and at most upperBound items.</returns>
-    protected Func<JToken, string, bool> ConstrainArrayCount(int lowerBound, int upperBound)
+    protected Func<JToken, string, List<Error>> ConstrainArrayCount(int lowerBound, int upperBound)
     {
       if (lowerBound > upperBound)
       {
         throw new ArgumentException($"ConstrainArrayCount lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: " + upperBound);
       }
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         JArray inputArray = (JArray)inputToken;
         if (inputArray.Count < lowerBound || inputArray.Count > upperBound)
         {
-          ErrorList.Add($"Value of token {inputName} contains {inputArray.Count} values, but must contain between {lowerBound} and {upperBound} values.");
-          return false;
+          internalErrorList.Add(new Error($"Value of token {inputName} contains {inputArray.Count} values, but must contain between {lowerBound} and {upperBound} values."));
+          return internalErrorList;
         }
-        return true;
+        return internalErrorList;
       }
       return InnerMethod;
     }
@@ -686,32 +692,28 @@ namespace schemaforge.Crucible
     /// <typeparam name="T">Type of all items in the target JArray.</typeparam>
     /// <param name="constraints">List of functions to run on all items in the JArray individually.</param>
     /// <returns>Function ensuring that all items in the target JArray are of type T and pass all provided constraints.</returns>
-    protected Func<JToken, string, bool> ApplyConstraintsToAllArrayValues<T>(params Func<JToken, string, bool>[] constraints)
+    protected Func<JToken, string, List<Error>> ApplyConstraintsToAllArrayValues<T>(params Func<JToken, string, List<Error>>[] constraints)
     {
-      bool InnerMethod(JToken inputToken, string inputName)
+      List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         JArray inputArray = (JArray)inputToken;
-        bool allPassed = true;
         foreach (JToken value in inputArray)
         {
           try
           {
             T castValue = value.Value<T>();
-            foreach (Func<JToken, string, bool> constraint in constraints)
+            foreach (Func<JToken, string, List<Error>> constraint in constraints)
             {
-              if (!constraint(value, "in array " + inputName))
-              {
-                allPassed = false;
-              }
+              internalErrorList.AddRange(constraint(value, "in array " + inputName));
             }
           }
           catch
           {
-            ErrorList.Add($"Value {value} in array {inputName} is an incorrect type. Expected value type: {typeof(T)}");
-            allPassed = false;
+            internalErrorList.Add(new Error($"Value {value} in array {inputName} is an incorrect type. Expected value type: {typeof(T)}"));
           }
         }
-        return allPassed;
+        return internalErrorList;
       }
       return InnerMethod;
     }

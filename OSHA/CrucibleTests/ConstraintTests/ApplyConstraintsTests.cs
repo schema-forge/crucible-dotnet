@@ -70,11 +70,11 @@ namespace ConstraintTests
     public void ApplyTwoTypeConstraintPlusIndividualConstraintsTest(bool expectedResult, object inputValue)
     {
       Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library", ApplyConstraints<int, string>(
-      constraintsIfT1: new Func<JToken, string, bool>[]
+      constraintsIfT1: new Func<JToken, string, List<Error>>[]
         {
           ConstrainNumericValue(3,15)
         },
-      constraintsIfT2: new Func<JToken, string, bool>[]
+      constraintsIfT2: new Func<JToken, string, List<Error>>[]
         {
           ConstrainStringValues("Tennant", "Smith", "Eccleston")
         })).Validate(new JValue(inputValue)));
