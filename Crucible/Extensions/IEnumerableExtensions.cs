@@ -45,5 +45,28 @@ namespace schemaforge.Crucible.Extensions
       }
       return errorCollection.Any(x => fatalTypes.Contains(x.ErrorSeverity));
     }
+
+    /// <summary>
+    /// Checks to see if any error in the calling error collection has severity Fatal or NullOrEmpty unless NullOrEmpty is explicitly allowed.
+    /// </summary>
+    /// <param name="errorCollection">Error collection to search.</param>
+    /// <param name="nullOrEmptyIsFatal">If true, NullOrEmpty is a fatal error.</param>
+    /// <returns>Bool indicating if the error collection contains a fatal error.</returns>
+    public static bool AnyFatal(this IList<Error> errorCollection, bool nullOrEmptyIsFatal = true)
+    {
+      List<Severity> fatalTypes = new() { Severity.Fatal };
+      if (nullOrEmptyIsFatal)
+      {
+        fatalTypes.Add(Severity.NullOrEmpty);
+      }
+      for(int i=errorCollection.Count; i-- > 0;)
+      {
+        if(fatalTypes.Contains(errorCollection[i].ErrorSeverity))
+        {
+          return true;
+        }
+      }
+      return errorCollection.Any(x => fatalTypes.Contains(x.ErrorSeverity));
+    }
   }
 }

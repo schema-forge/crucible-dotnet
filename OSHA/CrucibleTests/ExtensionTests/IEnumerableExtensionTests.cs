@@ -61,5 +61,47 @@ namespace Extensions
       string expected = "Our lives are not our own..nwo ruo ton era sevil ruO We are bound to others,,srehto ot dnuob era eW past and present..tneserp dna tsap";
       Assert.Equal(expected, testArray.Join(' '));
     }
+
+    [Fact]
+    public void AnyFatal_IEnumerable_ReturnsTrue()
+    {
+      HashSet<Error> errorSet = new() { new Error("Isildur") };
+      Assert.True(errorSet.AnyFatal());
+    }
+
+    [Fact]
+    public void AnyFatal_IEnumerable_ReturnsFalse()
+    {
+      HashSet<Error> errorSet = new() { new Error("Boromir",Severity.Warning) };
+      Assert.False(errorSet.AnyFatal());
+    }
+
+    [Fact]
+    public void AnyFatal_IEnumerable_IgnoresNullOrEmpty()
+    {
+      HashSet<Error> errorSet = new() { new Error("Lenore", Severity.NullOrEmpty) };
+      Assert.False(errorSet.AnyFatal(false));
+    }
+
+    [Fact]
+    public void AnyFatal_IList_ReturnsTrue()
+    {
+      Error[] errorList = { new Error("Saruman"), new Error("Tom Bombadil",Severity.NullOrEmpty) };
+      Assert.True(errorList.AnyFatal());
+    }
+
+    [Fact]
+    public void AnyFatal_IList_ReturnsFalse()
+    {
+      Error[] errorList = { new Error("Boromir", Severity.Warning) };
+      Assert.False(errorList.AnyFatal());
+    }
+
+    [Fact]
+    public void AnyFatal_IList_IgnoresNullOrEmpty()
+    {
+      Error[] errorList = { new Error("Lenore", Severity.NullOrEmpty) };
+      Assert.False(errorList.AnyFatal(false));
+    }
   }
 }
