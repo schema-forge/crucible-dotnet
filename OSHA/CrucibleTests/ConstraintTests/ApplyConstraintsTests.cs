@@ -12,7 +12,7 @@ using static SchemaForge.Crucible.Constraints;
 namespace ConstraintTests
 {
   [Trait("Crucible", "")]
-  public class ApplyConstraintsTests : SchemaController
+  public class ApplyConstraintsTests : Schema
   {
     private readonly ITestOutputHelper output;
 

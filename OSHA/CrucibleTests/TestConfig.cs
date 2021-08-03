@@ -9,7 +9,7 @@ using static SchemaForge.Crucible.Constraints;
 
 namespace Crucible
 {
-    public class TestConfig : SchemaController
+    public class TestConfig : Schema
     {
         TestConfig(JObject inputConfig)
         {

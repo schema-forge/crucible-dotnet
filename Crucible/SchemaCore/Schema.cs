@@ -8,7 +8,7 @@ using SchemaForge.Crucible.Extensions;
 
 namespace SchemaForge.Crucible
 {
-  public abstract class SchemaController
+  public abstract class Schema
   {
     // In child config definitions, RequiredConfigTokens and OptionalConfigTokens are set by merging a new HashSet of config tokens with the parent.
     /// <summary>

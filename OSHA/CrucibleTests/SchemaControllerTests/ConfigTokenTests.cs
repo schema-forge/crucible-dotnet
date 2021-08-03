@@ -11,7 +11,7 @@ using static SchemaForge.Crucible.Constraints;
 namespace SchemaControllerTests
 {
   [Trait("Crucible", "")]
-  public class ConfigTokenTests : SchemaController
+  public class ConfigTokenTests : Schema
   {
     private readonly ITestOutputHelper output;
 

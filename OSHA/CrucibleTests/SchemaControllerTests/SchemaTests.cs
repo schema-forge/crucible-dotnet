@@ -12,11 +12,11 @@ using static SchemaForge.Crucible.Constraints;
 namespace SchemaControllerTests
 {
   [Trait("Crucible", "")]
-  public class SchemaControllerTests : SchemaController
+  public class SchemaTests : Schema
   {
     private readonly ITestOutputHelper output;
 
-    public SchemaControllerTests(ITestOutputHelper output)
+    public SchemaTests(ITestOutputHelper output)
     {
       this.output = output;
       UserConfig = JObject.Parse(
