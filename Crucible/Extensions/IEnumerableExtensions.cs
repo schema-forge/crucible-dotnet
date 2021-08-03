@@ -17,10 +17,7 @@ namespace schemaforge.Crucible.Extensions
     /// <param name="enumerable">Enumerable object to be joined.</param>
     /// <param name="separator">Separator to be used to delimit items.</param>
     /// <returns><paramref name="separator"/>-delimited <see cref="string"/>.</returns>
-    public static string Join<T>(this IEnumerable<T> enumerable, char separator)
-    {
-      return string.Join(separator, enumerable);
-    }
+    public static string Join<T>(this IEnumerable<T> enumerable, char separator) => string.Join(separator, enumerable);
 
     /// <summary>
     /// Performs a <see cref="string.Join{T}(string, IEnumerable{T})"/>
@@ -31,9 +28,6 @@ namespace schemaforge.Crucible.Extensions
     /// <param name="enumerable">Enumerable object to be joined.</param>
     /// <param name="separator">Separator to be used to delimit items.</param>
     /// <returns><paramref name="separator"/>-delimited <see cref="string"/></returns>
-    public static string Join<T>(this IEnumerable<T> enumerable, string separator)
-    {
-      return string.Join(separator, enumerable);
-    }
+    public static string Join<T>(this IEnumerable<T> enumerable, string separator) => string.Join(separator, enumerable);
   }
 }
