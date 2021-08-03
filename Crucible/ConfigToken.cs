@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using schemaforge.Crucible.Extensions;
+using SchemaForge.Crucible.Extensions;
 using Newtonsoft.Json.Linq;
 
-namespace schemaforge.Crucible
+namespace SchemaForge.Crucible
 {
   public class ConfigToken
   {

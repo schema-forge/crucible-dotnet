@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace schemaforge.Crucible.Extensions
+namespace SchemaForge.Crucible.Extensions
 {
   public static class StringExtensions
   {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
-namespace schemaforge.Crucible.Extensions
+namespace SchemaForge.Crucible.Extensions
 {
   public static class JTokenExtensions
   {

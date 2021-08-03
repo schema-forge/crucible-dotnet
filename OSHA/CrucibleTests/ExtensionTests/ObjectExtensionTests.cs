@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using schemaforge.Crucible;
-using schemaforge.Crucible.Extensions;
+using SchemaForge.Crucible;
+using SchemaForge.Crucible.Extensions;
 using Xunit;
 
 namespace Extensions

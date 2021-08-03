@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>schemaforge.Crucible</RootNamespace>
+    <RootNamespace>SchemaForge.Crucible</RootNamespace>
     <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
 

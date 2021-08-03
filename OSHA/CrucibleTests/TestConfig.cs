@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using schemaforge.Crucible;
-using schemaforge.Crucible.Extensions;
+using SchemaForge.Crucible;
+using SchemaForge.Crucible.Extensions;
 using Newtonsoft.Json.Linq;
+using static SchemaForge.Crucible.Constraints;
 
 namespace Crucible
 {

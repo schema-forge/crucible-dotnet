@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace schemaforge.Crucible.Extensions
+namespace SchemaForge.Crucible.Extensions
 {
   public static class ObjectExtensions
   {

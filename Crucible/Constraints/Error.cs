@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using schemaforge.Crucible.Extensions;
+using SchemaForge.Crucible.Extensions;
 
-namespace schemaforge.Crucible
+namespace SchemaForge.Crucible
 {
   public enum Severity
   {
