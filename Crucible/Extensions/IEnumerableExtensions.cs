@@ -66,7 +66,7 @@ namespace schemaforge.Crucible.Extensions
           return true;
         }
       }
-      return errorCollection.Any(x => fatalTypes.Contains(x.ErrorSeverity));
+      return false;
     }
   }
 }
