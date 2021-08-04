@@ -28,7 +28,7 @@ namespace ConstraintTests
     [InlineData(true, 15, 15, 15)]
     [InlineData(false, 15, 3, 7)]
     [InlineData(false, 15, 7, 3)]
-    public void ConstrainNumericIntTests(bool expectedResult, int constrainedValue, params int[] constraints)
+    public void ConstrainNumericApplyInnerFunctionIntTests(bool expectedResult, int constrainedValue, params int[] constraints)
     {
       ConfigToken testToken;
       bool testResult;
@@ -61,25 +61,25 @@ namespace ConstraintTests
     [InlineData(true, 15.0, 15.0, 15.0)]
     [InlineData(false, 15.5, 3.5, 3.5)]
     [InlineData(false, 15.5, 3.3, 3.2)]
-    public void ConstrainNumericDoubleTests(bool expectedResult, double constrainedValue, params double[] constraints)
+    public void ConstrainNumericApplyInnerFunctionDoubleTests(bool expectedResult, double constrainedValue, params double[] constraints)
     {
       ConfigToken testToken;
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<int>(ConstrainNumericValue(constraints[0])));
+        testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<double>(ConstrainNumericValue(constraints[0])));
         testResult = testToken.Validate(constrainedValue);
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "I think", ApplyConstraints<int>(ConstrainNumericValue(constraints[0], constraints[1]))));
+          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "I think", ApplyConstraints<double>(ConstrainNumericValue(constraints[0], constraints[1]))));
           return;
         }
         else
         {
-          testToken = new ConfigToken("TestToken", "we've done this before", ApplyConstraints<int>(ConstrainNumericValue(constraints[0], constraints[1])));
+          testToken = new ConfigToken("TestToken", "we've done this before", ApplyConstraints<double>(ConstrainNumericValue(constraints[0], constraints[1])));
           testResult = testToken.Validate(constrainedValue);
         }
       }
@@ -88,11 +88,11 @@ namespace ConstraintTests
     }
     [Theory]
     [MemberData(nameof(ConstrainNumericDoubleDomainData))]
-    public void ConstrainNumericDoubleDomainTests(bool expectedResult, int constrainedValue, params (double, double)[] domains)
+    public void ConstrainNumericApplyInnerFunctionDoubleDomainTests(bool expectedResult, int constrainedValue, params (double, double)[] domains)
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<int>(ConstrainNumericValue(domains)));
+      testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<double>(ConstrainNumericValue(domains)));
       testResult = testToken.Validate(constrainedValue);
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
@@ -114,7 +114,7 @@ namespace ConstraintTests
 
     [Theory]
     [MemberData(nameof(ConstrainNumericIntDomainData))]
-    public void ConstrainNumericIntDomainTests(bool expectedResult, int constrainedValue, params (int, int)[] domains)
+    public void ConstrainNumericApplyInnerFunctionIntDomainTests(bool expectedResult, int constrainedValue, params (int, int)[] domains)
     {
       ConfigToken testToken;
       bool testResult;
@@ -149,6 +149,38 @@ namespace ConstraintTests
     public void ConstrainNumericDoubleDomain_InvalidBounds()
     {
       Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Doomed Token", ApplyConstraints<int>(ConstrainNumericValue((15.0, 13.0)))));
+    }
+
+    [Fact]
+    public void ConstrainNumericValuePropertyTestLowerBound()
+    {
+      Constraint testConstraint = ConstrainNumericValue(25);
+      JProperty expected = new("ConstrainNumericValue", 25);
+      Assert.Equal(expected, testConstraint.Property);
+    }
+
+    [Fact]
+    public void ConstrainNumericValuePropertyTestUpperAndLowerBound()
+    {
+      Constraint testConstraint = ConstrainNumericValue(25,75);
+      JProperty expected = new("ConstrainNumericValue", "25, 75");
+      Assert.Equal(expected, testConstraint.Property);
+    }
+
+    [Fact]
+    public void ConstrainNumericValuePropertyTestIntDomains()
+    {
+      Constraint testConstraint = ConstrainNumericValue((25, 75), (1, 3));
+      JProperty expected = new("ConstrainNumericValue", new JArray() { "(25, 75)", "(1, 3)" });
+      Assert.Equal(expected, testConstraint.Property);
+    }
+
+    [Fact]
+    public void ConstrainNumericValuePropertyTestDoubleDomains()
+    {
+      Constraint testConstraint = ConstrainNumericValue((25.3, 75.7), (1.6, 3.1));
+      JProperty expected = new("ConstrainNumericValue", new JArray() { "(25.3, 75.7)", "(1.6, 3.1)" });
+      Assert.Equal(expected, testConstraint.Property);
     }
   }
 }
