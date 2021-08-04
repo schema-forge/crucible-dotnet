@@ -8,7 +8,7 @@ using Xunit;
 using Xunit.Abstractions;
 using static SchemaForge.Crucible.Constraints;
 
-namespace SchemaControllerTests
+namespace SchemaTests
 {
   [Trait("Crucible", "")]
   public class ConfigTokenTests

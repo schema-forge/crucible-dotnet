@@ -6,7 +6,7 @@ using SchemaForge.Crucible.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace SchemaControllerTests
+namespace SchemaTests
 {
   public class ErrorTests
   {
