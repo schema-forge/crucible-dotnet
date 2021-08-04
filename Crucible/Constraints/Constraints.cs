@@ -43,6 +43,10 @@ namespace SchemaForge.Crucible
       JsonConstraints = inputArray;
       ApplyConstraints = inputFunction;
     }
+
+    public override string ToString() => JsonConstraints.Count > 1?JsonConstraints.ToString():JsonConstraints[0].ToString();
+
+    public JToken ToJToken() => JsonConstraints.Count > 1 ? JsonConstraints : JsonConstraints[0];
   }
   public class Constraint
   {
