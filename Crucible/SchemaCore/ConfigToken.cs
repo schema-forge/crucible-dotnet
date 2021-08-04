@@ -36,7 +36,7 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
     /// </summary>
-    /// <exception cref="ArgumentException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
     /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config. Ideally created by ApplyConstraints().</param>
@@ -48,7 +48,7 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
     /// </summary>
-    /// <exception cref="ArgumentException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
     /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config. Ideally created by ApplyConstraints().</param>
@@ -60,13 +60,17 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
     /// </summary>
-    /// <exception cref="ArgumentException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If inputName, inputDefaultValue, or inputHelpString is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
     /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="inputDefaultValue">String that will be inserted into the user config if an optional token is not provided.</param>
     /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config. Ideally created by ApplyConstraints().></param>
     public ConfigToken(string inputName, string inputHelpString, string inputDefaultValue,ConstraintContainer constraintContainer)
     {
+      if(inputDefaultValue.IsNullOrEmpty())
+      {
+        throw new ArgumentNullException(nameof(inputDefaultValue));
+      }
       BuildConfigToken(inputName, inputHelpString, false, inputDefaultValue, constraintContainer);
     }
 
@@ -74,11 +78,11 @@ namespace SchemaForge.Crucible
     {
       if (inputName.IsNullOrEmpty())
       {
-        throw new ArgumentException("Name of ConfigToken is null or empty.");
+        throw new ArgumentNullException(nameof(inputName));
       }
       if (inputHelpString.IsNullOrEmpty())
       {
-        throw new ArgumentException($"HelpString of config token {inputName} is null or empty.");
+        throw new ArgumentNullException(nameof(inputHelpString));
       }
       Required = required;
       TokenName = inputName;
