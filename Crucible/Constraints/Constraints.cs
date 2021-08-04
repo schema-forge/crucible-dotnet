@@ -10,6 +10,69 @@ using SchemaForge.Crucible.Extensions;
 
 namespace SchemaForge.Crucible
 {
+  public sealed class ConstraintContainer
+  {
+    /// <summary>
+    /// Contains a representation of this ConstraintContainer. Methods like ApplyConstraints that can take more than one type parameter can return more than one JObject representation of a type and its constraints; therefore, we take a JArray instead of a single JObject.
+    /// </summary>
+    public JArray JsonConstraints { get; private set; }
+    /// <summary>
+    /// The function that applies all the constraints in the container. This function should be composed from all the constraints passed to the method that returns a ConstraintContainer. See ApplyConstraints and its overloads for an example.
+    /// </summary>
+    public Func<JToken, string, List<Error>> ApplyConstraints { get; private set; }
+
+    /// <summary>
+    /// Builds a ConstraintContainer, which will be invoked by a ConfigToken to apply all the rules contained therein.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown if an element in inputArray is not a JObject or an element of inputArray does not contain Type.</exception>
+    /// <param name="inputFunction">Function to execute when this ConstraintContainer is invoked.</param>
+    /// <param name="inputArray">Array of JObject representations of constraint sets. Each value must be a JObject and must contain Type at the very least.</param>
+    public ConstraintContainer(Func<JToken, string, List<Error>> inputFunction, JArray inputArray)
+    {
+      foreach(JToken value in inputArray)
+      {
+        if(value.Type != JTokenType.Object)
+        {
+          throw new ArgumentException($"Token {value} is not a JObject.");
+        }
+        else if(!value.Contains("Type"))
+        {
+          throw new ArgumentException($"Constraint representation is missing required token Type: {value}");
+        }
+      }
+      JsonConstraints = inputArray;
+      ApplyConstraints = inputFunction;
+    }
+  }
+  public class Constraint
+  {
+    /// <summary>
+    /// Function that will be applied by the constraint.
+    /// </summary>
+    public Func<JToken, string, List<Error>> Function { get; private set; }
+    /// <summary>
+    /// JProperty representation of this constraint. Will be used when saving a Schema to Json.
+    /// </summary>
+    public JProperty Property { get; private set; }
+    /// <summary>
+    /// Constraint objects represent a rule that is applied to a token; the Function property is the validation function that will be executed on the token's value while the Property is the representation of the constraint as a JProperty.
+    /// </summary>
+    /// <param name="inputFunction">Function to execute from this constraint. The JToken in the function is the value being tested; the string is the name of the token in the object being tested.</param>
+    /// <param name="inputProperty">JProperty representation of this constraint. Neither name nor value can be null or whitespace.</param>
+    public Constraint(Func<JToken, string, List<Error>> inputFunction, JProperty inputProperty)
+    {
+      if(inputProperty.Name.IsNullOrEmpty())
+      {
+        throw new ArgumentNullException(nameof(inputProperty), "Name of inputProperty cannot be null or whitespace.");
+      }
+      if(inputProperty.Value.IsNullOrEmpty())
+      {
+        throw new ArgumentNullException(nameof(inputProperty), "Value of inputProperty cannot be null or whitespace.");
+      }
+      Property = inputProperty;
+      Function = inputFunction;
+    }
+  }
   public static class Constraints
   {
 
@@ -22,13 +85,13 @@ namespace SchemaForge.Crucible
 
     */
     /// <summary>
-    /// Produces ValidationFunction members for ConfigTokens, which are executed on the corresponding values found in the UserConfig property.
+    /// Produces ConstraintContainer members for ConfigTokens, which are executed on the corresponding values found in the UserConfig property. The returned function in the ConstraintContainer is composed from all the functions in all the Constraints passed to the method.
     /// It first checks the type of the value with T, then executes all passed constraints on the value.
     /// </summary>
     /// <typeparam name="T">Type that the token value will be cast to.</typeparam>
     /// <param name="constraints">Functions to execute on the token value after cast is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public static Func<JToken, string, List<Error>> ApplyConstraints<T>(params Func<JToken, string, List<Error>>[] constraints)
+    public static ConstraintContainer ApplyConstraints<T>(params Constraint[] constraints)
     {
       List<Error> ValidationFunction(JToken inputToken, string tokenName)
       {
@@ -41,9 +104,9 @@ namespace SchemaForge.Crucible
         try
         {
           T castValue = inputToken.Value<T>();
-          foreach (Func<JToken, string, List<Error>> constraint in constraints)
+          foreach (Constraint constraint in constraints)
           {
-            internalErrorList.AddRange(constraint(inputToken, tokenName));
+            internalErrorList.AddRange(constraint.Function(inputToken, tokenName));
           }
           return internalErrorList;
         }
@@ -53,22 +116,34 @@ namespace SchemaForge.Crucible
           return internalErrorList;
         }
       }
-      return ValidationFunction;
+      JArray constraintArray = new();
+      JObject constraintObject = new();
+      constraintObject.Add("Type", typeof(T).ToString());
+      foreach(Constraint constraint in constraints)
+      {
+        constraintObject.Add(constraint.Property);
+      }
+      constraintArray.Add(constraintObject);
+      return new ConstraintContainer(ValidationFunction,constraintArray);
     }
 
     /// <summary>
-    /// Produces ValidationFunction members for ConfigTokens, which are executed on the corresponding values found in the UserConfig property.
-    /// If the value of the token in the user's config can be cast as T1, then constraintsIfT1 are executed.
-    /// If not, then if the value can be cast as T2, constraintsIfT2 will be executed.
+    /// Produces ConstraintContainer members for ConfigTokens, which are
+    /// executed on the corresponding values found in the UserConfig property.
+    /// If the input token can be cast as T1, all constraints in constraintsIfT1 
+    /// will be executed.
+    /// If the input token can be cast as T2, all constraints in constraintsIfT2
+    /// will be executed.
     /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraints string, int will NEVER treat the passed token as an int!
     /// </summary>
     /// <typeparam name="T1">First type to check against the token value in the returned function.</typeparam>
     /// <typeparam name="T2">Second type to check against the token value in the returned function.</typeparam>
-    /// <param name="constraintsIfT1">Functions to execute on the token value if casting to T1 is successful.</param>
-    /// <param name="constraintsIfT2">Functions to execute on the token value if casting to T2 is successful.</param>
+    /// <param name="constraintsIfT1">Constraints to execute on the token value if casting to T1 is successful.</param>
+    /// <param name="constraintsIfT2">Constraints to execute on the token value if casting to T2 is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public static Func<JToken, string, List<Error>> ApplyConstraints<T1, T2>(Func<JToken, string, List<Error>>[] constraintsIfT1 = null, Func<JToken, string, List<Error>>[] constraintsIfT2 = null)
+    public static ConstraintContainer ApplyConstraints<T1, T2>(Constraint[] constraintsIfT1 = null, Constraint[] constraintsIfT2 = null)
     {
+      // The inner function is composed of all constraints passed to the outer function, executing one set or the other depending on the type of the input token.
       List<Error> ValidationFunction(JToken inputToken, string tokenName)
       {
         List<Error> internalErrorList = new();
@@ -82,9 +157,9 @@ namespace SchemaForge.Crucible
           T1 castValue = inputToken.Value<T1>();
           if (!(constraintsIfT1 == null))
           {
-            foreach (Func<JToken, string, List<Error>> constraint in constraintsIfT1)
+            foreach (Constraint constraint in constraintsIfT1)
             {
-              internalErrorList.AddRange(constraint(inputToken, tokenName));
+              internalErrorList.AddRange(constraint.Function(inputToken, tokenName));
             }
             return internalErrorList;
           }
@@ -100,9 +175,9 @@ namespace SchemaForge.Crucible
             T2 castValue = inputToken.Value<T2>();
             if (!(constraintsIfT2 == null))
             {
-              foreach (Func<JToken, string, List<Error>> constraint in constraintsIfT2)
+              foreach (Constraint constraint in constraintsIfT2)
               {
-                internalErrorList.AddRange(constraint(inputToken, tokenName));
+                internalErrorList.AddRange(constraint.Function(inputToken, tokenName));
               }
               return internalErrorList;
             }
@@ -118,7 +193,26 @@ namespace SchemaForge.Crucible
           }
         }
       }
-      return ValidationFunction;
+      JArray constraintArray = new();
+      JObject constraintObjectT1 = new() { { "Type", typeof(T1).ToString() } };
+      if (constraintsIfT1.Exists())
+      {
+        foreach (Constraint constraint in constraintsIfT1)
+        {
+          constraintObjectT1.Add(constraint.Property);
+        }
+      }
+      constraintArray.Add(constraintObjectT1);
+      JObject constraintObjectT2 = new() { { "Type", typeof(T2).ToString() } };
+      if(constraintsIfT2.Exists())
+      {
+        foreach (Constraint constraint in constraintsIfT2)
+        {
+          constraintObjectT2.Add(constraint.Property);
+        }
+      }
+      constraintArray.Add(constraintObjectT2);
+      return new ConstraintContainer(ValidationFunction, constraintArray);
     }
 
     #endregion
@@ -130,7 +224,7 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="lowerBound">Double used as the lower bound in the returned function, inclusive.</param>
     /// <returns>Function checking to ensure that the value of the passed JToken is greater than the provided lower bound.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainNumericValue(double lowerBound)
+    public static Constraint ConstrainNumericValue(double lowerBound)
     {
       List<Error> InnerMethod(JToken inputToken, string inputName)
       {
@@ -142,7 +236,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod,new JProperty("ConstrainNumericValue",lowerBound));
     }
 
     /// <summary>
@@ -152,7 +246,7 @@ namespace SchemaForge.Crucible
     /// <param name="upperBound">Double used as the upper bound in the returned function, inclusive.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if upperBound is greater than lowerBound.</exception>
     /// <returns>Function checking to ensure that the value of the passed JToken is greater than the provided lower bound.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainNumericValue(double lowerBound, double upperBound)
+    public static Constraint ConstrainNumericValue(double lowerBound, double upperBound)
     {
       if (lowerBound > upperBound)
       {
@@ -168,7 +262,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ConstrainNumericValue", lowerBound + ", " + upperBound));
     }
 
     /// <summary>
@@ -177,7 +271,7 @@ namespace SchemaForge.Crucible
     /// <param name="domains">(double, double) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if the first item of any passed tuple is greater than the second item.</exception>
     /// <returns>Function checking to ensure that the value of the passed JToken is within at least one of the provided domains.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainNumericValue(params (double, double)[] domains)
+    public static Constraint ConstrainNumericValue(params (double, double)[] domains)
     {
       foreach ((double, double) domain in domains)
       {
@@ -204,7 +298,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ConstrainNumericValue", JArray.FromObject(domains)));
     }
 
     /// <summary>
@@ -213,7 +307,7 @@ namespace SchemaForge.Crucible
     /// <param name="domains">(int, int) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if the first item of any passed tuple is greater than the second item.</exception>
     /// <returns>Function checking to ensure that the value of the passed JToken is within at least one of the provided domains.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainNumericValue(params (int, int)[] domains)
+    public static Constraint ConstrainNumericValue(params (int, int)[] domains)
     {
       foreach ((int, int) domain in domains)
       {
@@ -240,7 +334,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ConstrainNumericValue", JArray.FromObject(domains)));
     }
 
     #endregion
@@ -249,7 +343,7 @@ namespace SchemaForge.Crucible
 
     /// <param name="acceptableValues">List of values used to build the returned function.</param>
     /// <returns>Function checking to ensure that the value of the passed JToken is one of acceptableValues.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainStringValues(params string[] acceptableValues)
+    public static Constraint ConstrainStringValues(params string[] acceptableValues)
     {
       List<Error> InnerMethod(JToken inputToken, string inputName)
       {
@@ -261,12 +355,12 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod,new JProperty("ConstrainStringValues",JArray.FromObject(acceptableValues)));
     }
 
     /// <param name="pattern">Valid Regex pattern(s) used in the returned function.</param>
     /// <returns>Function checking to ensure that the whole JToken matches at least one of the provided pattern strings.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainStringWithRegexExact(params Regex[] patterns)
+    public static Constraint ConstrainStringWithRegexExact(params Regex[] patterns)
     {
       List<Error> InnerMethod(JToken inputToken, string inputName)
       {
@@ -297,7 +391,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ConstrainStringWithRegexExact",JArray.FromObject(patterns)));
     }
 
     /// <summary>
@@ -305,7 +399,7 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="lowerBound">Minimum length of passed string.</param>
     /// <returns>Function that ensures the length of a string is at least lowerBound.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainStringLength(int lowerBound)
+    public static Constraint ConstrainStringLength(int lowerBound)
     {
       List<Error> InnerMethod(JToken inputToken, string inputName)
       {
@@ -318,7 +412,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod,new JProperty("ConstrainStringLength", lowerBound));
     }
 
     /// <summary>
@@ -328,7 +422,7 @@ namespace SchemaForge.Crucible
     /// <param name="upperBound">Maximum length of passed string.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if lowerBound is greater than upperBound.</exception>
     /// <returns>Function that ensures the length of a string is at least lowerBound and at most upperBound.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainStringLength(int lowerBound, int upperBound)
+    public static Constraint ConstrainStringLength(int lowerBound, int upperBound)
     {
       if (lowerBound > upperBound)
       {
@@ -345,7 +439,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ConstrainStringLength", lowerBound + ", " + upperBound));
     }
 
     /// <summary>
@@ -354,7 +448,7 @@ namespace SchemaForge.Crucible
     /// <param name="forbiddenCharacters">Characters that cannot occur in the input string.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if no chars are passed.</exception>
     /// <returns>Function that ensures the input string does not contain any of the passed characters.</returns>
-    public static Func<JToken, string, List<Error>> ForbidStringCharacters(params char[] forbiddenCharacters)
+    public static Constraint ForbidStringCharacters(params char[] forbiddenCharacters)
     {
       if (forbiddenCharacters.Length == 0)
       {
@@ -378,7 +472,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ForbidStringCharacters",JArray.FromObject(forbiddenCharacters.ToArray())));
     }
 
     #endregion
@@ -390,7 +484,7 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="lowerBound">Minimum number of items in the target JArray.</param>
     /// <returns>Function ensuring a JArray has at least lowerBound items.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainArrayCount(int lowerBound)
+    public static Constraint ConstrainArrayCount(int lowerBound)
     {
       List<Error> InnerMethod(JToken inputToken, string inputName)
       {
@@ -403,7 +497,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ConstrainArrayCount", lowerBound));
     }
 
     /// <summary>
@@ -413,7 +507,7 @@ namespace SchemaForge.Crucible
     /// <param name="upperBound">Maximum number of items in the target JArray.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if lowerBound is greater than upperBound.</exception>
     /// <returns>Function ensuring a JArray has at least lowerBound and at most upperBound items.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainArrayCount(int lowerBound, int upperBound)
+    public static Constraint ConstrainArrayCount(int lowerBound, int upperBound)
     {
       if (lowerBound > upperBound)
       {
@@ -430,7 +524,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ConstrainArrayCount", lowerBound + ", " + upperBound));
     }
 
     /// <summary>
@@ -439,7 +533,7 @@ namespace SchemaForge.Crucible
     /// <typeparam name="T">Type of all items in the target JArray.</typeparam>
     /// <param name="constraints">List of functions to run on all items in the JArray individually.</param>
     /// <returns>Function ensuring that all items in the target JArray are of type T and pass all provided constraints.</returns>
-    public static Func<JToken, string, List<Error>> ApplyConstraintsToAllArrayValues<T>(params Func<JToken, string, List<Error>>[] constraints)
+    public static Constraint ApplyConstraintsToAllArrayValues(ConstraintContainer constraints)
     {
       List<Error> InnerMethod(JToken inputToken, string inputName)
       {
@@ -447,22 +541,13 @@ namespace SchemaForge.Crucible
         JArray inputArray = (JArray)inputToken;
         foreach (JToken value in inputArray)
         {
-          try
-          {
-            T castValue = value.Value<T>();
-            foreach (Func<JToken, string, List<Error>> constraint in constraints)
-            {
-              internalErrorList.AddRange(constraint(value, "in array " + inputName));
-            }
-          }
-          catch
-          {
-            internalErrorList.Add(new Error($"Value {value} in array {inputName} is an incorrect type. Expected value type: {typeof(T)}"));
-          }
+           internalErrorList.AddRange(constraints.ApplyConstraints(value, "in array " + inputName));
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ApplyConstraintsToAllArrayValues",constraints.JsonConstraints));
+
+      // TODO: Reorganize to only accept ApplyConstraints<T>, which should return a JObject containing the type constraint and all other constraints.
     }
 
     #endregion
@@ -474,7 +559,7 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="lowerBound">Minimum number of properties the target JObject must contain.</param>
     /// <returns>Function ensuring a JObject has at least lowerBound properties.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainPropertyCount(int lowerBound)
+    public static Constraint ConstrainPropertyCount(int lowerBound)
     {
       List<Error> InnerMethod(JToken inputToken, string inputName)
       {
@@ -487,7 +572,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ConstrainPropertyCount",lowerBound));
     }
 
     /// <summary>
@@ -496,7 +581,7 @@ namespace SchemaForge.Crucible
     /// <param name="lowerBound">Minimum number of properties the target JObject must contain.</param>
     /// <param name="upperBound">Maximum number of properties the target JObject can contain.</param>
     /// <returns>Function ensuring a JObject has at least lowerBound and at most upperBound properties.</returns>
-    public static Func<JToken, string, List<Error>> ConstrainPropertyCount(int lowerBound, int upperBound)
+    public static Constraint ConstrainPropertyCount(int lowerBound, int upperBound)
     {
       if (lowerBound > upperBound)
       {
@@ -513,7 +598,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return InnerMethod;
+      return new Constraint(InnerMethod, new JProperty("ConstrainPropertyCount", lowerBound + ", " + upperBound));
     }
 
     #endregion

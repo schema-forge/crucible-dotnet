@@ -12,7 +12,7 @@ using static SchemaForge.Crucible.Constraints;
 namespace ConstraintTests
 {
   [Trait("Crucible", "")]
-  public class NumericConstraintTests : Schema
+  public class NumericConstraintTests
   {
     private readonly ITestOutputHelper output;
 
@@ -30,24 +30,27 @@ namespace ConstraintTests
     [InlineData(false, 15, 7, 3)]
     public void ConstrainNumericIntTests(bool expectedResult, int constrainedValue, params int[] constraints)
     {
+      ConfigToken testToken;
       bool testResult;
       if (constraints.Length == 1)
       {
-        testResult = new ConfigToken("TestToken", "Angry String", ConstrainNumericValue(constraints[0])).Validate(constrainedValue);
+        testToken = new ConfigToken("TestToken", "Angry String", ApplyConstraints<int>(ConstrainNumericValue(constraints[0])));
+        testResult = testToken.Validate(constrainedValue);
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Relaxed String", ConstrainNumericValue(constraints[0], constraints[1])));
-          testResult = false;
+          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Relaxed String", ApplyConstraints<int>(ConstrainNumericValue(constraints[0], constraints[1]))));
+          return;
         }
         else
         {
-          testResult = new ConfigToken("TestToken", "Nervous String", ConstrainNumericValue(constraints[0], constraints[1])).Validate(constrainedValue);
+          testToken = new ConfigToken("TestToken", "Nervous String", ApplyConstraints<int>(ConstrainNumericValue(constraints[0], constraints[1])));
+          testResult = testToken.Validate(constrainedValue);
         }
       }
-      output.WriteLine(string.Join('\n', ErrorList));
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -60,33 +63,38 @@ namespace ConstraintTests
     [InlineData(false, 15.5, 3.3, 3.2)]
     public void ConstrainNumericDoubleTests(bool expectedResult, double constrainedValue, params double[] constraints)
     {
+      ConfigToken testToken;
       bool testResult;
       if (constraints.Length == 1)
       {
-        testResult = new ConfigToken("TestToken", "Deja Vu", ConstrainNumericValue(constraints[0])).Validate(constrainedValue);
+        testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<int>(ConstrainNumericValue(constraints[0])));
+        testResult = testToken.Validate(constrainedValue);
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "I think", ConstrainNumericValue(constraints[0], constraints[1])));
-          testResult = false;
+          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "I think", ApplyConstraints<int>(ConstrainNumericValue(constraints[0], constraints[1]))));
+          return;
         }
         else
         {
-          testResult = new ConfigToken("TestToken", "we've done this before", ConstrainNumericValue(constraints[0], constraints[1])).Validate(constrainedValue);
+          testToken = new ConfigToken("TestToken", "we've done this before", ApplyConstraints<int>(ConstrainNumericValue(constraints[0], constraints[1])));
+          testResult = testToken.Validate(constrainedValue);
         }
       }
-      output.WriteLine(string.Join('\n', ErrorList));
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
     [Theory]
     [MemberData(nameof(ConstrainNumericDoubleDomainData))]
     public void ConstrainNumericDoubleDomainTests(bool expectedResult, int constrainedValue, params (double, double)[] domains)
     {
+      ConfigToken testToken;
       bool testResult;
-      testResult = new ConfigToken("TestToken", "Deja Vu", ConstrainNumericValue(domains)).Validate(constrainedValue);
-      output.WriteLine(string.Join('\n', ErrorList));
+      testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<int>(ConstrainNumericValue(domains)));
+      testResult = testToken.Validate(constrainedValue);
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -108,9 +116,11 @@ namespace ConstraintTests
     [MemberData(nameof(ConstrainNumericIntDomainData))]
     public void ConstrainNumericIntDomainTests(bool expectedResult, int constrainedValue, params (int, int)[] domains)
     {
+      ConfigToken testToken;
       bool testResult;
-      testResult = new ConfigToken("TestToken", "Deja Vu", ConstrainNumericValue(domains)).Validate(constrainedValue);
-      output.WriteLine(string.Join('\n', ErrorList));
+      testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<int>(ConstrainNumericValue(domains)));
+      testResult = testToken.Validate(constrainedValue);
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -131,14 +141,14 @@ namespace ConstraintTests
     [Fact]
     public void ConstrainNumericIntDomain_InvalidBounds()
     {
-      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Doomed Token", ConstrainNumericValue((15, 13))));
+      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Doomed Token", ApplyConstraints<int>(ConstrainNumericValue((15, 13)))));
     }
 
 
     [Fact]
     public void ConstrainNumericDoubleDomain_InvalidBounds()
     {
-      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Doomed Token", ConstrainNumericValue((15.0, 13.0))));
+      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Doomed Token", ApplyConstraints<int>(ConstrainNumericValue((15.0, 13.0)))));
     }
   }
 }

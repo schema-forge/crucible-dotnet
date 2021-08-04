@@ -27,7 +27,7 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// The function that will be executed on the passed token value.
     /// </summary>
-    protected Func<JToken, string, List<Error>> ValidationFunction { get; private set; }
+    protected ConstraintContainer Constraints { get; private set; }
 
     /// <summary>
     /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
@@ -35,10 +35,10 @@ namespace SchemaForge.Crucible
     /// <exception cref="ArgumentException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
     /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
-    /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config.</param>
-    public ConfigToken(string inputName, string inputHelpString, Func<JToken, string, List<Error>> inputValidationFunction)
+    /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config. Ideally created by ApplyConstraints().</param>
+    public ConfigToken(string inputName, string inputHelpString, ConstraintContainer constraintContainer)
     {
-      BuildConfigToken(inputName, inputHelpString, null, inputValidationFunction);
+      BuildConfigToken(inputName, inputHelpString, null, constraintContainer);
     }
 
     /// <summary>
@@ -48,13 +48,13 @@ namespace SchemaForge.Crucible
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
     /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="inputDefaultValue">String that will be inserted into the user config if an optional token is not provided.</param>
-    /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config.</param>
-    public ConfigToken(string inputName, string inputHelpString, string inputDefaultValue, Func<JToken, string, List<Error>> inputValidationFunction)
+    /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config. Ideally created by ApplyConstraints().></param>
+    public ConfigToken(string inputName, string inputHelpString, string inputDefaultValue,ConstraintContainer constraintContainer)
     {
-      BuildConfigToken(inputName, inputHelpString, inputDefaultValue, inputValidationFunction);
+      BuildConfigToken(inputName, inputHelpString, inputDefaultValue, constraintContainer);
     }
 
-    private void BuildConfigToken(string inputName, string inputHelpString, string inputDefaultValue, Func<JToken, string, List<Error>> inputValidationFunction)
+    private void BuildConfigToken(string inputName, string inputHelpString, string inputDefaultValue, ConstraintContainer constraintContainer)
     {
       if (inputName.IsNullOrEmpty())
       {
@@ -65,22 +65,11 @@ namespace SchemaForge.Crucible
         throw new ArgumentException($"HelpString of config token {inputName} is null or empty.");
       }
       TokenName = inputName;
-      ValidationFunction = inputValidationFunction;
+      Constraints = constraintContainer;
       HelpString = inputHelpString;
       DefaultValue = inputDefaultValue;
     }
-    /*
-
-    When Validate is called on a config token, it searches the JObject userConfig for a token with its current Name.
-
-    If such a token is found, ValidationFunction() is executed. The value found and the token's name are passed as parameters.
-
-    The function passed to a constructor should ideally be something created by ValidationFactory<T>(), which will enforce type checking on the user input and execute any additional Func<JToken, string, List<Error>> passed to the ValidationFactory function.
-
-    Example below.
-
-    */
-
+    
     /// <summary>
     /// Executes the ConfigToken's ValidationFunction on the passed JToken.
     /// </summary>
@@ -88,7 +77,7 @@ namespace SchemaForge.Crucible
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
     public bool Validate(JToken tokenValue)
     {
-      ErrorList.AddRange(ValidationFunction(tokenValue, TokenName));
+      ErrorList.AddRange(Constraints.ApplyConstraints(tokenValue, TokenName));
       return !ErrorList.AnyFatal();
     }
     public override string ToString()

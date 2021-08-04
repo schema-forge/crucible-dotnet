@@ -12,7 +12,7 @@ using static SchemaForge.Crucible.Constraints;
 namespace ConstraintTests
 {
   [Trait("Crucible", "")]
-  public class StringConstraintTests : Schema
+  public class StringConstraintTests
   {
     private readonly ITestOutputHelper output;
 
@@ -26,8 +26,9 @@ namespace ConstraintTests
     [InlineData(false, "HowDareYouFeedMeThisString", "AcceptableString", "AnotherAcceptableString", "YetAnotherAcceptableString")]
     public void ConstrainStringValuesTest(bool expectedResult, string constrainedString, params string[] acceptableStrings)
     {
-      bool testResult = new ConfigToken("TestToken", "There Is No String", ConstrainStringValues(acceptableStrings)).Validate(constrainedString);
-      output.WriteLine(string.Join('\n', ErrorList));
+      ConfigToken testToken = new ConfigToken("TestToken", "There Is No String", ApplyConstraints<string>(ConstrainStringValues(acceptableStrings)));
+      bool testResult = testToken.Validate(constrainedString);
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -35,8 +36,9 @@ namespace ConstraintTests
     [MemberData(nameof(ConstrainRegexTestData))]
     public void ConstrainStringRegexExactTest(bool expectedResult, string constrainedString, params Regex[] patterns)
     {
-      bool testResult = new ConfigToken("TestToken", "There is only yourself.", ConstrainStringWithRegexExact(patterns)).Validate(constrainedString);
-      output.WriteLine(string.Join('\n', ErrorList));
+      ConfigToken testToken = new ConfigToken("TestToken", "There is only yourself.", ApplyConstraints<string>(ConstrainStringWithRegexExact(patterns)));
+      bool testResult = testToken.Validate(constrainedString);
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -62,24 +64,27 @@ namespace ConstraintTests
     [InlineData(false, "ThisTestWasWrittenIncorrectly", 8, 5)]
     public void ConstrainStringLengthTest(bool expectedResult, string constrainedString, params int[] passedConstraints)
     {
+      ConfigToken testToken;
       bool testResult;
       if (passedConstraints.Length == 1)
       {
-        testResult = new ConfigToken("TestToken", "There Is No String", ConstrainStringLength(passedConstraints[0])).Validate(constrainedString);
+        testToken = new ConfigToken("TestToken", "There Is No String", ApplyConstraints<string>(ConstrainStringLength(passedConstraints[0])));
+        testResult = testToken.Validate(constrainedString);
       }
       else
       {
         if (passedConstraints[0] > passedConstraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Doomed", ConstrainStringLength(passedConstraints[0], passedConstraints[1])));
-          testResult = false;
+          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Doomed", ApplyConstraints<string>(ConstrainStringLength(passedConstraints[0], passedConstraints[1]))));
+          return;
         }
         else
         {
-          testResult = new ConfigToken("TestToken", "Another Movie Quote", ConstrainStringLength(passedConstraints[0], passedConstraints[1])).Validate(constrainedString);
+          testToken = new ConfigToken("TestToken", "Another Movie Quote", ApplyConstraints<string>(ConstrainStringLength(passedConstraints[0], passedConstraints[1])));
+          testResult = testToken.Validate(constrainedString);
         }
       }
-      output.WriteLine(string.Join('\n', ErrorList));
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -91,13 +96,14 @@ namespace ConstraintTests
     {
       if (forbiddenChars.Length > 0)
       {
-        bool testResult = new ConfigToken("TestToken", "One Million Watts", ForbidStringCharacters(forbiddenChars)).Validate(constrainedString);
-        output.WriteLine(string.Join('\n', ErrorList));
+        ConfigToken testToken = new ConfigToken("TestToken", "One Million Watts", ApplyConstraints<string>(ForbidStringCharacters(forbiddenChars)));
+        bool testResult = testToken.Validate(constrainedString);
+        output.WriteLine(string.Join('\n', testToken.ErrorList));
         Assert.Equal(testResult, expectedResult);
       }
       else
       {
-        Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "There Is No String", ForbidStringCharacters(forbiddenChars)));
+        Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "There Is No String", ApplyConstraints<string>(ForbidStringCharacters(forbiddenChars))));
       }
     }
   }

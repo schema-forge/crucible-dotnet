@@ -12,7 +12,7 @@ using static SchemaForge.Crucible.Constraints;
 namespace ConstraintTests
 {
   [Trait("Crucible", "")]
-  public class ApplyConstraintsTests : Schema
+  public class ApplyConstraintsTests
   {
     private readonly ITestOutputHelper output;
 
@@ -71,11 +71,11 @@ namespace ConstraintTests
     public void ApplyTwoTypeConstraintPlusIndividualConstraintsTest(bool expectedResult, object inputValue)
     {
       Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library", ApplyConstraints<int, string>(
-      constraintsIfT1: new Func<JToken, string, List<Error>>[]
+      constraintsIfT1: new Constraint[]
         {
           ConstrainNumericValue(3,15)
         },
-      constraintsIfT2: new Func<JToken, string, List<Error>>[]
+      constraintsIfT2: new Constraint[]
         {
           ConstrainStringValues("Tennant", "Smith", "Eccleston")
         })).Validate(new JValue(inputValue)));

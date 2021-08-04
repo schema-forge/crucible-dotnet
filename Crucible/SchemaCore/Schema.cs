@@ -10,7 +10,6 @@ namespace SchemaForge.Crucible
 {
   public abstract class Schema
   {
-    // In child config definitions, RequiredConfigTokens and OptionalConfigTokens are set by merging a new HashSet of config tokens with the parent.
     /// <summary>
     /// Set of tokens that must exist in the JObject set as UserConfig. Object must be added to; it cannot be replaced.
     /// </summary>
