@@ -25,6 +25,10 @@ namespace SchemaForge.Crucible
     /// </summary>
     public List<Error> ErrorList { get; private set; } = new();
     /// <summary>
+    /// Indicates whether or not this token is required.
+    /// </summary>
+    public bool Required { get; private set; }
+    /// <summary>
     /// The function that will be executed on the passed token value.
     /// </summary>
     protected ConstraintContainer Constraints { get; private set; }
@@ -38,7 +42,19 @@ namespace SchemaForge.Crucible
     /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config. Ideally created by ApplyConstraints().</param>
     public ConfigToken(string inputName, string inputHelpString, ConstraintContainer constraintContainer)
     {
-      BuildConfigToken(inputName, inputHelpString, null, constraintContainer);
+      BuildConfigToken(inputName, inputHelpString, true, null, constraintContainer);
+    }
+
+    /// <summary>
+    /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
+    /// </summary>
+    /// <exception cref="ArgumentException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
+    /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
+    /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config. Ideally created by ApplyConstraints().</param>
+    public ConfigToken(string inputName, string inputHelpString, bool required, ConstraintContainer constraintContainer)
+    {
+      BuildConfigToken(inputName, inputHelpString, required, null, constraintContainer);
     }
 
     /// <summary>
@@ -51,10 +67,10 @@ namespace SchemaForge.Crucible
     /// <param name="inputValidationFunction">Function that will be executed on the corresponding value in the input config. Ideally created by ApplyConstraints().></param>
     public ConfigToken(string inputName, string inputHelpString, string inputDefaultValue,ConstraintContainer constraintContainer)
     {
-      BuildConfigToken(inputName, inputHelpString, inputDefaultValue, constraintContainer);
+      BuildConfigToken(inputName, inputHelpString, false, inputDefaultValue, constraintContainer);
     }
 
-    private void BuildConfigToken(string inputName, string inputHelpString, string inputDefaultValue, ConstraintContainer constraintContainer)
+    private void BuildConfigToken(string inputName, string inputHelpString, bool required, string inputDefaultValue, ConstraintContainer constraintContainer)
     {
       if (inputName.IsNullOrEmpty())
       {
@@ -64,6 +80,7 @@ namespace SchemaForge.Crucible
       {
         throw new ArgumentException($"HelpString of config token {inputName} is null or empty.");
       }
+      Required = required;
       TokenName = inputName;
       Constraints = constraintContainer;
       HelpString = inputHelpString;
@@ -84,5 +101,39 @@ namespace SchemaForge.Crucible
     {
       return TokenName;
     }
+
+    /// <summary>
+    /// All equality operators compare the TokenName of two ConfigTokens to determine equality.
+    /// </summary>
+    /// <param name="obj">The other object to compare.</param>
+    /// <returns>Bool indicating if two ConfigTokens have the same name.</returns>
+    public override bool Equals(object obj) => this.Equals(obj as ConfigToken);
+
+    /// <summary>
+    /// All equality operators compare the TokenName of two ConfigTokens to determine equality.
+    /// </summary>
+    /// <param name="other">The other token to compare.</param>
+    /// <returns>Bool indicating if two ConfigTokens have the same name.</returns>
+    public bool Equals(ConfigToken other)
+    {
+      if(!other.Exists())
+      {
+        return false;
+      }
+      if(this.TokenName == other.TokenName)
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+
+    /// <summary>
+    /// Sets the HashCode of a ConfigToken to the HashCode of its TokenName.
+    /// </summary>
+    /// <returns>HashCode of TokenName string.</returns>
+    public override int GetHashCode() => TokenName.GetHashCode();
   }
 }
