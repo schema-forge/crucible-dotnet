@@ -8,58 +8,40 @@ using SchemaForge.Crucible.Extensions;
 
 namespace SchemaForge.Crucible
 {
-  public abstract class Schema
+  public class Schema
   {
     /// <summary>
-    /// Set of tokens that must exist in the JObject set as UserConfig. Object must be added to; it cannot be replaced.
+    /// Set of token rules to use when a Json is passed to Validate().
     /// </summary>
-    protected HashSet<ConfigToken> RequiredConfigTokens { get; } = new();
-    /// <summary>
-    /// Set of tokens that optionally exist in the JObject set as UserConfig.
-    /// </summary>
-    protected HashSet<ConfigToken> OptionalConfigTokens { get; } = new();
+    public HashSet<ConfigToken> ConfigTokens { get; } = new();
     /// <summary>
     /// Contains all errors generated during validation and the associated HelpStrings of each token that was marked invalid.
     /// Should be printed to console or returned as part of an HTTP 400 response.
     /// </summary>
     public List<Error> ErrorList { get; } = new();
-    /// <summary>
-    /// Should be populated with the JObject that is being checked with RequiredConfigTokens and OptionalConfigTokens.
-    /// </summary>
-    public JObject UserConfig { get; protected set; }
-    /// <summary>
-    /// Indicates if any step of validation failed.
-    /// </summary>
-    public bool Valid { get; protected set; } = true;
 
-    /// <summary>
-    /// Checks UserConfig against RequiredConfigTokens and OptionalConfigTokens.
-    /// If name and type are provided, the message "Validation for [type] [name] failed." will be added to ErrorList on validation failure.
-    /// </summary>
-    protected virtual void Initialize(string name = null, string type = null)
+    public Schema()
     {
-      Initialize(RequiredConfigTokens, OptionalConfigTokens, UserConfig, name, type);
+
     }
 
-    /// <summary>
-    /// Checks UserConfig against the ConfigToken HashSets required and optional.
-    /// If name and type are provided, the message "Validation for [type] [name] failed." will be added to ErrorList on validation failure.
-    /// </summary>
-    /// <param name="required">Collection of ConfigToken objects that must be included in UserConfig.</param>
-    /// <param name="optional">Collection of ConfigToken objects that can be included in UserConfig.</param>
-    protected virtual void Initialize(HashSet<ConfigToken> required, HashSet<ConfigToken> optional, string name = null, string type = null)
+    public Schema(IEnumerable<ConfigToken> tokens)
     {
-      Initialize(required, optional, UserConfig, name, type);
+      foreach(ConfigToken token in tokens)
+      {
+        if(!ConfigTokens.Add(token))
+        {
+          throw new ArgumentException("Input IEnumerable<ConfigToken> contains duplicate tokens.");
+        }
+      }
     }
 
     /// <summary>
     /// Checks config against the ConfigToken HashSets required and optional.
     /// If name and type are provided, the message "Validation for [type] [name] failed." will be added to ErrorList on validation failure.
     /// </summary>
-    /// <param name="required">Collection of ConfigToken objects that must be included in UserConfig.</param>
-    /// <param name="optional">Collection of ConfigToken objects that can be included in UserConfig.</param>
-    /// <param name="config">Config object to check against the ConfigToken sets.</param>
-    protected virtual void Initialize(HashSet<ConfigToken> required, HashSet<ConfigToken> optional, JObject config, string name = null, string type = null)
+    /// <param name="config">Config object to check using the ConfigToken rules set in ConfigTokens.</param>
+    protected virtual List<Error> Validate(JObject config, string name = null, string type = null)
     {
       string message = " ";
       // This option is included in case a sub-JObject of another configuration is being validated; this allows the ErrorList to indicate the exact configuration that has the issue.
@@ -68,43 +50,34 @@ namespace SchemaForge.Crucible
       {
         message = $"Validation for {type} {name} failed.";
       }
-      foreach (ConfigToken token in required)
+      foreach (ConfigToken token in ConfigTokens)
       {
         if (!config.ContainsKey(token.TokenName))
         {
-          if (message.IsNullOrEmpty())
+          if(token.Required)
           {
-            ErrorList.Add(new Error($"User config is missing required token {token.TokenName}\n{token.HelpString}"));
+            if (message.IsNullOrEmpty())
+            {
+              ErrorList.Add(new Error($"Input json is missing required token {token.TokenName}\n{token.HelpString}"));
+            }
+            else
+            {
+              ErrorList.Add(new Error($"{type} {name} is missing required token {token.TokenName}\n{token.HelpString}"));
+            }
           }
-          else
+          else if(!token.DefaultValue.IsNullOrEmpty())
           {
-            ErrorList.Add(new Error($"{type} {name} is missing required token {token.TokenName}\n{token.HelpString}"));
+            config[token.TokenName] = token.DefaultValue; // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
           }
-          Valid = false;
         }
         else if (config[token.TokenName].IsNullOrEmpty())
         {
           ErrorList.Add(new Error($"Value of token {token.TokenName} is null or empty.",Severity.NullOrEmpty));
-          Valid = false;
         }
         else if (!token.Validate(config[token.TokenName]))
         {
           ErrorList.AddRange(token.ErrorList);
           ErrorList.Add(new Error(token.HelpString,Severity.Info));
-          Valid = false;
-        }
-      }
-      foreach (ConfigToken token in optional)
-      {
-        if (!config.ContainsKey(token.TokenName) && token.DefaultValue != null)
-        {
-          config[token.TokenName] = token.DefaultValue; // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
-        }
-        else if (config.ContainsKey(token.TokenName) && !token.Validate(config[token.TokenName]))
-        {
-          ErrorList.AddRange(token.ErrorList);
-          ErrorList.Add(new Error(token.HelpString, Severity.Info));
-          Valid = false;
         }
       }
       /*
@@ -116,48 +89,64 @@ namespace SchemaForge.Crucible
           but it will also not have the effect the user intended from including the optional token.
 
       Such a problem would be very frustrating and possibly difficult to debug;
-          therefore, we invalidate the config file if there are any tokens that are not accounted for in Required and Optional put together.
+          therefore, we invalidate the config file if there are any tokens that are not accounted for in ConfigTokens.
 
       */
       foreach (KeyValuePair<string, JToken> property in config)
       {
-        if (!required.Select(x => x.TokenName).Contains(property.Key) && !optional.Select(x => x.TokenName).Contains(property.Key))
+        if (!ConfigTokens.Select(x => x.TokenName).Contains(property.Key))
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add(new Error($"User config file contains unrecognized token: {property.Key}"));
+            ErrorList.Add(new Error($"Input json file contains unrecognized token: {property.Key}"));
           }
           else
           {
             ErrorList.Add(new Error($"{type} {name} contains unrecognized token: {property.Key}"));
           }
-          Valid = false;
         }
       }
-      if (!Valid && !string.IsNullOrWhiteSpace(message))
+      if (ErrorList.AnyFatal() && !string.IsNullOrWhiteSpace(message))
       {
         ErrorList.Add(new Error(message,Severity.Info));
       }
+      return ErrorList;
     }
 
-    /// <summary>
-    /// Returns the current schema controller as a stringified Json object,
-    /// filling in values for required and optional config tokens if UserConfig has already been populated.
-    /// </summary>
-    /// <returns>String version of a JObject representation of the current schema controller.</returns>
-    public override string ToString()
-    {
-      JObject configJson = new();
-      foreach (ConfigToken token in RequiredConfigTokens)
-      {
-        configJson.Add(token.TokenName, UserConfig.ContainsKey(token.TokenName) ? UserConfig[token.TokenName].ToString() : "");
-      }
-      foreach (ConfigToken token in OptionalConfigTokens)
-      {
-        configJson.Add(token.TokenName, UserConfig.ContainsKey(token.TokenName) ? UserConfig[token.TokenName].ToString() : token.DefaultValue ?? "");
-      }
-      return configJson.ToString();
-    }
+    /*
+    
+    CONSRUCTION ZONE AHEAD
+    DO NOT ENTER
+    !DANGER!
+    -----------------------------------------
+
+    */
+
+    ///// <summary>
+    ///// Returns the current schema controller as a stringified Json object,
+    ///// filling in values for required and optional config tokens if UserConfig has already been populated.
+    ///// </summary>
+    ///// <returns>String version of a JObject representation of the current schema controller.</returns>
+    //public override string ToString()
+    //{
+    //  JObject configJson = new();
+    //  foreach (ConfigToken token in RequiredConfigTokens)
+    //  {
+    //    configJson.Add(token.TokenName, UserConfig.ContainsKey(token.TokenName) ? UserConfig[token.TokenName].ToString() : "");
+    //  }
+    //  foreach (ConfigToken token in OptionalConfigTokens)
+    //  {
+    //    configJson.Add(token.TokenName, UserConfig.ContainsKey(token.TokenName) ? UserConfig[token.TokenName].ToString() : token.DefaultValue ?? "");
+    //  }
+    //  return configJson.ToString();
+    //}
+
+    /*
+    
+    -----------------------------------------
+    END CONSTRUCTION ZONE
+    
+    */
 
     /// <summary>
     /// This method can be used to generate a new example request or configuration file with all the required and optional tokens along with their HelpStrings.
@@ -167,53 +156,37 @@ namespace SchemaForge.Crucible
     public JObject GenerateEmptyConfig()
     {
       JObject newConfig = new();
-      foreach (ConfigToken token in RequiredConfigTokens)
+      foreach (ConfigToken token in ConfigTokens)
       {
-        newConfig.Add(token.TokenName, token.HelpString);
-      }
-      foreach (ConfigToken token in OptionalConfigTokens)
-      {
-        newConfig.Add(token.TokenName, "Optional - " + token.HelpString);
+        if(token.Required)
+        {
+          newConfig.Add(token.TokenName, token.HelpString);
+        }
+        else
+        {
+          newConfig.Add(token.TokenName, "Optional - " + token.HelpString);
+        }
       }
       return newConfig;
     }
 
     #region JObject Constraints
 
-    // This constraint method allows nesting of Json objects inside one another without resorting to defining additional config types.
-
     /// <summary>
     /// Allows nested Json property checking.
     /// </summary>
-    /// <param name="requiredTokens">Array of required ConfigToken objects that will be applied to the passed Json object.</param>
+    /// <param name="inputSchema">Schema object to apply to the Json.</param>
     /// <returns>Function ensuring the passed JObject contains all tokens in requiredTokens and all validation functions are passed.</returns>
-    protected Func<JToken, string, List<Error>> ConstrainJsonTokens(params ConfigToken[] requiredTokens)
+    public static Constraint ApplySchema(Schema inputSchema)
     {
       List<Error> InnerMethod(JToken inputToken, string inputName)
       {
+        List<Error> internalErrorList = new();
         JObject inputJson = (JObject)inputToken;
-        Initialize(requiredTokens.ToHashSet(), new HashSet<ConfigToken>(), inputJson, inputName, "Value of token");
-        return ErrorList;
+        internalErrorList.AddRange(inputSchema.Validate(inputJson, inputName, "inner json"));
+        return internalErrorList;
       }
-      return InnerMethod;
-    }
-
-
-    /// <summary>
-    /// Allows nested Json property checking.
-    /// </summary>
-    /// <param name="requiredTokens">Array of required ConfigToken objects that will be applied to the passed Json object.</param>
-    /// <param name="optionalTokens">Array of optional ConfigToken objects that will be applied to the passed Json object.</param>
-    /// <returns>Function ensuring the passed JObject contains all tokens in requiredTokens and all validation functions are passed for both token arrays.</returns>
-    protected Func<JToken, string, List<Error>> ConstrainJsonTokens(ConfigToken[] requiredTokens, ConfigToken[] optionalTokens)
-    {
-      List<Error> InnerMethod(JToken inputToken, string inputName)
-      {
-        JObject inputJson = (JObject)inputToken;
-        Initialize(requiredTokens.ToHashSet(), optionalTokens.ToHashSet(), inputJson, inputName, "Value of token");
-        return ErrorList;
-      }
-      return InnerMethod;
+      return new Constraint(InnerMethod,new JProperty("ApplySchema",inputSchema.ToString()));
     }
 
     #endregion JObject Constraints
