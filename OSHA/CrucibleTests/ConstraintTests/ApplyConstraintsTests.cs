@@ -60,7 +60,7 @@ namespace ConstraintTests
     [InlineData(false, "Whitaker")]
     public void ApplyTwoTypeConstraintTest(bool expectedResult, object inputValue)
     {
-      Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library", ApplyConstraints<bool, int>()).Validate(new JValue(inputValue)));
+      Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library Part 1", ApplyConstraints<bool, int>()).Validate(new JValue(inputValue)));
     }
 
     [Theory]
@@ -70,7 +70,7 @@ namespace ConstraintTests
     [InlineData(false, 45)]
     public void ApplyTwoTypeConstraintPlusIndividualConstraintsTest(bool expectedResult, object inputValue)
     {
-      Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library", ApplyConstraints<int, string>(
+      Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library Part 2", ApplyConstraints<int, string>(
       constraintsIfT1: new Constraint[]
         {
           ConstrainNumericValue(3,15)
@@ -79,6 +79,12 @@ namespace ConstraintTests
         {
           ConstrainStringValues("Tennant", "Smith", "Eccleston")
         })).Validate(new JValue(inputValue)));
+    }
+
+    [Fact]
+    public void ApplyConstraintsThrowsWithDuplicateConstraints()
+    {
+      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Don't Blink", ApplyConstraints<string>(ConstrainStringValues("Please", "just"),ConstrainStringValues("put", "us", "in", "one", "constraint"))));
     }
   }
 }
