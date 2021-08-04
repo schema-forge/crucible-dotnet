@@ -13,7 +13,7 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// Set of token rules to use when a Json is passed to Validate().
     /// </summary>
-    public HashSet<ConfigToken> ConfigTokens { get; } = new();
+    private HashSet<ConfigToken> ConfigTokens = new();
     /// <summary>
     /// Contains all errors generated during validation and the associated HelpStrings of each token that was marked invalid.
     /// Should be printed to console or returned as part of an HTTP 400 response.
@@ -27,21 +27,36 @@ namespace SchemaForge.Crucible
 
     public Schema(IEnumerable<ConfigToken> tokens)
     {
-      foreach(ConfigToken token in tokens)
+      AddTokens(tokens);
+    }
+
+    public void AddToken(ConfigToken token)
+    {
+      if (!ConfigTokens.Add(token))
       {
-        if(!ConfigTokens.Add(token))
+        throw new ArgumentException("Input IEnumerable<ConfigToken> contains duplicate tokens.");
+      }
+    }
+
+    public void AddTokens(IEnumerable<ConfigToken> tokens)
+    {
+      foreach (ConfigToken token in tokens)
+      {
+        if (!ConfigTokens.Add(token))
         {
           throw new ArgumentException("Input IEnumerable<ConfigToken> contains duplicate tokens.");
         }
       }
     }
 
+    public int Count() => ConfigTokens.Count;
+
     /// <summary>
     /// Checks config against the ConfigToken HashSets required and optional.
     /// If name and type are provided, the message "Validation for [type] [name] failed." will be added to ErrorList on validation failure.
     /// </summary>
     /// <param name="config">Config object to check using the ConfigToken rules set in ConfigTokens.</param>
-    protected virtual List<Error> Validate(JObject config, string name = null, string type = null)
+    public virtual List<Error> Validate(JObject config, string name = null, string type = null)
     {
       string message = " ";
       // This option is included in case a sub-JObject of another configuration is being validated; this allows the ErrorList to indicate the exact configuration that has the issue.
@@ -62,7 +77,7 @@ namespace SchemaForge.Crucible
             }
             else
             {
-              ErrorList.Add(new Error($"{type} {name} is missing required token {token.TokenName}\n{token.HelpString}"));
+              ErrorList.Add(new Error($"Input {type} {name} is missing required token {token.TokenName}\n{token.HelpString}"));
             }
           }
           else if(!token.DefaultValue.IsNullOrEmpty())
@@ -102,7 +117,7 @@ namespace SchemaForge.Crucible
           }
           else
           {
-            ErrorList.Add(new Error($"{type} {name} contains unrecognized token: {property.Key}"));
+            ErrorList.Add(new Error($"Input {type} {name} contains unrecognized token: {property.Key}"));
           }
         }
       }
