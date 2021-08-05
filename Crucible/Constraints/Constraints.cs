@@ -19,7 +19,13 @@ namespace SchemaForge.Crucible
     /// JProperty representation of this constraint. Will be used when saving a Schema to Json.
     /// </summary>
     public JProperty Property { get; protected set; }
+    /// <summary>
+    /// Used solely to retrieve the function as an object when deserializing.
+    /// </summary>
+    /// <returns>Function boxed in an object.</returns>
+    public abstract object GetFunction();
   }
+
   public class Constraint<T> : Constraint
   {
     /// <summary>
@@ -35,15 +41,16 @@ namespace SchemaForge.Crucible
     {
       if (inputProperty.Name.IsNullOrEmpty())
       {
-        throw new ArgumentNullException(nameof(inputProperty), "Name of inputProperty cannot be null or whitespace.");
+        throw new ArgumentNullException(nameof(inputProperty), $"Name of {nameof(inputProperty)} cannot be null or whitespace.");
       }
       if (inputProperty.Value.IsNullOrEmpty())
       {
-        throw new ArgumentNullException(nameof(inputProperty), "Value of inputProperty cannot be null or whitespace.");
+        throw new ArgumentNullException(nameof(inputProperty), $"Value of {nameof(inputProperty)} cannot be null or whitespace.");
       }
       Property = inputProperty;
       Function = inputFunction;
     }
+    public override object GetFunction() => Function;
   }
   public static class Constraints
   {

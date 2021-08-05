@@ -39,7 +39,7 @@ namespace ConstraintTests
     }
 
     /// <summary>
-    /// 
+    /// Ensures that ConstrainStringRegex functions properly by checking the entire string and not only part of it.
     /// </summary>
     /// <param name="expectedResult">Expected result from validation.</param>
     /// <param name="constrainedString">String to test against acceptable values.</param>

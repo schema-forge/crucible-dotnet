@@ -12,13 +12,13 @@ using static SchemaForge.Crucible.Constraints;
 
 namespace SchemaForge.Crucible
 {
-  class ShippingAndReceiving
+  public class ShippingAndReceiving
   {
-    private static Dictionary<JToken, Func<JToken, Constraint>> StringToConstraint = new()
+    private static readonly Dictionary<JToken, Func<JToken, Constraint>> StringToConstraint = new()
     {
     };
 
-    private static Dictionary<string, string> InternalTypeMap = new()
+    private static readonly Dictionary<string, string> InternalTypeMap = new()
     {
       { "Byte", "Integer" },
       { "SByte", "Integer" },
@@ -41,14 +41,32 @@ namespace SchemaForge.Crucible
 
     private static Dictionary<string, Func<Constraint[], ConstraintContainer>> InternalDeserializeType = new()
     {
-      { "Integer", Blaaaaaargh<long> }
+      { "Integer", GetConstraintsForType<long> },
+      { "String", GetConstraintsForType<string> },
+      { "Decimal", GetConstraintsForType<double> },
+      { "Array", GetConstraintsForType<JArray> },
+      { "JObject", GetConstraintsForType<JObject> }
     };
 
     public static ConstraintContainer DeserializeType(string typeString, Constraint[] constraints) => InternalDeserializeType[typeString](constraints);
 
     public static string TypeMap(string typeString) => InternalTypeMap[typeString];
 
-    public static ConstraintContainer Blaaaaaargh<T>(Constraint[] constraints) => ApplyConstraints<T>((Constraint<T>[])constraints);
+    /// <summary>
+    /// Used as part of the type deserializer. When adding a new supported type, only use the method name and type argument. Do not attempt to pass constraints.
+    /// </summary>
+    /// <typeparam name="T">Type to align with a string key.</typeparam>
+    /// <param name="constraints">Irrelevant. Populated only when deserializing a Json file to a Schema.</param>
+    /// <returns>ConstraintContainer containing constraints of that particular type.</returns>
+    public static ConstraintContainer GetConstraintsForType<T>(Constraint[] constraints)
+    {
+      List<Constraint<T>> constraintList = new();
+      foreach(Constraint constraint in constraints)
+      {
+        constraintList.Add(new Constraint<T>((Func<T, string, List<Error>>)constraint.GetFunction(), constraint.Property));
+      }
+      return ApplyConstraints<T>(constraintList.ToArray());
+    }
 
     public static void AddSupportedType(string csTypeName, string schemaForgeTypeName, Func<Constraint[], ConstraintContainer> typeDeserializer)
     {
