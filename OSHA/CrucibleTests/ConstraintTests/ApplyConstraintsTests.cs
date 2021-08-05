@@ -21,6 +21,9 @@ namespace ConstraintTests
       this.output = output;
     }
 
+    /// <summary>
+    /// Ensures that type checking works properly.
+    /// </summary>
     [Fact]
     public void ApplyTypeConstraintValid()
     {
@@ -28,6 +31,9 @@ namespace ConstraintTests
       Assert.True(testResult);
     }
 
+    /// <summary>
+    /// Ensures that type checking invalidation works properly.
+    /// </summary>
     [Fact]
     public void ApplyTypeConstraintInvalidType()
     {
@@ -35,6 +41,9 @@ namespace ConstraintTests
       Assert.False(testResult);
     }
 
+    /// <summary>
+    /// Ensures that that empty tokens are properly flagged by ApplyConstraints.
+    /// </summary>
     [Fact]
     public void ApplyTypeConstraintNullOrEmpty()
     {
@@ -42,27 +51,43 @@ namespace ConstraintTests
       Assert.False(testResult);
     }
 
+    /// <summary>
+    /// Executes two constraints on a string that will pass both constarints.
+    /// </summary>
     [Fact]
     public void ApplyConstraintsValid()
     {
       Assert.True(new ConfigToken("TestToken", "I'm sorry. I'm so sorry.", ApplyConstraints<string>(ConstrainStringLength(5), ForbidStringCharacters(',', '\n'))).Validate("Valid string!"));
     }
 
+    /// <summary>
+    /// Executes two constraints on a string that fails both conditions.
+    /// </summary>
     [Fact]
     public void ApplyConstraintsInvalid()
     {
       Assert.False(new ConfigToken("TestToken", "Bow ties are cool.", ApplyConstraints<string>(ConstrainStringLength(5), ForbidStringCharacters('.', '\n'))).Validate("yup."));
     }
 
+    /// <summary>
+    /// Tests applying constraints to a token that can be one of two types.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="inputValue">Value to validate against the constraint (must be either bool or int)</param>
     [Theory]
     [InlineData(true, true)]
     [InlineData(true, 45)]
-    [InlineData(false, "Whitaker")]
+    [InlineData(false, "Whitaker")] // Will fail, because the input value must be either bool or int.
     public void ApplyTwoTypeConstraintTest(bool expectedResult, object inputValue)
     {
       Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library Part 1", ApplyConstraints<bool, int>()).Validate(new JValue(inputValue)));
     }
 
+    /// <summary>
+    /// Tests applying different constraints to different types.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="inputValue">Value to validate using the constraints. If int, it must be between 3 and 15. If string, must be one of Tennant, Smith, and Eccleston.</param>
     [Theory]
     [InlineData(true, "Tennant")]
     [InlineData(true, 12)]
@@ -81,10 +106,13 @@ namespace ConstraintTests
         })).Validate(new JValue(inputValue)));
     }
 
+    /// <summary>
+    /// Ensures that ApplyConstraints throws ArgumentException if duplicate constraints are passed.
+    /// </summary>
     [Fact]
     public void ApplyConstraintsThrowsWithDuplicateConstraints()
     {
-      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Don't Blink", ApplyConstraints<string>(AllowValues("Please", "just"),AllowValues("put", "us", "in", "one", "constraint"))));
+      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Don't Blink", ApplyConstraints(AllowValues("Please", "just"),AllowValues("put", "us", "in", "one", "constraint"))));
     }
   }
 }

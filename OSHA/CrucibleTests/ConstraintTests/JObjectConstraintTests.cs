@@ -21,6 +21,11 @@ namespace ConstraintTests
       this.output = output;
     }
 
+    /// <summary>
+    /// Tests ApplySchema using a constructed schema with two required tokens.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json that will be tested against the schema.</param>
     [Theory]
     [InlineData(false, "{}")]
     [InlineData(true, "{'Ripe':true,'MarketValue':3}")]
@@ -38,6 +43,11 @@ namespace ConstraintTests
       Assert.Equal(testResult, expectedResult);
     }
 
+    /// <summary>
+    /// Tests ApplySchema using a constructed schema with two required tokens and one optional token.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json that will be tested against the schema.</param>
     [Theory]
     [InlineData(false, "{}")]
     [InlineData(true, "{'Ripe':true,'MarketValue':3}")]
@@ -58,6 +68,12 @@ namespace ConstraintTests
       Assert.Equal(testResult, expectedResult);
     }
 
+    /// <summary>
+    /// ConstrainCollectionCount tests for JObjects. For JObjects, ConstrainCollectionCount counts the number of properties, since JObjects are really just dictionaries of string and JToken.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json that will be checked for its property count.</param>
+    /// <param name="constraints">Arguments that will be passed to ConstrainCollectionCount.</param>
     [Theory]
     [InlineData(true, "{'DecoyProperty':''}", 1)]
     [InlineData(false, "{}", 1)]

@@ -21,6 +21,12 @@ namespace ConstraintTests
       this.output = output;
     }
 
+    /// <summary>
+    /// Tests ConstrainValue on ints.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedValue">Value to check with ConstrainValue.</param>
+    /// <param name="constraints">Arguments to be passed to ConstrainValue.</param>
     [Theory]
     [InlineData(true, 15, 15)]
     [InlineData(false, 15, 25)]
@@ -28,13 +34,13 @@ namespace ConstraintTests
     [InlineData(true, 15, 15, 15)]
     [InlineData(false, 15, 3, 7)]
     [InlineData(false, 15, 7, 3)]
-    public void ConstrainNumericApplyInnerFunctionIntTests(bool expectedResult, int constrainedValue, params int[] constraints)
+    public void ConstrainApplyInnerFunctionIntTests(bool expectedResult, int constrainedValue, params int[] constraints)
     {
       ConfigToken testToken;
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken("TestToken", "Angry String", ApplyConstraints<int>(ConstrainValue(constraints[0])));
+        testToken = new ConfigToken("TestToken", "Angry String", ApplyConstraints(ConstrainValue(constraints[0])));
         testResult = testToken.Validate(constrainedValue);
       }
       else
@@ -54,6 +60,12 @@ namespace ConstraintTests
       Assert.Equal(testResult, expectedResult);
     }
 
+    /// <summary>
+    /// Tests ConstrainValue on doubles.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedValue">Value to check with ConstrainValue.</param>
+    /// <param name="constraints">Arguments to be passed to ConstrainValue.</param>
     [Theory]
     [InlineData(true, 15.3, 15.3)]
     [InlineData(false, 15.7, 15.8)]
@@ -61,7 +73,7 @@ namespace ConstraintTests
     [InlineData(true, 15.0, 15.0, 15.0)]
     [InlineData(false, 15.5, 3.5, 3.5)]
     [InlineData(false, 15.5, 3.3, 3.2)]
-    public void ConstrainNumericApplyInnerFunctionDoubleTests(bool expectedResult, double constrainedValue, params double[] constraints)
+    public void ConstrainValueApplyInnerFunctionDoubleTests(bool expectedResult, double constrainedValue, params double[] constraints)
     {
       ConfigToken testToken;
       bool testResult;
@@ -86,35 +98,16 @@ namespace ConstraintTests
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
-    [Theory]
-    [MemberData(nameof(ConstrainNumericDoubleDomainData))]
-    public void ConstrainNumericApplyInnerFunctionDoubleDomainTests(bool expectedResult, int constrainedValue, params (double, double)[] domains)
-    {
-      ConfigToken testToken;
-      bool testResult;
-      testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<double>(ConstrainValue(domains)));
-      testResult = testToken.Validate(constrainedValue);
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
-      Assert.Equal(testResult, expectedResult);
-    }
 
-    public static IEnumerable<object[]> ConstrainNumericDoubleDomainData
-    {
-      get
-      {
-        return new[]
-        {
-          new object[] { true, 15, (14.0, 16.0) },
-          new object[] { false, 15, (13.0, 14.0) },
-          new object[] { true, 15, (10.0, 12.0), (3.0, 5.0), (14.0, 16.0) },
-          new object[] { false, 13, (10.0, 12.0), (3.0, 5.0), (14.0, 16.0) }
-        };
-      }
-    }
-
+    /// <summary>
+    /// Tests ConstrainValue with domain ranges on values.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedValue">Value to check with ConstrainValue.</param>
+    /// <param name="domains">Domains to be passed to ConstrainValue.</param>
     [Theory]
-    [MemberData(nameof(ConstrainNumericDomainData))]
-    public void ConstrainNumericApplyInnerFunctionIntDomainTests(bool expectedResult, int constrainedValue, params (int, int)[] domains)
+    [MemberData(nameof(ConstrainValueIntDomainData))]
+    public void ConstrainValueApplyInnerFunctionIntDomainTests(bool expectedResult, int constrainedValue, params (int, int)[] domains)
     {
       ConfigToken testToken;
       bool testResult;
@@ -124,7 +117,7 @@ namespace ConstraintTests
       Assert.Equal(testResult, expectedResult);
     }
 
-    public static IEnumerable<object[]> ConstrainNumericDomainData
+    public static IEnumerable<object[]> ConstrainValueIntDomainData
     {
       get
       {
@@ -138,12 +131,51 @@ namespace ConstraintTests
       }
     }
 
+
+    /// <summary>
+    /// Tests ConstrainValue with domain ranges on values.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedValue">Value to check with ConstrainValue.</param>
+    /// <param name="domains">Domains to be passed to ConstrainValue.</param>
+    [Theory]
+    [MemberData(nameof(ConstrainValueDoubleDomainData))]
+    public void ConstrainValueApplyInnerFunctionDoubleDomainTests(bool expectedResult, int constrainedValue, params (double, double)[] domains)
+    {
+      ConfigToken testToken;
+      bool testResult;
+      testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<double>(ConstrainValue(domains)));
+      testResult = testToken.Validate(constrainedValue);
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
+
+    public static IEnumerable<object[]> ConstrainValueDoubleDomainData
+    {
+      get
+      {
+        return new[]
+        {
+          new object[] { true, 15, (14.0, 16.0) },
+          new object[] { false, 15, (13.0, 14.0) },
+          new object[] { true, 15, (10.0, 12.0), (3.0, 5.0), (14.0, 16.0) },
+          new object[] { false, 13, (10.0, 12.0), (3.0, 5.0), (14.0, 16.0) }
+        };
+      }
+    }
+
+    /// <summary>
+    /// Ensures that passing a domain with a higher upper bound than a lower bound will throw an exception. Invalid inputs will be punished.
+    /// </summary>
     [Fact]
     public void ConstrainNumericDomain_InvalidBounds()
     {
       Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Doomed Token", ApplyConstraints<int>(ConstrainValue((15, 13)))));
     }
 
+    /// <summary>
+    /// Ensures that the JProperty passed back from the constraint function with lower bound is as expected.
+    /// </summary>
     [Fact]
     public void ConstrainValuePropertyTestLowerBound()
     {
@@ -152,6 +184,9 @@ namespace ConstraintTests
       Assert.Equal(expected, testConstraint.Property);
     }
 
+    /// <summary>
+    /// Ensures that the JProperty passed back from the constraint function with a lower bound and upper bound is as expected.
+    /// </summary>
     [Fact]
     public void ConstrainValuePropertyTestUpperAndLowerBound()
     {
@@ -160,6 +195,10 @@ namespace ConstraintTests
       Assert.Equal(expected, testConstraint.Property);
     }
 
+
+    /// <summary>
+    /// Ensures that the JProperty passed back from the constraint function with domains is as expected.
+    /// </summary>
     [Fact]
     public void ConstrainValuePropertyTestIntDomains()
     {
@@ -168,6 +207,10 @@ namespace ConstraintTests
       Assert.Equal(expected, testConstraint.Property);
     }
 
+
+    /// <summary>
+    /// Ensures that the JProperty passed back from the constraint function with double domains is as expected.
+    /// </summary>
     [Fact]
     public void ConstrainValuePropertyTestDoubleDomains()
     {

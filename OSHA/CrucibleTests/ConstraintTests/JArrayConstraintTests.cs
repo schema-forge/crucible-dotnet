@@ -21,6 +21,12 @@ namespace ConstraintTests
       this.output = output;
     }
 
+    /// <summary>
+    /// Tests for ConstrainCollectionCount on JArray.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json containing the array that will be tested.</param>
+    /// <param name="constraints">Upper and lower bounds to pass to ConstrainCollectionCount.</param>
     [Theory]
     [InlineData(true, "{'TestArray':[1,'fish']}", 2)] // Equal to lower.
     [InlineData(false, "{'TestArray':['beat']}", 2)] // Too few.
@@ -55,6 +61,12 @@ namespace ConstraintTests
       Assert.Equal(testResult, expectedResult);
     }
 
+    /// <summary>
+    /// Tests applying constraints to all values of an array.
+    /// In this case, checks to ensure that all the values are valid ints.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json containing the array that will be tested.</param>
     [Theory]
     [InlineData(true, "{'TestArray':[1,5,15]}")]
     [InlineData(false, "{'TestArray':[]}")]
@@ -69,6 +81,12 @@ namespace ConstraintTests
       Assert.Equal(testResult, expectedResult);
     }
 
+    /// <summary>
+    /// Tests applying constraints to all values of an array.
+    /// In this case, checks for int type and gives a minimum value.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json containing the array that will be tested.</param>
     [Theory]
     [InlineData(true, "{'TestArray':[5,15]}")]
     [InlineData(false, "{'TestArray':[1,5,15]}")]
@@ -84,6 +102,11 @@ namespace ConstraintTests
       Assert.Equal(testResult, expectedResult);
     }
 
+    /// <summary>
+    /// Tests applying two constraints to all values of an array. In this case, contains minimum string length and forbids / ? and !.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json containing the array that will be tested.</param>
     [Theory]
     [InlineData(true, "{'TestArray':['Do not touch the operational end of The Device.','Do not look directly at the operational end of The Device.']}")] // Passes all constraints.
     [InlineData(false, "{'TestArray':['Well done! Your OSHA compliance score is currently 7/129. Keep going, sport!']}")] // Fails one constraint.

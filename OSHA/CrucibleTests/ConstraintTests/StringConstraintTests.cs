@@ -21,6 +21,12 @@ namespace ConstraintTests
       this.output = output;
     }
 
+    /// <summary>
+    /// Ensures that AllowValues functions with strings with two tests.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedString">String to test against acceptable values.</param>
+    /// <param name="acceptableStrings">Acceptable strings.</param>
     [Theory]
     [InlineData(true, "AcceptableString", "AcceptableString", "AnotherAcceptableString", "YetAnotherAcceptableString")]
     [InlineData(false, "HowDareYouFeedMeThisString", "AcceptableString", "AnotherAcceptableString", "YetAnotherAcceptableString")]
@@ -32,6 +38,12 @@ namespace ConstraintTests
       Assert.Equal(testResult, expectedResult);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedString">String to test against acceptable values.</param>
+    /// <param name="patterns">Pattern or patterns to test with.</param>
     [Theory]
     [MemberData(nameof(ConstrainRegexTestData))]
     public void ConstrainStringRegexExactInnerFunctionTest(bool expectedResult, string constrainedString, params Regex[] patterns)
@@ -55,6 +67,12 @@ namespace ConstraintTests
       }
     }
 
+    /// <summary>
+    /// Ensures that ConstrainStringLength functions properly with one, two, and invalid arguments.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedString">String to validate with ConstrainStringLength.</param>
+    /// <param name="passedConstraints">Arguments to pass to ConstrainStringLength.</param>
     [Theory]
     [InlineData(true, "APerfectlyWellBehavedString", 3)]
     [InlineData(false, "AnInsubordinateAndChurlishString", 33)]
@@ -88,7 +106,14 @@ namespace ConstraintTests
       Assert.Equal(testResult, expectedResult);
     }
 
+    /// <summary>
+    /// Ensures that ForbidStringCharacters functions properly with one, multiple, and no arguments.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedString">String to test against forbidden characters.</param>
+    /// <param name="forbiddenChars">Arguments to pass to ForbidStringCharacters.</param>
     [Theory]
+    [InlineData(true, "ModestyPrevails", 'V')]
     [InlineData(true, "GoodBoy", '/', '*')]
     [InlineData(false, "Why, father?", 'W')]
     [InlineData(false, "Doomed")]
@@ -96,7 +121,7 @@ namespace ConstraintTests
     {
       if (forbiddenChars.Length > 0)
       {
-        ConfigToken testToken = new ConfigToken("TestToken", "One Million Watts", ApplyConstraints<string>(ForbidStringCharacters(forbiddenChars)));
+        ConfigToken testToken = new("TestToken", "One Million Watts", ApplyConstraints<string>(ForbidStringCharacters(forbiddenChars)));
         bool testResult = testToken.Validate(constrainedString);
         output.WriteLine(string.Join('\n', testToken.ErrorList));
         Assert.Equal(testResult, expectedResult);
@@ -107,6 +132,9 @@ namespace ConstraintTests
       }
     }
 
+    /// <summary>
+    /// Ensures that the AllowValues constraint passes the expected JProperty.
+    /// </summary>
     [Fact]
     public void AllowValuesPropertyTest()
     {
@@ -115,6 +143,9 @@ namespace ConstraintTests
       Assert.Equal(expected, testConstraint.Property);
     }
 
+    /// <summary>
+    /// Ensures that ConstrainStringLength passes the expected JProperty when given a lower bound.
+    /// </summary>
     [Fact]
     public void ConstrainStringLengthLowerBoundPropertyTest()
     {
@@ -123,6 +154,9 @@ namespace ConstraintTests
       Assert.Equal(expected, testConstraint.Property);
     }
 
+    /// <summary>
+    /// Ensures that ConstrainStringLength passes the expected JProperty when given a lower and upper bound.
+    /// </summary>
     [Fact]
     public void ConstrainStringLowerAndUpperBoundLengthPropertyTest()
     {
