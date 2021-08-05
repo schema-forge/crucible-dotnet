@@ -39,10 +39,34 @@ namespace SchemaTests
           new object[] { false, "String", new JArray() { 6, 6, 4, 7, 5 } }, // Applies string type constraint to invalid input.
           new object[] { true, "Decimal", 25.3 }, // Applies decimal type constraint to valid input.
           new object[] { true, "Decimal", 25.3, ConstrainValue<double>(22) }, // Applies actual decimal constraint to valid input.
-          new object[] { false, "Decimal", true }, // Applies decimal type constraint to invalid input.
+          new object[] { false, "Decimal", "astrong" }, // Applies decimal type constraint to invalid input.
           new object[] { true, "Array", new JArray() { 3 } }, // Applies array type constraint to valid input.
           new object[] { true, "Array", new JArray() { 3 }, ApplyConstraintsToAllCollectionValues<JArray, int>() }, // Applies actual array constraint to valid input.
           new object[] { false, "Array", "youthoughtitwasarealarraybutitwasmeDIO" } // Applies array type constraint to invalid input.
+        };
+      }
+    }
+
+    [Theory]
+    [MemberData(nameof(GetConstraintsForTypeTestData))]
+    public static void GetConstraintsForTypeTests(bool expected, JToken inputValue, params Constraint[] constraints)
+    {
+      ConstraintContainer container = ShippingAndReceiving.GetConstraintsForType<long>(constraints);
+      List<Error> resultList = container.ApplyConstraints(inputValue, "Test Token");
+      Assert.Equal(expected, !resultList.AnyFatal());
+    }
+
+    public static IEnumerable<object[]> GetConstraintsForTypeTestData
+    {
+      get
+      {
+        return new[]
+        {
+          new object[] { true, 25 }, // Applies type constraint to valid input.
+          new object[] { false, "bleventeen" }, // Applies type constraint to invalid input.
+          new object[] { true, 25, ConstrainValue<long>(22) }, // Applies actual constraint to valid input.
+          new object[] { true, 25, ConstrainValue<long>(22,35) }, // Applies actual constraint to valid input.
+          new object[] { false, 25, ConstrainValue<long>(26,35) }, // Applies actual constraint to invalid input.
         };
       }
     }
