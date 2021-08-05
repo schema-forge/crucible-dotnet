@@ -9,6 +9,8 @@ using Newtonsoft.Json.Linq;
 
 using SchemaForge.Crucible.Extensions;
 
+//using ConstraintApplicator = System.Func<SchemaForge.Crucible.Constraint[], SchemaForge.Crucible.ConstraintContainer>;
+
 namespace SchemaForge.Crucible
 {
   public abstract class Constraint
@@ -46,52 +48,6 @@ namespace SchemaForge.Crucible
   public static class Constraints
   {
 
-    private static Dictionary<JToken, Func<JToken, Constraint>> StringToConstraint = new()
-    {
-    };
-
-    public static Constraint<T> JPropertyToConstraint<T>(JProperty inputProperty) => (Constraint<T>)StringToConstraint[inputProperty.Name](inputProperty.Value);
-
-    private static List<int> GetIntArgsFromJToken(JToken args)
-    {
-      JTokenType[] acceptableTypes = { JTokenType.String, JTokenType.Integer, JTokenType.Float };
-      if(!acceptableTypes.Contains(args.Type))
-      {
-        
-      }
-      string[] argString = args.ToString().Replace(" ", "").Split(',');
-      if (argString.Length > 2)
-      {
-        throw new ArgumentException("Comma-separated list must have no more than two values.");
-      }
-      else
-      {
-        List<int> argsInt = new List<int>();
-        foreach(string stringArg in argString)
-        {
-          if (stringArg.Contains('.') && !EndsInZeroHelper(stringArg))
-          {
-            throw new ArgumentException($"Error encountered while parsing value {stringArg}: Value is not parseable to int without loss of information.");
-          }
-          if(int.TryParse(stringArg, out int intArg))
-          {
-            argsInt.Add(intArg);
-          }
-          else
-          {
-            throw new ArgumentException("Error encountered while parsing value " + stringArg + ": Value is not a valid int.");
-          }
-        }
-        return argsInt;
-      }
-    }
-
-    /// <summary>
-    /// Returns true if the string representation of a number is something like "3.0" or "3." and false otherwise.
-    /// </summary>
-    /// <param name="inputString">String to check.</param>
-    /// <returns>Bool indicating if the decimal places are all zero.</returns>
-    private static bool EndsInZeroHelper(string inputString) => inputString.Replace("0","")[^1] == '.';
 
     #region Apply Constraints
 
@@ -105,10 +61,10 @@ namespace SchemaForge.Crucible
     /// Produces ConstraintContainer members for ConfigTokens, which are executed on the corresponding values found in the UserConfig property. The returned function in the ConstraintContainer is composed from all the functions in all the Constraints passed to the method.
     /// It first checks the type of the value with T, then executes all passed constraints on the value.
     /// </summary>
-    /// <typeparam name="T">Type that the token value will be cast to.</typeparam>
+    /// <typeparam name="TValueType">Type that the token value will be cast to.</typeparam>
     /// <param name="constraints">Functions to execute on the token value after cast is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public static ConstraintContainer ApplyConstraints<T>(params Constraint<T>[] constraints)
+    public static ConstraintContainer ApplyConstraints<TValueType>(params Constraint<TValueType>[] constraints)
     {
       List<Error> ValidationFunction(JToken inputToken, string tokenName)
       {
@@ -120,8 +76,8 @@ namespace SchemaForge.Crucible
         }
         try
         {
-          T castValue = inputToken.Value<T>();
-          foreach (Constraint<T> constraint in constraints)
+          TValueType castValue = inputToken.Value<TValueType>();
+          foreach (Constraint<TValueType> constraint in constraints)
           {
             internalErrorList.AddRange(constraint.Function(castValue, tokenName));
           }
@@ -129,14 +85,21 @@ namespace SchemaForge.Crucible
         }
         catch
         {
-          internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected value type: {typeof(T)}"));
+          internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected value type: {typeof(TValueType)}"));
           return internalErrorList;
         }
       }
       JArray constraintArray = new();
       JObject constraintObject = new();
-      constraintObject.Add("Type", typeof(T).ToString());
-      foreach(Constraint<T> constraint in constraints)
+      try
+      {
+        constraintObject.Add("Type", ShippingAndReceiving.TypeMap(typeof(TValueType).Name));
+      }
+      catch
+      {
+        throw new ArgumentException($"Attempted to pass unsupported type {typeof(TValueType).Name}\nIf needed, use AddSupportedType to add a new type to the recognized types. This will enable SchemaForge to recognize this token type for your project.");
+      }
+      foreach(Constraint<TValueType> constraint in constraints)
       {
         constraintObject.Add(constraint.Property);
       }
@@ -153,12 +116,12 @@ namespace SchemaForge.Crucible
     /// will be executed.
     /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraints string, int will NEVER treat the passed token as an int!
     /// </summary>
-    /// <typeparam name="T1">First type to check against the token value in the returned function.</typeparam>
-    /// <typeparam name="T2">Second type to check against the token value in the returned function.</typeparam>
+    /// <typeparam name="TPossibleType1">First type to check against the token value in the returned function.</typeparam>
+    /// <typeparam name="TPossibleType2">Second type to check against the token value in the returned function.</typeparam>
     /// <param name="constraintsIfT1">Constraints to execute on the token value if casting to T1 is successful.</param>
     /// <param name="constraintsIfT2">Constraints to execute on the token value if casting to T2 is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public static ConstraintContainer ApplyConstraints<T1, T2>(Constraint<T1>[] constraintsIfT1 = null, Constraint<T2>[] constraintsIfT2 = null)
+    public static ConstraintContainer ApplyConstraints<TPossibleType1, TPossibleType2>(Constraint<TPossibleType1>[] constraintsIfT1 = null, Constraint<TPossibleType2>[] constraintsIfT2 = null)
     {
       // The inner function is composed of all constraints passed to the outer function, executing one set or the other depending on the type of the input token.
       List<Error> ValidationFunction(JToken inputToken, string tokenName)
@@ -171,10 +134,10 @@ namespace SchemaForge.Crucible
         }
         try
         {
-          T1 castValue = inputToken.Value<T1>();
+          TPossibleType1 castValue = inputToken.Value<TPossibleType1>();
           if (!(constraintsIfT1 == null))
           {
-            foreach (Constraint<T1> constraint in constraintsIfT1)
+            foreach (Constraint<TPossibleType1> constraint in constraintsIfT1)
             {
               internalErrorList.AddRange(constraint.Function(castValue, tokenName));
             }
@@ -189,10 +152,10 @@ namespace SchemaForge.Crucible
         {
           try
           {
-            T2 castValue = inputToken.Value<T2>();
+            TPossibleType2 castValue = inputToken.Value<TPossibleType2>();
             if (!(constraintsIfT2 == null))
             {
-              foreach (Constraint<T2> constraint in constraintsIfT2)
+              foreach (Constraint<TPossibleType2> constraint in constraintsIfT2)
               {
                 internalErrorList.AddRange(constraint.Function(castValue, tokenName));
               }
@@ -205,25 +168,25 @@ namespace SchemaForge.Crucible
           }
           catch
           {
-            internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected one of: {typeof(T1)}, {typeof(T2)}"));
+            internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected one of: {typeof(TPossibleType1)}, {typeof(TPossibleType2)}"));
             return internalErrorList;
           }
         }
       }
       JArray constraintArray = new();
-      JObject constraintObjectT1 = new() { { "Type", typeof(T1).ToString() } };
+      JObject constraintObjectT1 = new() { { "Type", typeof(TPossibleType1).ToString() } };
       if (constraintsIfT1.Exists())
       {
-        foreach (Constraint<T1> constraint in constraintsIfT1)
+        foreach (Constraint<TPossibleType1> constraint in constraintsIfT1)
         {
           constraintObjectT1.Add(constraint.Property);
         }
       }
       constraintArray.Add(constraintObjectT1);
-      JObject constraintObjectT2 = new() { { "Type", typeof(T2).ToString() } };
+      JObject constraintObjectT2 = new() { { "Type", typeof(TPossibleType2).ToString() } };
       if(constraintsIfT2.Exists())
       {
-        foreach (Constraint<T2> constraint in constraintsIfT2)
+        foreach (Constraint<TPossibleType2> constraint in constraintsIfT2)
         {
           constraintObjectT2.Add(constraint.Property);
         }
@@ -514,7 +477,7 @@ namespace SchemaForge.Crucible
         List<Error> internalErrorList = new();
         foreach (JToken value in inputArray)
         {
-          internalErrorList.AddRange(ApplyConstraints(constraints).ApplyConstraints(value, "in array " + inputName));
+          internalErrorList.AddRange(ApplyConstraints(constraints).ApplyConstraints(value, "in collection " + inputName));
         }
         return internalErrorList;
       }

@@ -137,24 +137,19 @@ namespace SchemaForge.Crucible
 
     */
 
-    ///// <summary>
-    ///// Returns the current schema controller as a stringified Json object,
-    ///// filling in values for required and optional config tokens if UserConfig has already been populated.
-    ///// </summary>
-    ///// <returns>String version of a JObject representation of the current schema controller.</returns>
-    //public override string ToString()
-    //{
-    //  JObject configJson = new();
-    //  foreach (ConfigToken token in RequiredConfigTokens)
-    //  {
-    //    configJson.Add(token.TokenName, UserConfig.ContainsKey(token.TokenName) ? UserConfig[token.TokenName].ToString() : "");
-    //  }
-    //  foreach (ConfigToken token in OptionalConfigTokens)
-    //  {
-    //    configJson.Add(token.TokenName, UserConfig.ContainsKey(token.TokenName) ? UserConfig[token.TokenName].ToString() : token.DefaultValue ?? "");
-    //  }
-    //  return configJson.ToString();
-    //}
+    /// <summary>
+    /// Returns the current schema as a stringified Json object.
+    /// </summary>
+    /// <returns>String version of a JObject representation of the current schema controller.</returns>
+    public override string ToString()
+    {
+      JObject schemaJson = new();
+      foreach(ConfigToken token in ConfigTokens)
+      {
+        schemaJson.Add(token.TokenName, token.Constraints.ToJToken());
+      }
+      return schemaJson.ToString();
+    }
 
     /*
     
@@ -183,6 +178,16 @@ namespace SchemaForge.Crucible
         }
       }
       return newConfig;
+    }
+
+    public Schema Clone()
+    {
+      Schema newSchema = new();
+      foreach(ConfigToken token in ConfigTokens)
+      {
+        newSchema.AddToken(token);
+      }
+      return newSchema;
     }
   }
 }

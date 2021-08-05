@@ -31,7 +31,7 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// The function that will be executed on the passed token value.
     /// </summary>
-    protected ConstraintContainer Constraints { get; private set; }
+    public ConstraintContainer Constraints { get; private set; }
 
     /// <summary>
     /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
@@ -101,10 +101,7 @@ namespace SchemaForge.Crucible
       ErrorList.AddRange(Constraints.ApplyConstraints(tokenValue, TokenName));
       return !ErrorList.AnyFatal();
     }
-    public override string ToString()
-    {
-      return TokenName;
-    }
+    public override string ToString() => TokenName;
 
     /// <summary>
     /// All equality operators compare the TokenName of two ConfigTokens to determine equality.
