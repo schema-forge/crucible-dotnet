@@ -530,5 +530,25 @@ namespace SchemaForge.Crucible
     }
 
     #endregion
+
+    #region JObject Constraints
+
+    /// <summary>
+    /// Allows nested Json property checking.
+    /// </summary>
+    /// <param name="inputSchema">Schema object to apply to the Json.</param>
+    /// <returns>Function ensuring the passed JObject contains all tokens in requiredTokens and all validation functions are passed.</returns>
+    public static Constraint<JObject> ApplySchema(Schema inputSchema)
+    {
+      List<Error> InnerMethod(JObject inputJson, string inputName)
+      {
+        List<Error> internalErrorList = new();
+        internalErrorList.AddRange(inputSchema.Validate(inputJson, inputName, "inner json"));
+        return internalErrorList;
+      }
+      return new Constraint<JObject>(InnerMethod, new JProperty("ApplySchema", inputSchema.ToString()));
+    }
+
+    #endregion
   }
 }

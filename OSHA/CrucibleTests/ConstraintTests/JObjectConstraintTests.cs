@@ -21,48 +21,42 @@ namespace ConstraintTests
       this.output = output;
     }
 
-    //[Theory]
-    //[InlineData(false, "{}")]
-    //[InlineData(true, "{'Ripe':true,'MarketValue':3}")]
-    //[InlineData(false, "{'Ripe':'Brotato','MarketValue':3}")]
-    //[InlineData(false, "{'Ripe':true,'MarketValue':3,'youthoughtitwasarealtokenbutitwasme':'DIO'}")]
-    //public void ConstrainJsonTokensTests(bool expectedResult, string constrainedJson)
-    //{
-    //  ConfigToken TestToken =
-    //    new ConfigToken("FruitProperties", "Json: Additional properties of the fruit in question.", ApplyConstraints<JObject>(ConstrainJsonTokens(
-    //      new ConfigToken[] {
-    //        new ConfigToken("Ripe","Bool: Indicates whether or not the fruit is ripe.",ApplyConstraints<bool>()),
-    //        new ConfigToken("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",ApplyConstraints<int>(ConstrainValue((0,5),(10,15))))
-    //      })));
-    //  bool testResult = TestToken.Validate(JObject.Parse(constrainedJson));
-    //  output.WriteLine(string.Join('\n', ErrorList));
-    //  Assert.Equal(testResult, expectedResult);
-    //}
+    [Theory]
+    [InlineData(false, "{}")]
+    [InlineData(true, "{'Ripe':true,'MarketValue':3}")]
+    [InlineData(false, "{'Ripe':'Brotato','MarketValue':3}")]
+    [InlineData(false, "{'Ripe':true,'MarketValue':3,'youthoughtitwasarealtokenbutitwasme':'DIO'}")]
+    public void ConstrainJsonTokensTests(bool expectedResult, string constrainedJson)
+    {
+      Schema appliedSchema = new(new ConfigToken[] {
+            new ConfigToken("Ripe","Bool: Indicates whether or not the fruit is ripe.",ApplyConstraints<bool>()),
+            new ConfigToken("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",ApplyConstraints(ConstrainValue((0,5),(10,15))))
+          });
+      ConfigToken testToken = new("FruitProperties", "Json: Additional properties of the fruit in question.", ApplyConstraints(ApplySchema(appliedSchema)));
+      bool testResult = testToken.Validate(JObject.Parse(constrainedJson));
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
 
-    //[Theory]
-    //[InlineData(false, "{}")]
-    //[InlineData(true, "{'Ripe':true,'MarketValue':3}")]
-    //[InlineData(false, "{'Ripe':'Brotato','MarketValue':3}")]
-    //[InlineData(true, "{'Ripe':true,'MarketValue':3,'Color':'bloo'}")]
-    //[InlineData(false, "{'Ripe':true,'MarketValue':3,'Color':['youthoughtitwasarealcolorbutitwasmeDIO']}")]
-    //[InlineData(false, "{'Ripe':true,'MarketValue':3,'youthoughtitwasarealtokenbutitwasme':'DIO'}")]
-    //public void ConstrainJsonTokensWithOptionalTests(bool expectedResult, string constrainedJson)
-    //{
-    //  ConfigToken TestToken =
-    //    new ConfigToken("FruitProperties", "Json: Additional properties of the fruit in question.", ApplyConstraints<JObject>(ConstrainJsonTokens(
-    //      new ConfigToken[]
-    //        {
-    //          new ConfigToken("Ripe","Bool: Indicates whether or not the fruit is ripe.",ApplyConstraints<bool>()),
-    //          new ConfigToken("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",ApplyConstraints<int>(ConstrainValue((0,5),(10,15))))
-    //        },
-    //      new ConfigToken[] 
-    //        {
-    //          new ConfigToken("Color","String: Indicates the color of the fruit.",ApplyConstraints<string>())
-    //        })));
-    //  bool testResult = TestToken.Validate(JObject.Parse(constrainedJson));
-    //  output.WriteLine(string.Join('\n', ErrorList));
-    //  Assert.Equal(testResult, expectedResult);
-    //}
+    [Theory]
+    [InlineData(false, "{}")]
+    [InlineData(true, "{'Ripe':true,'MarketValue':3}")]
+    [InlineData(false, "{'Ripe':'Brotato','MarketValue':3}")]
+    [InlineData(true, "{'Ripe':true,'MarketValue':3,'Color':'bloo'}")]
+    [InlineData(false, "{'Ripe':true,'MarketValue':3,'Color':['youthoughtitwasarealcolorbutitwasmeDIO']}")]
+    [InlineData(false, "{'Ripe':true,'MarketValue':3,'youthoughtitwasarealtokenbutitwasme':'DIO'}")]
+    public void ConstrainJsonTokensWithOptionalTests(bool expectedResult, string constrainedJson)
+    {
+      Schema appliedSchema = new(new ConfigToken[] {
+            new ConfigToken("Ripe","Bool: Indicates whether or not the fruit is ripe.",ApplyConstraints<bool>()),
+            new ConfigToken("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",ApplyConstraints(ConstrainValue((0,5),(10,15)))),
+            new ConfigToken("Color","String: Indicates the color of the fruit.",false,ApplyConstraints<string>())
+          });
+      ConfigToken testToken = new("FruitProperties", "Json: Additional properties of the fruit in question.", ApplyConstraints(ApplySchema(appliedSchema)));
+      bool testResult = testToken.Validate(JObject.Parse(constrainedJson));
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
 
     [Theory]
     [InlineData(true, "{'DecoyProperty':''}", 1)]
