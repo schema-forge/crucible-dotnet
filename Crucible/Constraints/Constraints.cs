@@ -104,7 +104,7 @@ namespace SchemaForge.Crucible
       }
       catch
       {
-        throw new ArgumentException($"Attempted to pass unsupported type {typeof(TValueType).Name}\nIf needed, use AddSupportedType to add a new type to the recognized types. This will enable SchemaForge to recognize this token type for your project.");
+        throw new ArgumentException($"Attempted to pass unsupported type {typeof(TValueType).Name}\nSupported types: {ShippingAndReceiving.GetSupportedTypes().Join(", ")}\nIf needed, use AddSupportedType to add a new type to the recognized types. This will enable SchemaForge to recognize this token type for your project.");
       }
       foreach(Constraint<TValueType> constraint in constraints)
       {
@@ -181,7 +181,15 @@ namespace SchemaForge.Crucible
         }
       }
       JArray constraintArray = new();
-      JObject constraintObjectT1 = new() { { "Type", typeof(TPossibleType1).ToString() } };
+      JObject constraintObjectT1 = new();
+      try
+      {
+        constraintObjectT1.Add("Type", ShippingAndReceiving.TypeMap(typeof(TPossibleType1).Name));
+      }
+      catch
+      {
+        throw new ArgumentException($"Attempted to pass unsupported type {typeof(TPossibleType1).Name}\nSupported types: {ShippingAndReceiving.GetSupportedTypes().Join(", ")}\nIf needed, use AddSupportedType to add a new type to the recognized types. This will enable SchemaForge to recognize this token type for your project.");
+      }
       if (constraintsIfT1.Exists())
       {
         foreach (Constraint<TPossibleType1> constraint in constraintsIfT1)
@@ -190,8 +198,16 @@ namespace SchemaForge.Crucible
         }
       }
       constraintArray.Add(constraintObjectT1);
-      JObject constraintObjectT2 = new() { { "Type", typeof(TPossibleType2).ToString() } };
-      if(constraintsIfT2.Exists())
+      JObject constraintObjectT2 = new();
+      try
+      {
+        constraintObjectT2.Add("Type", ShippingAndReceiving.TypeMap(typeof(TPossibleType2).Name));
+      }
+      catch
+      {
+        throw new ArgumentException($"Attempted to pass unsupported type {typeof(TPossibleType2).Name}\nSupported types: {ShippingAndReceiving.GetSupportedTypes().Join(", ")}\nIf needed, use AddSupportedType to add a new type to the recognized types. This will enable SchemaForge to recognize this token type for your project.");
+      }
+      if (constraintsIfT2.Exists())
       {
         foreach (Constraint<TPossibleType2> constraint in constraintsIfT2)
         {

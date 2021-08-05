@@ -52,6 +52,8 @@ namespace SchemaForge.Crucible
 
     public static string TypeMap(string typeString) => InternalTypeMap[typeString];
 
+    public static List<string> GetSupportedTypes() => InternalTypeMap.Keys.ToList();
+
     /// <summary>
     /// Used as part of the type deserializer. When adding a new supported type, only use the method name and type argument. Do not attempt to pass constraints.
     /// </summary>

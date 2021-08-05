@@ -55,7 +55,7 @@ namespace ConstraintTests
       ConstraintContainer testContainer = ApplyConstraints<string>(AllowValues("Something", "or other"));
       JObject expected = new()
       {
-        { "Type", "System.String" },
+        { "Type", "String" },
         { "AllowValues", new JArray() { "Something", "or other" } }
       };
 
@@ -72,13 +72,13 @@ namespace ConstraintTests
 
       JObject expected1 = new()
       {
-        { "Type", "System.Int32" },
+        { "Type", "Integer" },
         { "ConstrainValue", new JArray() { "(5, 15)", "(35, 56)" } }
       }; 
       
       JObject expected2 = new()
       {
-        { "Type", "System.String" },
+        { "Type", "String" },
         { "AllowValues", new JArray() { "Something", "or other" } }
       };
 

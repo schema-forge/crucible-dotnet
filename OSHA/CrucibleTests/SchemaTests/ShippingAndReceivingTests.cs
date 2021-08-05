@@ -70,5 +70,17 @@ namespace SchemaTests
         };
       }
     }
+
+    [Fact]
+    public static void TypeMapTests()
+    {
+      Assert.Equal("Integer", ShippingAndReceiving.TypeMap("Int64"));
+    }
+
+    [Fact]
+    public static void GetSupportedTypesTest()
+    {
+      Assert.Contains("UInt64", ShippingAndReceiving.GetSupportedTypes());
+    }
   }
 }
