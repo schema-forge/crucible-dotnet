@@ -71,20 +71,20 @@ namespace ConstraintTests
     public void ApplyTwoTypeConstraintPlusIndividualConstraintsTest(bool expectedResult, object inputValue)
     {
       Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library Part 2", ApplyConstraints<int, string>(
-      constraintsIfT1: new Constraint[]
+      constraintsIfT1: new Constraint<int>[]
         {
-          ConstrainNumericValue(3,15)
+          ConstrainValue(3,15)
         },
-      constraintsIfT2: new Constraint[]
+      constraintsIfT2: new Constraint<string>[]
         {
-          ConstrainStringValues("Tennant", "Smith", "Eccleston")
+          AllowValues("Tennant", "Smith", "Eccleston")
         })).Validate(new JValue(inputValue)));
     }
 
     [Fact]
     public void ApplyConstraintsThrowsWithDuplicateConstraints()
     {
-      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Don't Blink", ApplyConstraints<string>(ConstrainStringValues("Please", "just"),ConstrainStringValues("put", "us", "in", "one", "constraint"))));
+      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Don't Blink", ApplyConstraints<string>(AllowValues("Please", "just"),AllowValues("put", "us", "in", "one", "constraint"))));
     }
   }
 }

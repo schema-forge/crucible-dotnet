@@ -24,9 +24,9 @@ namespace ConstraintTests
     [Theory]
     [InlineData(true, "AcceptableString", "AcceptableString", "AnotherAcceptableString", "YetAnotherAcceptableString")]
     [InlineData(false, "HowDareYouFeedMeThisString", "AcceptableString", "AnotherAcceptableString", "YetAnotherAcceptableString")]
-    public void ConstrainStringValuesInnerFunctionTest(bool expectedResult, string constrainedString, params string[] acceptableStrings)
+    public void AllowValuesInnerFunctionTest(bool expectedResult, string constrainedString, params string[] acceptableStrings)
     {
-      ConfigToken testToken = new ConfigToken("TestToken", "There Is No String", ApplyConstraints<string>(ConstrainStringValues(acceptableStrings)));
+      ConfigToken testToken = new ConfigToken("TestToken", "There Is No String", ApplyConstraints<string>(AllowValues(acceptableStrings)));
       bool testResult = testToken.Validate(constrainedString);
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
@@ -108,10 +108,10 @@ namespace ConstraintTests
     }
 
     [Fact]
-    public void ConstrainStringValuesPropertyTest()
+    public void AllowValuesPropertyTest()
     {
-      Constraint testConstraint = ConstrainStringValues("Hello", "dlrow");
-      JProperty expected = new("ConstrainStringValues", new JArray() { "Hello", "dlrow" });
+      Constraint testConstraint = AllowValues("Hello", "dlrow");
+      JProperty expected = new("AllowValues", new JArray() { "Hello", "dlrow" });
       Assert.Equal(expected, testConstraint.Property);
     }
 
@@ -119,7 +119,7 @@ namespace ConstraintTests
     public void ConstrainStringLengthLowerBoundPropertyTest()
     {
       Constraint testConstraint = ConstrainStringLength(3);
-      JProperty expected = new("ConstrainStringValues", 3);
+      JProperty expected = new("AllowValues", 3);
       Assert.Equal(expected, testConstraint.Property);
     }
 
@@ -127,7 +127,7 @@ namespace ConstraintTests
     public void ConstrainStringLowerAndUpperBoundLengthPropertyTest()
     {
       Constraint testConstraint = ConstrainStringLength(3,25);
-      JProperty expected = new("ConstrainStringValues", "3, 25");
+      JProperty expected = new("AllowValues", "3, 25");
       Assert.Equal(expected, testConstraint.Property);
     }
   }

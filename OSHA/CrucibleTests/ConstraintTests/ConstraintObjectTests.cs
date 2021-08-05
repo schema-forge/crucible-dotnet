@@ -52,11 +52,11 @@ namespace ConstraintTests
     [Fact]
     public void ConstraintContainer_ToString1ConstraintSet()
     {
-      ConstraintContainer testContainer = ApplyConstraints<string>(ConstrainStringValues("Something", "or other"));
+      ConstraintContainer testContainer = ApplyConstraints<string>(AllowValues("Something", "or other"));
       JObject expected = new()
       {
         { "Type", "System.String" },
-        { "ConstrainStringValues", new JArray() { "Something", "or other" } }
+        { "AllowValues", new JArray() { "Something", "or other" } }
       };
 
       Assert.Equal(expected.ToString(), testContainer.ToString());
@@ -68,18 +68,18 @@ namespace ConstraintTests
     [Fact]
     public void ConstraintContainer_ToString2ConstraintSets()
     {
-      ConstraintContainer testContainer = ApplyConstraints<int,string>(new Constraint[] { ConstrainNumericValue((5,15),(35,56)) },new Constraint[] { ConstrainStringValues("Something", "or other") });
+      ConstraintContainer testContainer = ApplyConstraints<int,string>(new Constraint<int>[] { ConstrainValue((5,15),(35,56)) },new Constraint<string>[] { AllowValues("Something", "or other") });
 
       JObject expected1 = new()
       {
         { "Type", "System.Int32" },
-        { "ConstrainNumericValue", new JArray() { "(5, 15)", "(35, 56)" } }
+        { "ConstrainValue", new JArray() { "(5, 15)", "(35, 56)" } }
       }; 
       
       JObject expected2 = new()
       {
         { "Type", "System.String" },
-        { "ConstrainStringValues", new JArray() { "Something", "or other" } }
+        { "AllowValues", new JArray() { "Something", "or other" } }
       };
 
       JArray expected = new JArray() { expected1, expected2 };
@@ -93,7 +93,7 @@ namespace ConstraintTests
     [Fact]
     public void Constraint_ConstructorValid()
     {
-      Constraint constraint = new(TestFunction, new JProperty("ConstraintName", "Bill"));
+      Constraint<JToken> constraint = new Constraint<JToken>(TestFunction, new JProperty("ConstraintName", "Bill"));
       Assert.NotNull(constraint.Function);
       Assert.NotNull(constraint.Property);
     }
@@ -104,7 +104,7 @@ namespace ConstraintTests
     [Fact]
     public void Constraint_ConstructorThrowsOnNullName()
     {
-      Assert.Throws<ArgumentNullException>(() => new Constraint(TestFunction, new JProperty("", "Ghost Property")));
+      Assert.Throws<ArgumentNullException>(() => new Constraint<JToken>(TestFunction, new JProperty("", "Ghost Property")));
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ namespace ConstraintTests
     [Fact]
     public void Constraint_ConstructorThrowsOnNullValue()
     {
-      Assert.Throws<ArgumentNullException>(() => new Constraint(TestFunction, new JProperty("EmptyInside", "")));
+      Assert.Throws<ArgumentNullException>(() => new Constraint<JToken>(TestFunction, new JProperty("EmptyInside", "")));
     }
   }
 }

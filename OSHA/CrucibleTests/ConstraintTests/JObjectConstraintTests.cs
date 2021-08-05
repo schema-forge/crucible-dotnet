@@ -32,7 +32,7 @@ namespace ConstraintTests
     //    new ConfigToken("FruitProperties", "Json: Additional properties of the fruit in question.", ApplyConstraints<JObject>(ConstrainJsonTokens(
     //      new ConfigToken[] {
     //        new ConfigToken("Ripe","Bool: Indicates whether or not the fruit is ripe.",ApplyConstraints<bool>()),
-    //        new ConfigToken("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",ApplyConstraints<int>(ConstrainNumericValue((0,5),(10,15))))
+    //        new ConfigToken("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",ApplyConstraints<int>(ConstrainValue((0,5),(10,15))))
     //      })));
     //  bool testResult = TestToken.Validate(JObject.Parse(constrainedJson));
     //  output.WriteLine(string.Join('\n', ErrorList));
@@ -53,7 +53,7 @@ namespace ConstraintTests
     //      new ConfigToken[]
     //        {
     //          new ConfigToken("Ripe","Bool: Indicates whether or not the fruit is ripe.",ApplyConstraints<bool>()),
-    //          new ConfigToken("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",ApplyConstraints<int>(ConstrainNumericValue((0,5),(10,15))))
+    //          new ConfigToken("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",ApplyConstraints<int>(ConstrainValue((0,5),(10,15))))
     //        },
     //      new ConfigToken[] 
     //        {
@@ -71,25 +71,25 @@ namespace ConstraintTests
     [InlineData(false, "{}", 1, 3)]
     [InlineData(false, "{'DecoyProperty':'','AnotherDecoyProperty':'','AThirdDecoyProperty':'','OneTooMany':''}", 1, 3)]
     [InlineData(false, "{}", 3, 1)] // Exception test.
-    public void ConstrainPropertyCountTests(bool expectedResult, string constrainedJson, params int[] constraints)
+    public void ConstrainCollectionCountTests(bool expectedResult, string constrainedJson, params int[] constraints)
     {
       ConfigToken testToken;
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken("TestToken", "Eat the ice cream.", ApplyConstraints<JObject>(ConstrainPropertyCount(constraints[0])));
+        testToken = new ConfigToken("TestToken", "Eat the ice cream.", ApplyConstraints(ConstrainCollectionCount<JObject>(constraints[0])));
         testResult = testToken.Validate(JObject.Parse(constrainedJson));
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Eat the ice cream.", ApplyConstraints<JObject>(ConstrainPropertyCount(constraints[0], constraints[1]))));
+          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Eat the ice cream.", ApplyConstraints(ConstrainCollectionCount<JObject>(constraints[0], constraints[1]))));
           return;
         }
         else
         {
-          testToken = new ConfigToken("TestToken", "Eat the ice cream.", ApplyConstraints<JObject>(ConstrainPropertyCount(constraints[0], constraints[1])));
+          testToken = new ConfigToken("TestToken", "Eat the ice cream.", ApplyConstraints(ConstrainCollectionCount<JObject>(constraints[0], constraints[1])));
           testResult = testToken.Validate(JObject.Parse(constrainedJson));
         }
       }
