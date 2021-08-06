@@ -72,9 +72,12 @@ namespace SchemaForge.Crucible
       try
       {
         TValueType castValue = inputToken.Value<TValueType>();
-        foreach (Constraint<TValueType> constraint in constraints)
+        if(constraints.Exists())
         {
-          internalErrorList.AddRange(constraint.Function(castValue, tokenName));
+          foreach (Constraint<TValueType> constraint in constraints)
+          {
+            internalErrorList.AddRange(constraint.Function(castValue, tokenName));
+          }
         }
         return internalErrorList;
       }
@@ -118,13 +121,16 @@ namespace SchemaForge.Crucible
 
     */
     /// <summary>
-    /// Produces ConstraintContainer members for ConfigTokens, which are executed on the corresponding values found in the UserConfig property. The returned function in the ConstraintContainer is composed from all the functions in all the Constraints passed to the method.
-    /// It first checks the type of the value with T, then executes all passed constraints on the value.
+    /// Produces ConstraintContainer members for instantiating ConfigTokens.
+    /// The returned function in the ConstraintContainer is composed from all
+    /// the functions in all the Constraints passed to the method.
+    /// It first checks the type of the value with <typeparam name="Type"/>,
+    /// then executes all passed constraints on the value.
     /// </summary>
-    /// <typeparam name="TValueType">Type that the token value will be cast to.</typeparam>
+    /// <typeparam name="Type">Type that the token value will be cast to.</typeparam>
     /// <param name="constraints">Functions to execute on the token value after cast is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public static ConstraintContainer ApplyConstraints<TValueType>(params Constraint<TValueType>[] constraints)
+    public static ConstraintContainer ApplyConstraints<Type>(params Constraint<Type>[] constraints)
     {
       List<Error> ValidationFunction(JToken inputToken, string tokenName)
       {
@@ -140,7 +146,7 @@ namespace SchemaForge.Crucible
         }
         catch
         {
-          internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected value type: {typeof(TValueType).Name}"));
+          internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected value type: {typeof(Type).Name}"));
           return internalErrorList;
         }
       }
@@ -150,20 +156,25 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Produces ConstraintContainer members for ConfigTokens, which are
-    /// executed on the corresponding values found in the UserConfig property.
-    /// If the input token can be cast as T1, all constraints in constraintsIfT1 
-    /// will be executed.
-    /// If the input token can be cast as T2, all constraints in constraintsIfT2
-    /// will be executed.
-    /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraints string, int will NEVER treat the passed token as an int!
+    /// Produces ConstraintContainer members for instantiating ConfigTokens.
+    /// If the input token can be cast as <typeparam name="Type1"/>,
+    /// all constraints in <param name="constraintsIfType1"/> will be executed.
+    /// If the input token can be cast as <typeparam name="Type2"/>,
+    /// all constraints in <param name="constraintsIfType2"/> will be executed.
+    /// WARNING: Casts will be attempted IN ORDER. For example,
+    /// ApplyConstraints{string, int} will NEVER treat the passed token as an int!
     /// </summary>
-    /// <typeparam name="TPossibleType1">First type to check against the token value in the returned function.</typeparam>
-    /// <typeparam name="TPossibleType2">Second type to check against the token value in the returned function.</typeparam>
-    /// <param name="constraintsIfT1">Constraints to execute on the token value if casting to T1 is successful.</param>
-    /// <param name="constraintsIfT2">Constraints to execute on the token value if casting to T2 is successful.</param>
-    /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public static ConstraintContainer ApplyConstraints<TPossibleType1, TPossibleType2>(Constraint<TPossibleType1>[] constraintsIfT1 = null, Constraint<TPossibleType2>[] constraintsIfT2 = null)
+    /// <typeparam name="Type1">First type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <typeparam name="Type2">Second type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <param name="constraintsIfType1">Constraints to execute on the
+    /// token value if casting to T1 is successful.</param>
+    /// <param name="constraintsIfType2">Constraints to execute on the
+    /// token value if casting to T2 is successful.</param>
+    /// <returns>Composite function of the type cast and all passed constraints.
+    /// Can be used in the constructor of a ConfigToken.</returns>
+    public static ConstraintContainer ApplyConstraints<Type1, Type2>(Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null)
     {
       // The inner function is composed of all constraints passed to the outer function, executing one set or the other depending on the type of the input token.
       List<Error> ValidationFunction(JToken inputToken, string tokenName)
@@ -176,44 +187,54 @@ namespace SchemaForge.Crucible
         }
         try
         {
-          return ApplyConstraintsHelper(inputToken, tokenName,constraintsIfT1);
+          return ApplyConstraintsHelper(inputToken, tokenName,constraintsIfType1);
         }
         catch
         {
           try
           {
-            return ApplyConstraintsHelper(inputToken, tokenName, constraintsIfT2);
+            return ApplyConstraintsHelper(inputToken, tokenName, constraintsIfType2);
           }
           catch
           {
-            internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected one of: {typeof(TPossibleType1).Name}, {typeof(TPossibleType2).Name}"));
+            internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}"));
             return internalErrorList;
           }
         }
       }
       JArray constraintArray = new();
-      constraintArray.Add(GetConstraintObject(constraintsIfT1));
-      constraintArray.Add(GetConstraintObject(constraintsIfT2));
+      constraintArray.Add(GetConstraintObject(constraintsIfType1));
+      constraintArray.Add(GetConstraintObject(constraintsIfType2));
       return new ConstraintContainer(ValidationFunction, constraintArray);
     }
 
     /// <summary>
     /// Produces ConstraintContainer members for ConfigTokens, which are
     /// executed on the corresponding values found in the UserConfig property.
-    /// If the input token can be cast as TPossibleType1, all constraints in constraintsIfT1 
-    /// will be executed.
-    /// If the input token can be cast as TPossibleType2, all constraints in constraintsIfT2
-    /// will be executed.
-    /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraints{string, int}
+    /// If the input token can be cast as <typeparam name="Type1"/>,
+    /// all constraints in <param name="constraintsIfType1"/> will be executed.
+    /// If the input token can be cast as <typeparam name="Type2"/>,
+    /// all constraints in <param name="constraintsIfType2"/> will be executed.
+    /// If the input token can be cast as <typeparam name="Type3"/>,
+    /// all constraints in <param name="constraintsIfType3"/> will be executed.
+    /// WARNING: Casts will be attempted IN ORDER. For example, <see cref="ApplyConstraints{string, int}"/>
     /// will NEVER treat the passed token as an int!
     /// </summary>
-    /// <typeparam name="TPossibleType1">First type to check against the token value in the returned function.</typeparam>
-    /// <typeparam name="TPossibleType2">Second type to check against the token value in the returned function.</typeparam>
-    /// <typeparam name="TPossibleType3">Third type to check against the token value in the returned function.</typeparam>
-    /// <param name="constraintsIfT1">Constraints to execute on the token value if casting to T1 is successful.</param>
-    /// <param name="constraintsIfT2">Constraints to execute on the token value if casting to T2 is successful.</param>
-    /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public static ConstraintContainer ApplyConstraints<TPossibleType1, TPossibleType2, TPossibleType3>(Constraint<TPossibleType1>[] constraintsIfT1 = null, Constraint<TPossibleType2>[] constraintsIfT2 = null, Constraint<TPossibleType3>[] constraintsIfT3 = null)
+    /// <typeparam name="Type1">First type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <typeparam name="Type2">Second type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <typeparam name="Type3">Third type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <param name="constraintsIfType1">Constraints to execute on the
+    /// token value if casting to <typeparam name="Type1"/> is successful.</param>
+    /// <param name="constraintsIfType2">Constraints to execute on the
+    /// token value if casting to <typeparam name="Type2"/> is successful.</param>
+    /// <param name="constraintsIfType3">Constraints to execute on the
+    /// token value if casting to <typeparam name="Type3"/> is successful.</param>
+    /// <returns>Composite function of the type cast and all passed constraints.
+    /// Can be used in the constructor of a ConfigToken.</returns>
+    public static ConstraintContainer ApplyConstraints<Type1, Type2, Type3>(Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, Constraint<Type3>[] constraintsIfType3 = null)
     {
       // The inner function is composed of all constraints passed to the outer function, executing one set or the other depending on the type of the input token.
       List<Error> ValidationFunction(JToken inputToken, string tokenName)
@@ -226,32 +247,32 @@ namespace SchemaForge.Crucible
         }
         try
         {
-          return ApplyConstraintsHelper(inputToken, tokenName, constraintsIfT1);
+          return ApplyConstraintsHelper(inputToken, tokenName, constraintsIfType1);
         }
         catch
         {
           try
           {
-            return ApplyConstraintsHelper(inputToken, tokenName, constraintsIfT2);
+            return ApplyConstraintsHelper(inputToken, tokenName, constraintsIfType2);
           }
           catch
           {
             try
             {
-              return ApplyConstraintsHelper(inputToken, tokenName, constraintsIfT3);
+              return ApplyConstraintsHelper(inputToken, tokenName, constraintsIfType3);
             }
             catch
             {
-              internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected one of: {typeof(TPossibleType1).Name}, {typeof(TPossibleType2).Name}, {typeof(TPossibleType3).Name}"));
+              internalErrorList.Add(new Error($"Token {tokenName} with value {inputToken} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}, {typeof(Type3).Name}"));
               return internalErrorList;
             }
           }
         }
       }
       JArray constraintArray = new();
-      constraintArray.Add(GetConstraintObject(constraintsIfT1));
-      constraintArray.Add(GetConstraintObject(constraintsIfT2));
-      constraintArray.Add(GetConstraintObject(constraintsIfT3));
+      constraintArray.Add(GetConstraintObject(constraintsIfType1));
+      constraintArray.Add(GetConstraintObject(constraintsIfType2));
+      constraintArray.Add(GetConstraintObject(constraintsIfType3));
       return new ConstraintContainer(ValidationFunction, constraintArray);
     }
 
@@ -525,31 +546,136 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Ensures all items in the target JArray are of type T and pass all provided constraints.
+    /// Ensures all items in the target JArray are of type <typeparam name="TElementType"/> and pass all provided constraints.
     /// </summary>
-    /// <typeparam name="T">Type of all items in the target JArray.</typeparam>
+    /// <typeparam name="TElementType">Type of all items in the target JArray.</typeparam>
     /// <param name="constraints">List of functions to run on all items in the JArray individually.</param>
     /// <returns>Function ensuring that all items in the target JArray are of type T and pass all provided constraints.</returns>
-    public static Constraint<CollectionType> ApplyConstraintsToAllCollectionValues<CollectionType,ElementType>(params Constraint<ElementType>[] constraints) where CollectionType: IEnumerable
+    public static Constraint<JArray> ApplyConstraintsToCollection<TElementType>(params Constraint<TElementType>[] constraints)
     {
-      List<Error> InnerMethod(CollectionType inputArray, string inputName)
+      List<Error> InnerMethod(JArray inputArray, string inputName)
       {
         List<Error> internalErrorList = new();
-        foreach (JToken value in inputArray)
+        foreach(JToken token in inputArray)
         {
-          internalErrorList.AddRange(ApplyConstraints(constraints).ApplyConstraints(value, "in collection " + inputName));
+          internalErrorList.AddRange(ApplyConstraintsHelper(token, "in collection " + inputName,constraints));
         }
         return internalErrorList;
       }
       JArray constraintArray = new();
-      JObject constraintObject = new();
-      constraintObject.Add("Type", typeof(CollectionType).ToString());
-      foreach (Constraint<ElementType> constraint in constraints)
+      constraintArray.Add(GetConstraintObject(constraints));
+      return new Constraint<JArray>(InnerMethod, new JProperty("ApplyConstraintsToCollection", constraintArray));
+    }
+
+    /// <summary>
+    /// Ensures all items in the target JArray are of type
+    /// <typeparam name="TElementType1"/> or <typeparam name="TElementType2"/>
+    /// and applies all constraints on the type to which the element corresponds.
+    /// WARNING: Casts will be attempted IN ORDER. For example, <see cref="ApplyConstraintsToCollection{string, int}"/>
+    /// will NEVER treat the passed token as an int!
+    /// </summary>
+    /// <typeparam name="TElementType1">First type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <typeparam name="TElementType2">First type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <param name="constraintsIfTElementType1">Constraints to execute if cast to
+    /// <typeparam name="TElementType1"/> is successful.</param>
+    /// <param name="constraintsIfTElementType2">Constraints to execute if cast to
+    /// <typeparam name="TElementType2"/> is successful.</param>
+    /// <returns>Composite function of the type cast and all passed constraints.
+    /// Can be used in the constructor of a ConfigToken.</returns>
+    public static Constraint<JArray> ApplyConstraintsToCollection<TElementType1,TElementType2>(Constraint<TElementType1>[] constraintsIfTElementType1, Constraint<TElementType2>[] constraintsIfTElementType2)
+    {
+      List<Error> InnerMethod(JArray inputArray, string inputName)
       {
-        constraintObject.Add(constraint.Property);
+        List<Error> internalErrorList = new();
+        foreach (JToken token in inputArray)
+        {
+          try
+          {
+            internalErrorList.AddRange(ApplyConstraintsHelper(token, "in collection " + inputName, constraintsIfTElementType1));
+          }
+          catch
+          {
+            try
+            {
+              internalErrorList.AddRange(ApplyConstraintsHelper(token, "in collection " + inputName, constraintsIfTElementType2));
+            }
+            catch
+            {
+              internalErrorList.Add(new Error($"Token {token} in collection {inputName} is an incorrect type. Expected one of: {typeof(TElementType1).Name}, {typeof(TElementType2).Name}"));
+              return internalErrorList;
+            }
+          }
+        }
+        return internalErrorList;
       }
-      constraintArray.Add(constraintObject);
-      return new Constraint<CollectionType>(InnerMethod, new JProperty("ApplyConstraintsToAllCollectionValues", constraintArray));
+      JArray constraintArray = new();
+      constraintArray.Add(GetConstraintObject(constraintsIfTElementType1));
+      constraintArray.Add(GetConstraintObject(constraintsIfTElementType2));
+      return new Constraint<JArray>(InnerMethod, new JProperty("ApplyConstraintsToCollection", constraintArray));
+    }
+
+    /// <summary>
+    /// Ensures all items in the target JArray are of type
+    /// <typeparam name="TElementType1"/>, or <typeparam name="TElementType2"/>,
+    /// or <typeparam name="TElementType3"/>
+    /// and applies all constraints on the type to which the element corresponds.
+    /// WARNING: Casts will be attempted IN ORDER. For example, <see cref="ApplyConstraintsToCollection{string, int}"/>
+    /// will NEVER treat the passed token as an int!
+    /// </summary>
+    /// <typeparam name="TElementType1">First type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <typeparam name="TElementType2">First type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <typeparam name="TElementType3">First type to check against the token value
+    /// in the returned function.</typeparam>
+    /// <param name="constraintsIfTElementType1">Constraints to execute if cast to
+    /// <typeparam name="TElementType1"/> is successful.</param>
+    /// <param name="constraintsIfTElementType2">Constraints to execute if cast to
+    /// <typeparam name="TElementType2"/> is successful.</param>
+    /// <param name="constraintsIfTElementType3">Constraints to execute if cast to
+    /// <typeparam name="TElementType3"/> is successful.</param>
+    /// <returns>Composite function of the type cast and all passed constraints.
+    /// Can be used in the constructor of a ConfigToken.</returns>
+    public static Constraint<JArray> ApplyConstraintsToCollection<TElementType1, TElementType2, TElementType3>(Constraint<TElementType1>[] constraintsIfT1, Constraint<TElementType2>[] constraintsIfT2, Constraint<TElementType3>[] constraintsIfT3)
+    {
+      List<Error> InnerMethod(JArray inputArray, string inputName)
+      {
+        List<Error> internalErrorList = new();
+        foreach (JToken token in inputArray)
+        {
+          try
+          {
+            internalErrorList.AddRange(ApplyConstraintsHelper(token, "in collection " + inputName, constraintsIfT1));
+          }
+          catch
+          {
+            try
+            {
+              internalErrorList.AddRange(ApplyConstraintsHelper(token, "in collection " + inputName, constraintsIfT2));
+            }
+            catch
+            {
+              try
+              {
+                internalErrorList.AddRange(ApplyConstraintsHelper(token, "in collection " + inputName, constraintsIfT3));
+              }
+              catch
+              {
+                internalErrorList.Add(new Error($"Token {token} in collection {inputName} is an incorrect type. Expected one of: {typeof(TElementType1).Name}, {typeof(TElementType2).Name}, {typeof(TElementType3).Name}"));
+                return internalErrorList;
+              }
+            }
+          }
+        }
+        return internalErrorList;
+      }
+      JArray constraintArray = new();
+      constraintArray.Add(GetConstraintObject(constraintsIfT1));
+      constraintArray.Add(GetConstraintObject(constraintsIfT2));
+      constraintArray.Add(GetConstraintObject(constraintsIfT3));
+      return new Constraint<JArray>(InnerMethod, new JProperty("ApplyConstraintsToCollection", constraintArray));
     }
 
     #endregion

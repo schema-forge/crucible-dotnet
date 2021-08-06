@@ -31,7 +31,7 @@ namespace Crucible
                 new ConfigToken("ConstrainCollectionCount","Burn with me.",false,ApplyConstraints(ConstrainCollectionCount<JObject>(1,3))),
                 new ConfigToken("ConstrainCollectionCountLowerBound","BURN WITH ME, MARTHA.",false,ApplyConstraints(ConstrainCollectionCount<JArray>(1))),
                 new ConfigToken("ConstrainCollectionCount","Anything. Anything for just a moment of relief. Anything to lay my head upon sunbaked asphalt and feel its cold touch. Anything.",false,ApplyConstraints(ConstrainCollectionCount<JArray>(1,5))),
-                new ConfigToken("ApplyConstraintsToArrayElements","hurry",false,ApplyConstraints(ApplyConstraintsToAllCollectionValues<JArray,string>(AllowValues("under the smelters", "in the tunnels beneath", "help us"))))
+                new ConfigToken("ApplyConstraintsToArrayElements","hurry",false,ApplyConstraints(ApplyConstraintsToCollection(AllowValues("under the smelters", "in the tunnels beneath", "help us"))))
             });
     }
   }

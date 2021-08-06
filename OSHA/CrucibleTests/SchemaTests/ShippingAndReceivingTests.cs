@@ -41,7 +41,7 @@ namespace SchemaTests
           new object[] { true, "Decimal", 25.3, ConstrainValue<double>(22) }, // Applies actual decimal constraint to valid input.
           new object[] { false, "Decimal", "astrong" }, // Applies decimal type constraint to invalid input.
           new object[] { true, "Array", new JArray() { 3 } }, // Applies array type constraint to valid input.
-          new object[] { true, "Array", new JArray() { 3 }, ApplyConstraintsToAllCollectionValues<JArray, int>() }, // Applies actual array constraint to valid input.
+          new object[] { true, "Array", new JArray() { 3 }, ApplyConstraintsToCollection<int>() }, // Applies actual array constraint to valid input.
           new object[] { false, "Array", "youthoughtitwasarealarraybutitwasmeDIO" } // Applies array type constraint to invalid input.
         };
       }

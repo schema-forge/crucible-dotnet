@@ -75,7 +75,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken("TestToken", "Where's David?", ApplyConstraints(ApplyConstraintsToAllCollectionValues<JArray,int>()));
+      testToken = new ConfigToken("TestToken", "Where's David?", ApplyConstraints(ApplyConstraintsToCollection<int>()));
       testResult = testToken.Validate(JObject.Parse(constrainedJson)["TestArray"]);
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
@@ -96,7 +96,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken("TestToken", "Everyone you love is gone.", ApplyConstraints(ApplyConstraintsToAllCollectionValues<JArray, int>(ConstrainValue(5))));
+      testToken = new ConfigToken("TestToken", "Everyone you love is gone.", ApplyConstraints(ApplyConstraintsToCollection(ConstrainValue(5))));
       testResult = testToken.Validate(JObject.Parse(constrainedJson)["TestArray"]);
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
@@ -116,7 +116,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken("TestToken", "There is only ice cream.", ApplyConstraints(ApplyConstraintsToAllCollectionValues<JArray,string>(ConstrainStringLength(15), ForbidStringCharacters('/', '?', '!'))));
+      testToken = new ConfigToken("TestToken", "There is only ice cream.", ApplyConstraints(ApplyConstraintsToCollection(ConstrainStringLength(15), ForbidStringCharacters('/', '?', '!'))));
       testResult = testToken.Validate(JObject.Parse(constrainedJson)["TestArray"]);
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
