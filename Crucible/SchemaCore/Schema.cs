@@ -33,15 +33,22 @@ namespace SchemaForge.Crucible
                       constraintsIfT3: new Constraint<JArray>[] { ApplyConstraintsToAllCollectionValues<JArray, string>(ConstrainStringWithRegexExact(new Regex("(\\(\\d+, *\\d*\\),* *)+")))}
                     )
               ),
-              new ConfigToken("Pool","Pool of permitted values.",false,ApplyConstraints(ApplyConstraintsToAllCollectionValues<JArray, int>()))
+              new ConfigToken("RestrictDecimalDigits", "Constrains number of digits after the decimal. Must one of: int, \"int, int\"", false,
+                    ApplyConstraints<int, string>(
+                      constraintsIfT2: new Constraint<string>[] { ConstrainStringWithRegexExact(new Regex("\\d+, *\\d+"), new Regex("\\d+")) }
+                    )
+              ),
             })
+      },
+      {
+        "String", new Schema()
       }
     };
 
     /// <summary>
     /// Set of token rules to use when a Json is passed to Validate().
     /// </summary>
-    private HashSet<ConfigToken> ConfigTokens = new();
+    private readonly HashSet<ConfigToken> ConfigTokens = new();
     /// <summary>
     /// Contains all errors generated during validation and the associated HelpStrings of each token that was marked invalid.
     /// Should be printed to console or returned as part of an HTTP 400 response.
