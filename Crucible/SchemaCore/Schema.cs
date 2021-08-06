@@ -5,11 +5,39 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using SchemaForge.Crucible.Extensions;
+using static SchemaForge.Crucible.Constraints;
 
 namespace SchemaForge.Crucible
 {
   public class Schema
   {
+    /*
+    
+    "Integer":
+    {
+      "Type": must be integer
+      "ConstrainValues": 45
+      "Domains": [["ninf", 56], [20, 25]]
+      "AllowValues": array of numeric
+    }
+     */
+
+    private Dictionary<string, Schema> MetaSchema { get; } = new()
+    {
+      { "Integer", new Schema(new ConfigToken[] 
+            {
+              new ConfigToken("Type","Expected type of token value.", ApplyConstraints(AllowValues("Integer"))),
+              new ConfigToken("Domains", "Constrains integer values to a certain domain. Arguments must be one of: int; \"int, int\"; [\"(int, int)\", \"(int, int)\" ...]", false,
+                    ApplyConstraints<int, string, JArray>(
+                      constraintsIfT2: new Constraint<string>[] { ConstrainStringWithRegexExact(new Regex("\\d+, *\\d+"), new Regex("\\d+")) },
+                      constraintsIfT3: new Constraint<JArray>[] { ApplyConstraintsToAllCollectionValues<JArray, string>(ConstrainStringWithRegexExact(new Regex("(\\(\\d+, *\\d*\\),* *)+")))}
+                    )
+              ),
+              new ConfigToken("Pool","Pool of permitted values.",false,ApplyConstraints(ApplyConstraintsToAllCollectionValues<JArray, int>()))
+            })
+      }
+    };
+
     /// <summary>
     /// Set of token rules to use when a Json is passed to Validate().
     /// </summary>

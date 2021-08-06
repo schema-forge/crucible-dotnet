@@ -213,7 +213,7 @@ namespace SchemaForge.Crucible
     /// <param name="constraintsIfT1">Constraints to execute on the token value if casting to T1 is successful.</param>
     /// <param name="constraintsIfT2">Constraints to execute on the token value if casting to T2 is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints. Can be used in the constructor of a ConfigToken.</returns>
-    public static ConstraintContainer ApplyConstraints<TPossibleType1, TPossibleType2, TPossibleType3>(Constraint<TPossibleType1>[] constraintsIfT1 = null, Constraint<TPossibleType2>[] constraintsIfT2 = null, Constraint<TPossibleType2>[] constraintsIfT3 = null)
+    public static ConstraintContainer ApplyConstraints<TPossibleType1, TPossibleType2, TPossibleType3>(Constraint<TPossibleType1>[] constraintsIfT1 = null, Constraint<TPossibleType2>[] constraintsIfT2 = null, Constraint<TPossibleType3>[] constraintsIfT3 = null)
     {
       // The inner function is composed of all constraints passed to the outer function, executing one set or the other depending on the type of the input token.
       List<Error> ValidationFunction(JToken inputToken, string tokenName)
