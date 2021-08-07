@@ -12,7 +12,7 @@ namespace SchemaForge.Crucible
   {
     Warning,
     Fatal,
-    NullOrEmpty,
+    Null,
     Info,
     Trace
   }
@@ -31,6 +31,6 @@ namespace SchemaForge.Crucible
       ErrorSeverity = inputSeverity;
     }
 
-    public override string ToString() => ErrorMessage;
+    public override string ToString() => $"[{ErrorSeverity}] {ErrorMessage}";
   }
 }

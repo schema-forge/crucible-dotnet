@@ -137,7 +137,7 @@ namespace SchemaForge.Crucible
         List<Error> internalErrorList = new();
         if (inputToken.IsNullOrEmpty())
         {
-          internalErrorList.Add(new Error($"The value of token {tokenName} is empty or null.", Severity.NullOrEmpty));
+          internalErrorList.Add(new Error($"The value of token {tokenName} is empty or null.", Severity.Null));
           return internalErrorList;
         }
         try
@@ -182,7 +182,7 @@ namespace SchemaForge.Crucible
         List<Error> internalErrorList = new();
         if (inputToken.IsNullOrEmpty())
         {
-          internalErrorList.Add(new Error($"The value of token {tokenName} is empty or null.", Severity.NullOrEmpty));
+          internalErrorList.Add(new Error($"The value of token {tokenName} is empty or null.", Severity.Null));
           return internalErrorList;
         }
         try
@@ -242,7 +242,7 @@ namespace SchemaForge.Crucible
         List<Error> internalErrorList = new();
         if (inputToken.IsNullOrEmpty())
         {
-          internalErrorList.Add(new Error($"The value of token {tokenName} is empty or null.", Severity.NullOrEmpty));
+          internalErrorList.Add(new Error($"The value of token {tokenName} is empty or null.", Severity.Null));
           return internalErrorList;
         }
         try

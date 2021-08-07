@@ -42,7 +42,7 @@ namespace SchemaForge.Crucible.Extensions
       List<Severity> fatalTypes = new() { Severity.Fatal };
       if(nullOrEmptyIsFatal)
       {
-        fatalTypes.Add(Severity.NullOrEmpty);
+        fatalTypes.Add(Severity.Null);
       }
       return errorCollection.Any(x => fatalTypes.Contains(x.ErrorSeverity));
     }
@@ -58,7 +58,7 @@ namespace SchemaForge.Crucible.Extensions
       List<Severity> fatalTypes = new() { Severity.Fatal };
       if (nullOrEmptyIsFatal)
       {
-        fatalTypes.Add(Severity.NullOrEmpty);
+        fatalTypes.Add(Severity.Null);
       }
       for(int i=errorCollection.Count; i-- > 0;)
       {

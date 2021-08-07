@@ -127,7 +127,7 @@ namespace SchemaForge.Crucible
         }
         else if (config[token.TokenName].IsNullOrEmpty())
         {
-          ErrorList.Add(new Error($"Value of token {token.TokenName} is null or empty.",Severity.NullOrEmpty));
+          ErrorList.Add(new Error($"Value of token {token.TokenName} is null or empty.",Severity.Null));
         }
         else if (!token.Validate(config[token.TokenName]))
         {
