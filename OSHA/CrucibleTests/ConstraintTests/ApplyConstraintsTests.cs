@@ -98,7 +98,7 @@ namespace ConstraintTests
     [InlineData(false, 45)]
     public void ApplyTwoTypeConstraintPlusIndividualConstraintsTest(bool expectedResult, object inputValue)
     {
-      Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library Part 2", ApplyConstraints<int, string>(
+      Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library Part 2", ApplyConstraints(
       constraintsIfType1: new Constraint<int>[]
         {
           ConstrainValue(3,15)

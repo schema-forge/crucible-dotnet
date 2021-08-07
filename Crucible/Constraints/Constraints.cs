@@ -361,6 +361,30 @@ namespace SchemaForge.Crucible
       return new Constraint<T>(InnerMethod, new JProperty("ConstrainValue", JArray.FromObject(domains.Select(x => "(" + x.Item1 + ", " + x.Item2 + ")"))));
     }
 
+    /// <summary>
+    /// Constrains the number of digits a double has after the decimal.
+    /// </summary>
+    /// <param name="upperBound">Maximum number of digits after the decimal.</param>
+    /// <returns>A new Constraint{double} containing a method to constrain decimal digits.</returns>
+    public static Constraint<double> ConstrainDigits(int upperBound)
+    {
+      List<Error> InnerMethod(double inputValue, string inputName)
+      {
+        List<Error> internalErrorList = new();
+        string doubleString = inputValue.ToString();
+        if(doubleString.Contains('.'))
+        {
+          string[] splitDouble = doubleString.Split('.');
+          if(splitDouble[1].Length > upperBound)
+          {
+            internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value can have no more than {upperBound} digits after the decimal."));
+          }
+        }
+        return internalErrorList;
+      }
+      return new Constraint<double>(InnerMethod, new JProperty("ConstrainDigits", upperBound));
+    }
+
     #endregion
 
     #region String Constraints
@@ -584,7 +608,7 @@ namespace SchemaForge.Crucible
     /// <typeparam name="TElementType2"/> is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints.
     /// Can be used in the constructor of a ConfigToken.</returns>
-    public static Constraint<JArray> ApplyConstraintsToCollection<TElementType1,TElementType2>(Constraint<TElementType1>[] constraintsIfTElementType1, Constraint<TElementType2>[] constraintsIfTElementType2)
+    public static Constraint<JArray> ApplyConstraintsToCollection<TElementType1,TElementType2>(Constraint<TElementType1>[] constraintsIfTElementType1 = null, Constraint<TElementType2>[] constraintsIfTElementType2 = null)
     {
       List<Error> InnerMethod(JArray inputArray, string inputName)
       {
@@ -638,7 +662,7 @@ namespace SchemaForge.Crucible
     /// <typeparam name="TElementType3"/> is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints.
     /// Can be used in the constructor of a ConfigToken.</returns>
-    public static Constraint<JArray> ApplyConstraintsToCollection<TElementType1, TElementType2, TElementType3>(Constraint<TElementType1>[] constraintsIfT1, Constraint<TElementType2>[] constraintsIfT2, Constraint<TElementType3>[] constraintsIfT3)
+    public static Constraint<JArray> ApplyConstraintsToCollection<TElementType1, TElementType2, TElementType3>(Constraint<TElementType1>[] constraintsIfT1 = null, Constraint<TElementType2>[] constraintsIfT2 = null, Constraint<TElementType3>[] constraintsIfT3 = null)
     {
       List<Error> InnerMethod(JArray inputArray, string inputName)
       {

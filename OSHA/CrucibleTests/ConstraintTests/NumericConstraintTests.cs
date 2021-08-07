@@ -218,5 +218,18 @@ namespace ConstraintTests
       JProperty expected = new("ConstrainValue", new JArray() { "(25.3, 75.7)", "(1.6, 3.1)" });
       Assert.Equal(expected, testConstraint.Property);
     }
+
+    [Theory]
+    [InlineData(true,35.55,2)]
+    [InlineData(true, 35.55, 3)]
+    [InlineData(false, 35.5535, 3)]
+    [InlineData(false, 35.5, 0)]
+    public void ConstrainDigitsTests(bool expected, double constrainedValue, int arg)
+    {
+      Constraint<double> testConstraint = ConstrainDigits(arg);
+      JProperty expectedProperty = new("ConstrainDigits", arg);
+      Assert.Equal(expectedProperty, testConstraint.Property);
+      Assert.Equal(expected, !testConstraint.Function(constrainedValue, "Test Token").AnyFatal());
+    }
   }
 }

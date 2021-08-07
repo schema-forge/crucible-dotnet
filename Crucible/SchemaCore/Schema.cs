@@ -27,10 +27,14 @@ namespace SchemaForge.Crucible
       { "Integer", new Schema(new ConfigToken[] 
             {
               new ConfigToken("Type","Expected type of token value.", ApplyConstraints(AllowValues("Integer"))),
-              new ConfigToken("Domains", "Constrains integer values to a certain domain. Arguments must be one of: int; \"int, int\"; [\"(int, int)\", \"(int, int)\" ...]", false,
-                    ApplyConstraints<int, string, JArray>(
-                      constraintsIfType2: new Constraint<string>[] { ConstrainStringWithRegexExact(new Regex("\\d+, *\\d+"), new Regex("\\d+")) },
-                      constraintsIfType3: new Constraint<JArray>[] { ApplyConstraintsToCollection(ConstrainStringWithRegexExact(new Regex("(\\(\\d+, *\\d*\\),* *)+")))}
+              new ConfigToken("Domains", "Constrains integer values to a certain domain. Arguments must be one of: int; \"int, int\"; [\"[null, int]\",\"[int, null]\", \"[int, int]\" ...]", false,
+                    ApplyConstraints(
+                      new Constraint<JArray>[] 
+                      { ApplyConstraintsToCollection<int,JArray>
+                        (constraintsIfTElementType2: new Constraint<JArray>[] {
+                          ApplyConstraintsToCollection<int?, JArray>(), ConstrainCollectionCount<JArray>(2, 2) }
+                        )
+                      }
                     )
               ),
               new ConfigToken("RestrictDecimalDigits", "Constrains number of digits after the decimal. Must one of: int, \"int, int\"", false,
@@ -38,7 +42,8 @@ namespace SchemaForge.Crucible
                       constraintsIfType2: new Constraint<string>[] { ConstrainStringWithRegexExact(new Regex("\\d+, *\\d+"), new Regex("\\d+")) }
                     )
               ),
-            })
+            }
+          )
       },
       {
         "String", new Schema()
