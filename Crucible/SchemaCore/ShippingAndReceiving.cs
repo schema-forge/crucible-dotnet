@@ -144,9 +144,11 @@ namespace SchemaForge.Crucible
     };
 
     /// <summary>
-    /// Converts a type and array of constraints to a ConstraintContainer with constraints of the specified type.
+    /// Converts a type and array of constraints to a ConstraintContainer with
+    /// constraints of the specified type.
     /// </summary>
-    /// <param name="typeString">One of the supported types as strings, which can be retrieved with <see cref="ShippingAndReceiving.GetSupportedTypes()"/></param>
+    /// <param name="typeString">One of the supported types as strings, which
+    /// can be retrieved with <see cref="ShippingAndReceiving.GetSupportedTypes()"/></param>
     /// <param name="constraints">Constraints to pass along after the type check.</param>
     /// <returns>GetConstraintsForType with a type</returns>
     public static ConstraintContainer DeserializeType(string typeString, Constraint[] constraints) => InternalDeserializeType[typeString](constraints);
@@ -162,11 +164,13 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// Returns all convertible C# types as a list of string.
     /// </summary>
-    /// <returns>List of keys in InternalTypeMap. To add to this list, use <see cref="ShippingAndReceiving.AddSupportedType"/></returns>
+    /// <returns>List of keys in InternalTypeMap. To add to this list, use
+    /// <see cref="ShippingAndReceiving.AddSupportedType"/></returns>
     public static List<string> GetSupportedTypes() => InternalTypeMap.Keys.ToList();
 
     /// <summary>
-    /// Used as part of the type deserializer. When adding a new supported type, only use the method name and type argument. Do not attempt to pass constraints.
+    /// Used as part of the type deserializer. When adding a new supported type,
+    /// only use the method name and type argument. Do not attempt to pass constraints.
     /// </summary>
     /// <typeparam name="T">Type to align with a string key.</typeparam>
     /// <param name="constraints">Irrelevant. Populated only when deserializing a Json file to a Schema.</param>
@@ -189,7 +193,8 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="csTypeName">C# type name without namespace, such as UInt64 or String</param>
     /// <param name="schemaForgeTypeName">Equivalent name to serialize the C# type name to.</param>
-    /// <param name="typeDeserializer"><see cref="ShippingAndReceiving.GetConstraintsForType{T}"/> with a type parameter equivalent to the C# type name being provided.</param>
+    /// <param name="typeDeserializer"><see cref="ShippingAndReceiving.GetConstraintsForType{T}"/>
+    /// with a type parameter equivalent to the C# type name being provided.</param>
     public static void AddSupportedType(string csTypeName, string schemaForgeTypeName, Func<Constraint[], ConstraintContainer> typeDeserializer)
     {
       InternalTypeMap.Add(csTypeName, schemaForgeTypeName);

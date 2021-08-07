@@ -98,7 +98,14 @@ namespace SchemaForge.Crucible
       JObject constraintObject = new();
       try
       {
-        constraintObject.Add("Type", ShippingAndReceiving.TypeMap(typeof(TValueType).Name));
+        if(typeof(TValueType).ToString().Contains("Nullable"))
+        {
+          constraintObject.Add("Type", ShippingAndReceiving.TypeMap(typeof(TValueType).GenericTypeArguments[0].Name));
+        }
+        else
+        {
+          constraintObject.Add("Type", ShippingAndReceiving.TypeMap(typeof(TValueType).Name));
+        }
       }
       catch
       {
