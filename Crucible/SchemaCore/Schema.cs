@@ -16,10 +16,9 @@ namespace SchemaForge.Crucible
     "Integer":
     {
       "Type": must be integer
-      "ConstrainValues": 45
-      "Domains": [["ninf", 56], [20, 25]]
-      "AllowValues": array of numeric
+      "Domain": [[56], [20, 25]]
     }
+
      */
 
 
@@ -48,7 +47,7 @@ namespace SchemaForge.Crucible
     {
       if (!ConfigTokens.Add(token))
       {
-        throw new ArgumentException("Input IEnumerable<ConfigToken> contains duplicate tokens.");
+        throw new ArgumentException($"ConfigToken set already contains a ConfigToken named {token.TokenName}");
       }
     }
 
@@ -58,7 +57,7 @@ namespace SchemaForge.Crucible
       {
         if (!ConfigTokens.Add(token))
         {
-          throw new ArgumentException("Input IEnumerable<ConfigToken> contains duplicate tokens.");
+          throw new ArgumentException($"ConfigToken set already contains a ConfigToken named {token.TokenName}");
         }
       }
     }
