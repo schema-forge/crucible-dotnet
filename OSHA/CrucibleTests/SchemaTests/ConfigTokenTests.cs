@@ -35,5 +35,21 @@ namespace SchemaTests
       Assert.Equal("Hi, this is what this value does and hopefully what you did wrong in order to see this message!", token.HelpString);
       Assert.Equal("This is what you get if you don't put anything in for TestToken!", token.DefaultValue);
     }
+
+    [Fact]
+    public void ToJPropertyTest()
+    {
+      ConfigToken<string> token = new("TestToken", "This is a tautological description.");
+      JProperty expected = new("TestToken", new JObject() { { "Constraints", new JObject() { { "Type", "String" } } }, { "Description", "This is a tautological description." } });
+      Assert.Equal(expected, token.ToJProperty());
+    }
+
+    [Fact]
+    public void ToJPropertyWithConstraintTest()
+    {
+      ConfigToken<string> token = new("TestToken", "Ceci n'est pas une description", AllowValues("Russia", "United States", "Georgia", "Chad"));
+      JProperty expected = new("TestToken", new JObject() { { "Constraints", new JObject() { { "Type", "String" }, { "AllowValues", new JArray() { "Russia", "United States", "Georgia", "Chad" } } } }, { "Description", "Ceci n'est pas une description" } });
+      Assert.Equal(expected, token.ToJProperty());
+    }
   }
 }
