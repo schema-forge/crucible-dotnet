@@ -37,9 +37,9 @@ namespace SchemaTests
       Schema newSchema = new();
       newSchema.AddTokens(new HashSet<ConfigToken>()
         {
-          new ConfigToken("August Burns Red","The commit author's favorite August Burns Red song.",ApplyConstraints(AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)"))),
-          new ConfigToken("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",ApplyConstraints(AllowValues("Paramond Extended Mix"))),
-          new ConfigToken("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false,ApplyConstraints<int>())
+          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)")),
+          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",AllowValues("Paramond Extended Mix")),
+          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false)
         });
 
       Assert.Equal(3, newSchema.Count());
@@ -53,9 +53,9 @@ namespace SchemaTests
     {
       Schema newSchema = new(new HashSet<ConfigToken>()
         {
-          new ConfigToken("August Burns Red","The commit author's favorite August Burns Red song.",ApplyConstraints(AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)"))),
-          new ConfigToken("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",ApplyConstraints(AllowValues("Paramond Extended Mix"))),
-          new ConfigToken("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false,ApplyConstraints<int>())
+          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)")),
+          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",AllowValues("Paramond Extended Mix")),
+          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false)
         });
 
       Assert.Equal(3,newSchema.Count());
@@ -69,12 +69,12 @@ namespace SchemaTests
     {
       TestSchema.AddTokens(new HashSet<ConfigToken>()
         {
-          new ConfigToken("August Burns Red","The commit author's favorite August Burns Red song.",ApplyConstraints(AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)"))),
-          new ConfigToken("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",ApplyConstraints(AllowValues("Paramond Extended Mix"))),
-          new ConfigToken("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false,ApplyConstraints<int>())
+          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)")),
+          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",AllowValues("Paramond Extended Mix")),
+          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false)
         });
-
-      TestSchema.Validate(TestConfig);
+      
+      TestSchema.Validate(TestConfig, new JObjectTranslator());
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
       Assert.False(TestSchema.ErrorList.AnyFatal());
     }
@@ -87,11 +87,11 @@ namespace SchemaTests
     {
       TestSchema.AddTokens(new HashSet<ConfigToken>()
       {
-        new ConfigToken("August Burns Red","The commit author's favorite August Burns Red song.",ApplyConstraints(AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)"))),
-        new ConfigToken("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false,ApplyConstraints<int>())
+          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)")),
+          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false)
       });
-
-      TestSchema.Validate(TestConfig);
+      
+      TestSchema.Validate(TestConfig, new JObjectTranslator());
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
       Assert.True(TestSchema.ErrorList.AnyFatal());
     }
@@ -104,13 +104,13 @@ namespace SchemaTests
     {
       TestSchema.AddTokens(new HashSet<ConfigToken>()
       {
-        new ConfigToken("August Burns Red","The commit author's favorite August Burns Red song.",ApplyConstraints(AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)"))),
-        new ConfigToken("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",ApplyConstraints(AllowValues("Paramond Extended Mix"))),
-        new ConfigToken("Lincolnshire Poacher","The first 300 numbers read out on the Lincolnshire Poacher station.",ApplyConstraints(ConstrainCollectionCount<JArray>(300,300))),
-        new ConfigToken("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false,ApplyConstraints<int>())
+        new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)")),
+        new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",AllowValues("Paramond Extended Mix")),
+        new ConfigToken<JArray>("Lincolnshire Poacher","The first 300 numbers read out on the Lincolnshire Poacher station.",ConstrainCollectionCount<JArray>(300,300)),
+        new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false)
       });
-
-      TestSchema.Validate(TestConfig);
+            
+      TestSchema.Validate(TestConfig, new JObjectTranslator());
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
       Assert.True(TestSchema.ErrorList.AnyFatal());
     }
@@ -123,14 +123,14 @@ namespace SchemaTests
     {
       TestSchema.AddTokens(new HashSet<ConfigToken>()
         {
-          new ConfigToken("August Burns Red","The commit author's favorite August Burns Red song.",ApplyConstraints(AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)"))),
-          new ConfigToken("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",ApplyConstraints(AllowValues("Paramond Extended Mix"))),
-          new ConfigToken("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false,ApplyConstraints<int>())
+          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)")),
+          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",AllowValues("Paramond Extended Mix")),
+          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false)
         });
 
       TestConfig["Kids"] = "";
-
-      TestSchema.Validate(TestConfig);
+            
+      TestSchema.Validate(TestConfig, new JObjectTranslator());
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
       Assert.True(TestSchema.ErrorList.AnyFatal());
     }
@@ -143,11 +143,11 @@ namespace SchemaTests
     {
       TestSchema.AddTokens(new HashSet<ConfigToken>()
       {
-        new ConfigToken("August Burns Red","The commit author's favorite August Burns Red song.",ApplyConstraints(AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)"))),
-        new ConfigToken("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false,ApplyConstraints<int>())
+          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)")),
+          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false)
       });
 
-      TestSchema.Validate(TestConfig,"He of Many Tokens","BloatedConfig");
+      TestSchema.Validate(TestConfig,new JObjectTranslator(),"He of Many Tokens","BloatedConfig");
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
       Assert.Contains($"Input BloatedConfig He of Many Tokens contains unrecognized token: Kids", TestSchema.ErrorList.Select(x => x.ErrorMessage));
       Assert.Contains($"Validation for BloatedConfig He of Many Tokens failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
@@ -162,13 +162,13 @@ namespace SchemaTests
     {
       TestSchema.AddTokens(new HashSet<ConfigToken>()
       {
-        new ConfigToken("August Burns Red","The commit author's favorite August Burns Red song.",ApplyConstraints(AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)"))),
-        new ConfigToken("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",ApplyConstraints(AllowValues("Paramond Extended Mix"))),
-        new ConfigToken("Lincolnshire Poacher","The first 300 numbers read out on the Lincolnshire Poacher station.",ApplyConstraints(ConstrainCollectionCount<JArray>(300,300))),
-        new ConfigToken("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false,ApplyConstraints<int>())
+        new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)")),
+        new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",AllowValues("Paramond Extended Mix")),
+        new ConfigToken<JArray>("Lincolnshire Poacher","The first 300 numbers read out on the Lincolnshire Poacher station.",ConstrainCollectionCount<JArray>(300,300)),
+        new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false)
       });
 
-      TestSchema.Validate(TestConfig,"EmptyInside :(","Incomplete config");
+      TestSchema.Validate(TestConfig, new JObjectTranslator(), "EmptyInside :(","Incomplete config");
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
       Assert.Contains($"Input Incomplete config EmptyInside :( is missing required token Lincolnshire Poacher\nThe first 300 numbers read out on the Lincolnshire Poacher station.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
       Assert.Contains($"Validation for Incomplete config EmptyInside :( failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
@@ -180,7 +180,7 @@ namespace SchemaTests
     [Fact]
     public void ValidSchemaAddTokenTest()
     {
-      TestSchema.AddToken(new ConfigToken("ExtraCustomToken", "Super special!", ApplyConstraints<string>()));
+      TestSchema.AddToken(new ConfigToken<string>("ExtraCustomToken", "Super special!"));
 
       Assert.False(TestSchema.ErrorList.AnyFatal());
     }
@@ -193,9 +193,9 @@ namespace SchemaTests
     {
       TestSchema.AddTokens(new HashSet<ConfigToken>()
       {
-        new ConfigToken("The First of Three","A sample required token.",ApplyConstraints<string>()),
-        new ConfigToken("The Second of Three","Another sample required token.",ApplyConstraints<string>()),
-        new ConfigToken("The Third of Three","Finally, a sample optional token.",false,ApplyConstraints<int>())
+        new ConfigToken<string>("The First of Three","A sample required token."),
+        new ConfigToken<string>("The Second of Three","Another sample required token."),
+        new ConfigToken<int>("The Third of Three","Finally, a sample optional token.",false)
       });
 
       string configString = TestSchema.GenerateEmptyConfig().ToString();
@@ -211,11 +211,11 @@ namespace SchemaTests
     {
       TestSchema.AddTokens(new HashSet<ConfigToken>()
       {
-        new ConfigToken("The First of Three","A sample required token.",ApplyConstraints<string>()),
-        new ConfigToken("The Second of Three","Another sample required token.",ApplyConstraints<string>()),
-        new ConfigToken("The Third of Three","Finally, a sample optional token.",false,ApplyConstraints<int>())
+        new ConfigToken<string>("The First of Three","A sample required token."),
+        new ConfigToken<string>("The Second of Three","Another sample required token."),
+        new ConfigToken<int>("The Third of Three","Finally, a sample optional token.",false)
       });
-      Assert.Throws<ArgumentException>(() => TestSchema.AddToken(new ConfigToken("The First of Three", "Defective, fake, insubordinate, and churlish.", ApplyConstraints<string>())));
+      Assert.Throws<ArgumentException>(() => TestSchema.AddToken(new ConfigToken<string>("The First of Three", "Defective, fake, insubordinate, and churlish.")));
     }
 
     /// <summary>
@@ -226,12 +226,12 @@ namespace SchemaTests
     {
       TestSchema.AddTokens(new HashSet<ConfigToken>()
       {
-        new ConfigToken("The First of Three","A sample required token.",ApplyConstraints<string>()),
-        new ConfigToken("The Second of Three","Another sample required token.",ApplyConstraints<string>()),
-        new ConfigToken("The Third of Three","Finally, a sample optional token.",false,ApplyConstraints<int>())
+        new ConfigToken<string>("The First of Three","A sample required token."),
+        new ConfigToken<string>("The Second of Three","Another sample required token."),
+        new ConfigToken<int>("The Third of Three","Finally, a sample optional token.",false)
       });
-      Assert.Throws<ArgumentException>(() => TestSchema.AddTokens(new ConfigToken[] { new ConfigToken("A brand new token!", "Completely original!", ApplyConstraints<string>()),
-                                                                                      new ConfigToken("The First of Three", "Once again thinks it's the most important because it was added first.", ApplyConstraints<string>()) }));
+      Assert.Throws<ArgumentException>(() => TestSchema.AddTokens(new ConfigToken[] { new ConfigToken<string>("A brand new token!", "Completely original!"),
+                                                                                      new ConfigToken<string>("The First of Three", "Once again thinks it's the most important because it was added first.") }));
     }
 
     /// <summary>
@@ -242,10 +242,10 @@ namespace SchemaTests
     {
       Assert.Throws<ArgumentException>(() => new Schema(new ConfigToken[]
         {
-          new ConfigToken("August Burns Red","The commit author's favorite August Burns Red song.",ApplyConstraints(AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)"))),
-          new ConfigToken("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",ApplyConstraints(AllowValues("Paramond Extended Mix"))),
-          new ConfigToken("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",ApplyConstraints(AllowValues("Paramond Extended Mix"))),
-          new ConfigToken("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false,ApplyConstraints<int>())
+          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)")),
+          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",AllowValues("Paramond Extended Mix")),
+          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",AllowValues("Paramond Extended Mix")),
+          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",false)
         }));
     }
   }

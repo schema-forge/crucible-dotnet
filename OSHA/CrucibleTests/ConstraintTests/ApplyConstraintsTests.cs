@@ -27,7 +27,7 @@ namespace ConstraintTests
     [Fact]
     public void ApplyTypeConstraintValid()
     {
-      bool testResult = new ConfigToken("TestToken", "Allons-y!", ApplyConstraints<string>()).Validate("A string! :D");
+      bool testResult = new ConfigToken<string>("TestToken", "Allons-y!").Validate(new JValue("A string! :D"), new JTokenTranslator());
       Assert.True(testResult);
     }
 
@@ -37,7 +37,7 @@ namespace ConstraintTests
     [Fact]
     public void ApplyTypeConstraintInvalidType()
     {
-      bool testResult = new ConfigToken("TestToken", "Jeronimo!", ApplyConstraints<bool>()).Validate("Unfalsifiable! :D");
+      bool testResult = new ConfigToken<bool>("TestToken", "Jeronimo!").Validate(new JValue("Unfalsifiable! :D"), new JTokenTranslator());
       Assert.False(testResult);
     }
 
@@ -47,7 +47,7 @@ namespace ConstraintTests
     [Fact]
     public void ApplyTypeConstraintNullOrEmpty()
     {
-      bool testResult = new ConfigToken("TestToken", "Fantastic!", ApplyConstraints<string>()).Validate("");
+      bool testResult = new ConfigToken<string>("TestToken", "Fantastic!").Validate(new JValue(""),new JTokenTranslator());
       Assert.False(testResult);
     }
 
@@ -57,7 +57,7 @@ namespace ConstraintTests
     [Fact]
     public void ApplyConstraintsValid()
     {
-      Assert.True(new ConfigToken("TestToken", "I'm sorry. I'm so sorry.", ApplyConstraints<string>(ConstrainStringLength(5), ForbidStringCharacters(',', '\n'))).Validate("Valid string!"));
+      Assert.True(new ConfigToken<string>("TestToken", "I'm sorry. I'm so sorry.", ConstrainStringLength(5), ForbidStringCharacters(',', '\n')).Validate(new JValue("Valid string!"),new JTokenTranslator()));
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ namespace ConstraintTests
     [Fact]
     public void ApplyConstraintsInvalid()
     {
-      Assert.False(new ConfigToken("TestToken", "Bow ties are cool.", ApplyConstraints<string>(ConstrainStringLength(5), ForbidStringCharacters('.', '\n'))).Validate("yup."));
+      Assert.False(new ConfigToken<string>("TestToken", "Bow ties are cool.", ConstrainStringLength(5), ForbidStringCharacters('.', '\n')).Validate(new JValue("yup."), new JTokenTranslator()));
     }
 
     /// <summary>
@@ -80,8 +80,8 @@ namespace ConstraintTests
     [InlineData(false, "Whitaker")] // Will fail, because the input value must be either bool or int.
     public void ApplyTwoTypeConstraintTest(bool expectedResult, object inputValue)
     {
-      ConfigToken testToken = new("TestToken", "Silence in the Library Part 1", ApplyConstraints<bool, int>());
-      bool testResult = testToken.Validate(new JValue(inputValue));
+      ConfigToken<bool, int> testToken = new("TestToken", "Silence in the Library Part 1");
+      bool testResult = testToken.Validate(new JValue(inputValue), new JTokenTranslator());
       output.WriteLine(testToken.ErrorList.Join('\n'));
       Assert.Equal(expectedResult, testResult);
     }
@@ -98,7 +98,7 @@ namespace ConstraintTests
     [InlineData(false, 45)]
     public void ApplyTwoTypeConstraintPlusIndividualConstraintsTest(bool expectedResult, object inputValue)
     {
-      Assert.Equal(expectedResult, new ConfigToken("TestToken", "Silence in the Library Part 2", ApplyConstraints(
+      Assert.Equal(expectedResult, new ConfigToken<int, string>("TestToken", "Silence in the Library Part 2",
       constraintsIfType1: new Constraint<int>[]
         {
           ConstrainValue(3,15)
@@ -106,7 +106,7 @@ namespace ConstraintTests
       constraintsIfType2: new Constraint<string>[]
         {
           AllowValues("Tennant", "Smith", "Eccleston")
-        })).Validate(new JValue(inputValue)));
+        }).Validate(new JValue(inputValue), new JTokenTranslator()));
     }
 
     /// <summary>
@@ -115,7 +115,7 @@ namespace ConstraintTests
     [Fact]
     public void ApplyConstraintsThrowsWithDuplicateConstraints()
     {
-      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Don't Blink", ApplyConstraints(AllowValues("Please", "just"),AllowValues("put", "us", "in", "one", "constraint"))));
+      Assert.Throws<ArgumentException>(() => new ConfigToken<string>("TestToken", "Don't Blink", AllowValues("Please", "just"),AllowValues("put", "us", "in", "one", "constraint")));
     }
   }
 }

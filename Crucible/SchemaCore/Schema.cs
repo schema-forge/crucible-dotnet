@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,12 +14,12 @@ namespace SchemaForge.Crucible
   {
     public (bool,TCastType) TryCastToken<TCastType>(TCollectionType collection, string valueName);
     public bool TokenIsNullOrEmpty(TCollectionType collection, string valueName);
-    public TCollectionType InsertToken(TCollectionType collection, string valueName, string newValue);
+    public TCollectionType InsertToken<TDefaultValueType>(TCollectionType collection, string valueName, TDefaultValueType newValue);
     public bool CollectionContains(TCollectionType collection, string valueName);
     public string CollectionValueToString(TCollectionType collection, string valueName);
     public List<string> GetCollectionKeys(TCollectionType collection);
   }
-  class JsonTranslator : ISchemaTranslator<JObject,JToken>
+  public class JObjectTranslator : ISchemaTranslator<JObject,JToken>
   {
     public (bool, TCastType) TryCastToken<TCastType>(JObject collection, string valueName)
     {
@@ -34,14 +35,35 @@ namespace SchemaForge.Crucible
       }
     }
     public bool TokenIsNullOrEmpty(JObject collection, string valueName) => collection[valueName].IsNullOrEmpty();
-    public JObject InsertToken(JObject collection, string valueName, string newValue)
+    public JObject InsertToken<TDefaultValueType>(JObject collection, string valueName, TDefaultValueType newValue)
     {
-      collection.Add(valueName, newValue);
+      collection.Add(valueName, new JValue(newValue));
       return collection;
     }
     public bool CollectionContains(JObject collection, string valueName) => collection.ContainsKey(valueName);
     public List<string> GetCollectionKeys(JObject collection) => collection.Properties().Select(x => x.Name).ToList();
     public string CollectionValueToString(JObject collection, string valueName) => collection[valueName].ToString();
+  }
+  public class JTokenTranslator : ISchemaTranslator<JToken,JToken>
+  {
+    public (bool, TCastType) TryCastToken<TCastType>(JToken collection, string valueName)
+    {
+      try
+      {
+        JToken token = collection;
+        TCastType result = token.Value<TCastType>();
+        return (true, result);
+      }
+      catch
+      {
+        return (false, default);
+      }
+    }
+    public bool TokenIsNullOrEmpty(JToken collection, string valueName) => collection.IsNullOrEmpty();
+    public JToken InsertToken<TDefaultValueType>(JToken collection, string valueName, TDefaultValueType newValue) => throw new NotImplementedException("Cannot insert a value into a JToken. Use JObjectTranslator instead.");
+    public bool CollectionContains(JToken collection, string valueName) => collection.Contains(valueName);
+    public string CollectionValueToString(JToken collection, string valueName) => collection.ToString();
+    public List<string> GetCollectionKeys(JToken collection) => throw new NotImplementedException("A JToken does not always have keys.");
   }
   public class Schema
   {
@@ -127,16 +149,16 @@ namespace SchemaForge.Crucible
               ErrorList.Add(new Error($"Input {type} {name} is missing required token {token.TokenName}\n{token.HelpString}"));
             }
           }
-          else if(!token.DefaultValue.IsNullOrEmpty())
+          else if(!token.ContainsDefaultValue)
           {
-            collection = translator.InsertToken(collection, token.TokenName, token.DefaultValue); // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
+            token.InsertDefaultValue(collection, translator); // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
           }
         }
         else if (translator.TokenIsNullOrEmpty(collection,token.TokenName))
         {
           ErrorList.Add(new Error($"Value of token {token.TokenName} is null or empty.",Severity.Null));
         }
-        else if (!token.Validate(config[token.TokenName]))
+        else if (!token.Validate(collection,translator))
         {
           ErrorList.AddRange(token.ErrorList);
           ErrorList.Add(new Error(token.HelpString,Severity.Info));
@@ -194,7 +216,7 @@ namespace SchemaForge.Crucible
       JObject schemaJson = new();
       foreach(ConfigToken token in ConfigTokens)
       {
-        schemaJson.Add(token.TokenName, token.Constraints.ToJToken());
+        schemaJson.Add(token.TokenName, token.JsonConstraint);
       }
       return schemaJson.ToString();
     }

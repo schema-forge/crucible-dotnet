@@ -40,20 +40,20 @@ namespace ConstraintTests
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken("TestToken", "Angry String", ApplyConstraints(ConstrainValue(constraints[0])));
-        testResult = testToken.Validate(constrainedValue);
+        testToken = new ConfigToken<int>("TestToken", "Angry String", ConstrainValue(constraints[0]));
+        testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Relaxed String", ApplyConstraints<int>(ConstrainValue(constraints[0], constraints[1]))));
+          Assert.Throws<ArgumentException>(() => new ConfigToken<int>("TestToken", "Relaxed String", ConstrainValue(constraints[0], constraints[1])));
           return;
         }
         else
         {
-          testToken = new ConfigToken("TestToken", "Nervous String", ApplyConstraints<int>(ConstrainValue(constraints[0], constraints[1])));
-          testResult = testToken.Validate(constrainedValue);
+          testToken = new ConfigToken<int>("TestToken", "Nervous String", ConstrainValue(constraints[0], constraints[1]));
+          testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
         }
       }
       output.WriteLine(string.Join('\n', testToken.ErrorList));
@@ -79,20 +79,20 @@ namespace ConstraintTests
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<double>(ConstrainValue(constraints[0])));
-        testResult = testToken.Validate(constrainedValue);
+        testToken = new ConfigToken<double>("TestToken", "Deja Vu", ConstrainValue(constraints[0]));
+        testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "I think", ApplyConstraints<double>(ConstrainValue(constraints[0], constraints[1]))));
+          Assert.Throws<ArgumentException>(() => new ConfigToken<double>("TestToken", "I think", ConstrainValue(constraints[0], constraints[1])));
           return;
         }
         else
         {
-          testToken = new ConfigToken("TestToken", "we've done this before", ApplyConstraints<double>(ConstrainValue(constraints[0], constraints[1])));
-          testResult = testToken.Validate(constrainedValue);
+          testToken = new ConfigToken<double>("TestToken", "we've done this before", ConstrainValue(constraints[0], constraints[1]));
+          testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
         }
       }
       output.WriteLine(string.Join('\n', testToken.ErrorList));
@@ -111,8 +111,8 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<int>(ConstrainValue(domains)));
-      testResult = testToken.Validate(constrainedValue);
+      testToken = new ConfigToken<int>("TestToken", "Deja Vu", ConstrainValue(domains));
+      testResult = testToken.Validate(new JValue(constrainedValue),new JTokenTranslator());
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
@@ -144,8 +144,8 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken("TestToken", "Deja Vu", ApplyConstraints<double>(ConstrainValue(domains)));
-      testResult = testToken.Validate(constrainedValue);
+      testToken = new ConfigToken<double>("TestToken", "Deja Vu", ConstrainValue(domains));
+      testResult = testToken.Validate(new JValue(constrainedValue),new JTokenTranslator());
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
@@ -170,7 +170,7 @@ namespace ConstraintTests
     [Fact]
     public void ConstrainNumericDomain_InvalidBounds()
     {
-      Assert.Throws<ArgumentException>(() => new ConfigToken("TestToken", "Doomed Token", ApplyConstraints<int>(ConstrainValue((15, 13)))));
+      Assert.Throws<ArgumentException>(() => new ConfigToken<int>("TestToken", "Doomed Token", ConstrainValue((15, 13))));
     }
 
     /// <summary>

@@ -134,14 +134,14 @@ namespace SchemaForge.Crucible
       { "JObject", "Json" }
     };
 
-    private static Dictionary<string, Func<Constraint[], ConstraintContainer>> InternalDeserializeType = new()
-    {
-      { "Integer", GetConstraintsForType<long> },
-      { "String", GetConstraintsForType<string> },
-      { "Decimal", GetConstraintsForType<double> },
-      { "Array", GetConstraintsForType<JArray> },
-      { "JObject", GetConstraintsForType<JObject> }
-    };
+    //private static Dictionary<string, Func<Constraint[], ConfigToken>> InternalDeserializeType = new()
+    //{
+    //  { "Integer", GetConstraintsForType<long> },
+    //  { "String", GetConstraintsForType<string> },
+    //  { "Decimal", GetConstraintsForType<double> },
+    //  { "Array", GetConstraintsForType<JArray> },
+    //  { "JObject", GetConstraintsForType<JObject> }
+    //};
 
     /// <summary>
     /// Converts a type and array of constraints to a ConstraintContainer with
@@ -151,7 +151,7 @@ namespace SchemaForge.Crucible
     /// can be retrieved with <see cref="ShippingAndReceiving.GetSupportedTypes()"/></param>
     /// <param name="constraints">Constraints to pass along after the type check.</param>
     /// <returns>GetConstraintsForType with a type</returns>
-    public static ConstraintContainer DeserializeType(string typeString, Constraint[] constraints) => InternalDeserializeType[typeString](constraints);
+    //public static ConfigToken DeserializeType(string typeString, Constraint[] constraints) => InternalDeserializeType[typeString](constraints);
 
     /// <summary>
     /// Converts a type from the C# type to the SchemaForge equivalent. See
@@ -175,15 +175,15 @@ namespace SchemaForge.Crucible
     /// <typeparam name="T">Type to align with a string key.</typeparam>
     /// <param name="constraints">Irrelevant. Populated only when deserializing a Json file to a Schema.</param>
     /// <returns>ConstraintContainer containing constraints of that particular type.</returns>
-    public static ConstraintContainer GetConstraintsForType<T>(Constraint[] constraints)
-    {
-      List<Constraint<T>> constraintList = new();
-      foreach(Constraint constraint in constraints)
-      {
-        constraintList.Add(new Constraint<T>((Func<T, string, List<Error>>)constraint.GetFunction(), constraint.Property));
-      }
-      return ApplyConstraints<T>(constraintList.ToArray());
-    }
+    //public static ConstraintContainer GetConstraintsForType<T>(Constraint[] constraints)
+    //{
+    //  List<Constraint<T>> constraintList = new();
+    //  foreach(Constraint constraint in constraints)
+    //  {
+    //    constraintList.Add(new Constraint<T>((Func<T, string, List<Error>>)constraint.GetFunction(), constraint.Property));
+    //  }
+    //  return ApplyConstraints<T>(constraintList.ToArray());
+    //}
 
     /// <summary>
     /// Adds a new supported type for serializing and deserializing.
@@ -195,11 +195,11 @@ namespace SchemaForge.Crucible
     /// <param name="schemaForgeTypeName">Equivalent name to serialize the C# type name to.</param>
     /// <param name="typeDeserializer"><see cref="ShippingAndReceiving.GetConstraintsForType{T}"/>
     /// with a type parameter equivalent to the C# type name being provided.</param>
-    public static void AddSupportedType(string csTypeName, string schemaForgeTypeName, Func<Constraint[], ConstraintContainer> typeDeserializer)
-    {
-      InternalTypeMap.Add(csTypeName, schemaForgeTypeName);
-      InternalDeserializeType.Add(schemaForgeTypeName, typeDeserializer);
-    }
+    //public static void AddSupportedType(string csTypeName, string schemaForgeTypeName, Func<Constraint[], ConstraintContainer> typeDeserializer)
+    //{
+    //  InternalTypeMap.Add(csTypeName, schemaForgeTypeName);
+    //  InternalDeserializeType.Add(schemaForgeTypeName, typeDeserializer);
+    //}
 
     /// <summary>
     /// Accepts a JProperty. The Name of the JProperty will be used to look up

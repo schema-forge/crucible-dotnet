@@ -13,14 +13,14 @@ namespace SchemaTests
 {
   public class ShippingAndReceivingTests
   {
-    [Theory]
-    [MemberData(nameof(DeserializeTypeTestData))]
-    public static void DeserializeTypeTests(bool expected, string typeString, JToken inputValue, params Constraint[] constraints)
-    {
-      ConstraintContainer container = ShippingAndReceiving.DeserializeType(typeString, constraints);
-      List<Error> resultList = container.ApplyConstraints(inputValue,"Test Token");
-      Assert.Equal(expected, !resultList.AnyFatal());
-    }
+    //[Theory]
+    //[MemberData(nameof(DeserializeTypeTestData))]
+    //public static void DeserializeTypeTests(bool expected, string typeString, JToken inputValue, params Constraint[] constraints)
+    //{
+    //  ConstraintContainer container = ShippingAndReceiving.DeserializeType(typeString, constraints);
+    //  List<Error> resultList = container.ApplyConstraints(inputValue,"Test Token");
+    //  Assert.Equal(expected, !resultList.AnyFatal());
+    //}
 
     public static IEnumerable<object[]> DeserializeTypeTestData
     {
@@ -41,20 +41,20 @@ namespace SchemaTests
           new object[] { true, "Decimal", 25.3, ConstrainValue<double>(22) }, // Applies actual decimal constraint to valid input.
           new object[] { false, "Decimal", "astrong" }, // Applies decimal type constraint to invalid input.
           new object[] { true, "Array", new JArray() { 3 } }, // Applies array type constraint to valid input.
-          new object[] { true, "Array", new JArray() { 3 }, ApplyConstraintsToCollection<int>() }, // Applies actual array constraint to valid input.
+          new object[] { true, "Array", new JArray() { 3 }, ApplyConstraintsToJArray<int>() }, // Applies actual array constraint to valid input.
           new object[] { false, "Array", "youthoughtitwasarealarraybutitwasmeDIO" } // Applies array type constraint to invalid input.
         };
       }
     }
 
-    [Theory]
-    [MemberData(nameof(GetConstraintsForTypeTestData))]
-    public static void GetConstraintsForTypeTests(bool expected, JToken inputValue, params Constraint[] constraints)
-    {
-      ConstraintContainer container = ShippingAndReceiving.GetConstraintsForType<long>(constraints);
-      List<Error> resultList = container.ApplyConstraints(inputValue, "Test Token");
-      Assert.Equal(expected, !resultList.AnyFatal());
-    }
+    //[Theory]
+    //[MemberData(nameof(GetConstraintsForTypeTestData))]
+    //public static void GetConstraintsForTypeTests(bool expected, JToken inputValue, params Constraint[] constraints)
+    //{
+    //  ConstraintContainer container = ShippingAndReceiving.GetConstraintsForType<long>(constraints);
+    //  List<Error> resultList = container.ApplyConstraints(inputValue, "Test Token");
+    //  Assert.Equal(expected, !resultList.AnyFatal());
+    //}
 
     public static IEnumerable<object[]> GetConstraintsForTypeTestData
     {
