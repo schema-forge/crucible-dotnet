@@ -41,12 +41,6 @@ namespace SchemaTests
     }
 
     [Fact]
-    public void ConfigTokenInvalidDefaultValue()
-    {
-      Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("Are you trying to sneak in a null or empty default value, sir?", "Caught you crossing the border!", ""));
-    }
-
-    [Fact]
     public void ConfigTokenValidConfigurationWithOptional()
     {
       ConfigToken<string> token = new("TestToken", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!", "This is what you get if you don't put anything in for TestToken!");

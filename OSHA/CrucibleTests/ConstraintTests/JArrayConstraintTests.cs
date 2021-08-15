@@ -98,8 +98,9 @@ namespace ConstraintTests
       bool testResult;
       testToken = new ConfigToken<JArray>("TestArray", "Everyone you love is gone.", ApplyConstraintsToJArray(ConstrainValue(5)));
       testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      output.WriteLine($"Input array: {string.Join(",", JObject.Parse(constrainedJson)["TestArray"])}");
       output.WriteLine(string.Join('\n', testToken.ErrorList));
-      Assert.Equal(testResult, expectedResult);
+      Assert.Equal(expectedResult, testResult);
     }
 
     /// <summary>
@@ -118,6 +119,7 @@ namespace ConstraintTests
       bool testResult;
       testToken = new ConfigToken<JArray>("TestArray", "There is only ice cream.", ApplyConstraintsToJArray(ConstrainStringLength(15), ForbidStringCharacters('/', '?', '!')));
       testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      output.WriteLine($"Input array: {string.Join(",", JObject.Parse(constrainedJson)["TestArray"])}");
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }

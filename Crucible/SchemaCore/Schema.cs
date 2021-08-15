@@ -154,10 +154,6 @@ namespace SchemaForge.Crucible
             token.InsertDefaultValue(collection, translator); // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
           }
         }
-        else if (translator.TokenIsNullOrEmpty(collection,token.TokenName))
-        {
-          ErrorList.Add(new Error($"Value of token {token.TokenName} is null or empty.",Severity.Null));
-        }
         else if (!token.Validate(collection,translator))
         {
           ErrorList.AddRange(token.ErrorList);

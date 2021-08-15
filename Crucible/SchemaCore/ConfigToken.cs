@@ -45,7 +45,14 @@ namespace SchemaForge.Crucible
     /// the specified collection.</param>
     /// <returns>Bool indicating whether or not any fatal errors were
     /// raised by the constraint functions.</returns>
-    public abstract bool Validate<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator);
+    public virtual bool Validate<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
+    {
+      if (translator.TokenIsNullOrEmpty(collection, TokenName))
+      {
+        ErrorList.Add(new Error($"Value of token {TokenName} is null or empty.", Severity.Null));
+      }
+      return !ErrorList.AnyFatal();
+    }
 
     public abstract void InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator);
     #region Overrides
@@ -227,6 +234,7 @@ namespace SchemaForge.Crucible
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
     public override bool Validate<TCollectionType,TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType,TValueType> translator)
     {
+      base.Validate(collection, translator);
       if(!InternalValidate(translator.TryCastToken<Type1>(collection,TokenName),ConstraintsIfType1))
       {
         ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection,TokenName)} is an incorrect type. Expected value type: {typeof(Type1).Name}"));
@@ -319,7 +327,8 @@ namespace SchemaForge.Crucible
 
     public override bool Validate<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
     {
-      if(!InternalValidate(translator.TryCastToken<Type1>(collection, TokenName), ConstraintsIfType1) 
+      base.Validate(collection, translator);
+      if (!InternalValidate(translator.TryCastToken<Type1>(collection, TokenName), ConstraintsIfType1) 
         && !InternalValidate(translator.TryCastToken<Type2>(collection, TokenName), ConstraintsIfType2))
       {
         ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected value type: {typeof(Type1).Name} or {typeof(Type2).Name}"));
@@ -413,6 +422,7 @@ namespace SchemaForge.Crucible
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
     public override bool Validate<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
     {
+      base.Validate(collection, translator);
       if (!InternalValidate(translator.TryCastToken<Type1>(collection, TokenName), ConstraintsIfType1)
         && !InternalValidate(translator.TryCastToken<Type2>(collection, TokenName), ConstraintsIfType2)
         && !InternalValidate(translator.TryCastToken<Type3>(collection, TokenName), ConstraintsIfType3))

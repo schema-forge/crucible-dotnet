@@ -386,7 +386,15 @@ namespace SchemaForge.Crucible
         List<Error> internalErrorList = new();
         foreach(JToken token in inputArray)
         {
-          internalErrorList.AddRange(ApplyConstraintsHelper(token, "in collection " + inputName,constraints));
+          try
+          {
+            internalErrorList.AddRange(ApplyConstraintsHelper(token, "in collection " + inputName, constraints));
+          }
+          catch
+          {
+            internalErrorList.Add(new Error($"Value {token} in array {inputName} is an incorrect type. Expected value type: {typeof(TElementType).Name}"));
+            return internalErrorList;
+          }
         }
         return internalErrorList;
       }

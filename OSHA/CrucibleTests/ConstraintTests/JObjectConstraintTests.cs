@@ -38,7 +38,7 @@ namespace ConstraintTests
             new ConfigToken<int>("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",ConstrainValue((0,5),(10,15)))
           });
       ConfigToken<JObject> testToken = new("FruitProperties", "Json: Additional properties of the fruit in question.", ApplySchema(appliedSchema));
-      bool testResult = testToken.Validate(JObject.Parse(constrainedJson),new JObjectTranslator());
+      bool testResult = testToken.Validate(JObject.Parse(constrainedJson),new JTokenTranslator());
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
@@ -63,7 +63,7 @@ namespace ConstraintTests
             new ConfigToken<string>("Color","String: Indicates the color of the fruit.",false)
           });
       ConfigToken<JObject> testToken = new("FruitProperties", "Json: Additional properties of the fruit in question.", ApplySchema(appliedSchema));
-      bool testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      bool testResult = testToken.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
@@ -83,12 +83,12 @@ namespace ConstraintTests
     [InlineData(false, "{}", 3, 1)] // Exception test.
     public void ConstrainCollectionCountTests(bool expectedResult, string constrainedJson, params int[] constraints)
     {
-      ConfigToken testToken;
+      ConfigToken<JObject> testToken;
       bool testResult;
       if (constraints.Length == 1)
       {
         testToken = new ConfigToken<JObject>("TestToken", "Eat the ice cream.", ConstrainCollectionCount<JObject>(constraints[0]));
-        testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+        testResult = testToken.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
       }
       else
       {
@@ -100,7 +100,7 @@ namespace ConstraintTests
         else
         {
           testToken = new ConfigToken<JObject>("TestToken", "Eat the ice cream.", ConstrainCollectionCount<JObject>(constraints[0], constraints[1]));
-          testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+          testResult = testToken.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
         }
       }
       output.WriteLine(string.Join('\n', testToken.ErrorList));
