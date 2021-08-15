@@ -9,6 +9,47 @@ using static SchemaForge.Crucible.Constraints;
 
 namespace SchemaForge.Crucible
 {
+  public interface ISchemaTranslator<TCollectionType, TValueType>
+  {
+    public List<Error> ApplyConstraints(TCollectionType collection, string valueName, ConfigToken configToken);
+    public (bool,TCastType) TryCastToken<TCastType>(TCollectionType collection, string valueName);
+    public bool TokenIsNullOrEmpty(TCollectionType collection, string valueName);
+    public TCollectionType InsertToken(TCollectionType collection, string valueName, string newValue);
+    public bool CollectionContains(TCollectionType collection, string valueName);
+    public string CollectionValueToString(TCollectionType collection, string valueName);
+    public List<string> GetCollectionKeys(TCollectionType collection);
+  }
+  class JsonTranslator : ISchemaTranslator<JObject,JToken>
+  {
+    public (bool, TCastType) TryCastToken<TCastType>(JObject collection, string valueName)
+    {
+      try
+      {
+        JToken token = collection[valueName];
+        TCastType result = token.Value<TCastType>();
+        return (true, result);
+      }
+      catch
+      {
+        return (false, default);
+      }
+    }
+    public bool TokenIsNullOrEmpty(JObject collection, string valueName) => collection[valueName].IsNullOrEmpty();
+    public JObject InsertToken(JObject collection, string valueName, string newValue)
+    {
+      collection.Add(valueName, newValue);
+      return collection;
+    }
+    public List<Error> ApplyConstraints(JObject collection, string valueName, ConfigToken configToken)
+    {
+      List<Error> errors = new();
+
+      return errors;
+    }
+    public bool CollectionContains(JObject collection, string valueName) => collection.ContainsKey(valueName);
+    public List<string> GetCollectionKeys(JObject collection) => collection.Properties().Select(x => x.Name).ToList();
+    public string CollectionValueToString(JObject collection, string valueName) => collection[valueName].ToString();
+  }
   public class Schema
   {
     /*
@@ -69,7 +110,7 @@ namespace SchemaForge.Crucible
     /// If name and type are provided, the message "Validation for [type] [name] failed." will be added to ErrorList on validation failure.
     /// </summary>
     /// <param name="config">Config object to check using the ConfigToken rules set in ConfigTokens.</param>
-    public virtual List<Error> Validate(JObject config, string name = null, string type = null)
+    public virtual List<Error> Validate<TCollectionType,TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType,TValueType> translator, string name = null, string type = null)
     {
       string message = " ";
       // This option is included in case a sub-JObject of another configuration is being validated; this allows the ErrorList to indicate the exact configuration that has the issue.
@@ -80,7 +121,7 @@ namespace SchemaForge.Crucible
       }
       foreach (ConfigToken token in ConfigTokens)
       {
-        if (!config.ContainsKey(token.TokenName))
+        if (!translator.CollectionContains(collection, token.TokenName))
         {
           if(token.Required)
           {
@@ -95,10 +136,10 @@ namespace SchemaForge.Crucible
           }
           else if(!token.DefaultValue.IsNullOrEmpty())
           {
-            config[token.TokenName] = token.DefaultValue; // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
+            collection = translator.InsertToken(collection, token.TokenName, token.DefaultValue); // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
           }
         }
-        else if (config[token.TokenName].IsNullOrEmpty())
+        else if (translator.TokenIsNullOrEmpty(collection,token.TokenName))
         {
           ErrorList.Add(new Error($"Value of token {token.TokenName} is null or empty.",Severity.Null));
         }
@@ -120,17 +161,18 @@ namespace SchemaForge.Crucible
           therefore, we invalidate the config file if there are any tokens that are not accounted for in ConfigTokens.
 
       */
-      foreach (KeyValuePair<string, JToken> property in config)
+      List<string> collectionKeys = translator.GetCollectionKeys(collection);
+      foreach (string key in collectionKeys)
       {
-        if (!ConfigTokens.Select(x => x.TokenName).Contains(property.Key))
+        if (!ConfigTokens.Select(x => x.TokenName).Contains(key))
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add(new Error($"Input json file contains unrecognized token: {property.Key}"));
+            ErrorList.Add(new Error($"Input json file contains unrecognized token: {key}"));
           }
           else
           {
-            ErrorList.Add(new Error($"Input {type} {name} contains unrecognized token: {property.Key}"));
+            ErrorList.Add(new Error($"Input {type} {name} contains unrecognized token: {key}"));
           }
         }
       }
