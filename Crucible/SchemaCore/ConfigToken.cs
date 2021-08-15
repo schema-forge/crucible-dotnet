@@ -71,21 +71,7 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="other">The other token to compare.</param>
     /// <returns>Bool indicating if two ConfigTokens have the same name.</returns>
-    public bool Equals(ConfigToken other)
-    {
-      if (!other.Exists())
-      {
-        return false;
-      }
-      if (this.TokenName == other.TokenName)
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
+    public bool Equals(ConfigToken other) => other.Exists() && this.TokenName == other.TokenName;
 
     /// <summary>
     /// Sets the HashCode of a ConfigToken to the HashCode of its TokenName.
@@ -241,10 +227,7 @@ namespace SchemaForge.Crucible
       }
       return !ErrorList.AnyFatal();
     }
-    public override void InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
-    {
-      translator.InsertToken(collection, TokenName, DefaultValue);
-    }
+    public override void InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
 
   /// <summary>
@@ -335,10 +318,7 @@ namespace SchemaForge.Crucible
       }
       return !ErrorList.AnyFatal();
     }
-    public override void InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
-    {
-      translator.InsertToken(collection, TokenName, DefaultValue);
-    }
+    public override void InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
 
   /// <summary>
@@ -431,9 +411,6 @@ namespace SchemaForge.Crucible
       }
       return !ErrorList.AnyFatal();
     }
-    public override void InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
-    {
-      translator.InsertToken(collection, TokenName, DefaultValue);
-    }
+    public override void InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
 }

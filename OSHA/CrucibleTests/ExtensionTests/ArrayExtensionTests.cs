@@ -53,7 +53,7 @@ namespace Extensions
     [Fact]
     public void CloneEmptyArrayTest()
     {
-      string[] firstArray = { };
+      string[] firstArray = Array.Empty<string>();
       string[] secondArray = firstArray.CloneArray();
 
       Assert.True(secondArray.Length == 0);
@@ -63,9 +63,6 @@ namespace Extensions
     [InlineData(new int[] { 3, 5, 7 }, new int[] { 7, 5, 3 })] // Odd number of items.
     [InlineData(new int[] { 3, 5, 8, 6 }, new int[] { 6, 8, 5, 3 })] // Even number of items.
     [InlineData(new int[] { }, new int[] { })] // Empty arrays.
-    public void ReverseArrayTests(int[] originalArray, int[] expectedArray)
-    {
-      Assert.Equal(expectedArray, originalArray.Reverse());
-    }
+    public void ReverseArrayTests(int[] originalArray, int[] expectedArray) => Assert.Equal(expectedArray, originalArray.Reverse());
   }
 }

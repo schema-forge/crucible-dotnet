@@ -13,13 +13,6 @@ namespace SchemaTests
   [Trait("Crucible", "")]
   public class ConfigTokenTests
   {
-    private readonly ITestOutputHelper output;
-
-    public ConfigTokenTests(ITestOutputHelper output)
-    {
-      this.output = output;
-    }
-
     [Fact]
     public void ConfigTokenValidConfiguration()
     {
@@ -29,16 +22,10 @@ namespace SchemaTests
     }
 
     [Fact]
-    public void ConfigTokenInvalidName()
-    {
-      Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!"));
-    }
+    public void ConfigTokenInvalidName() => Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!"));
 
     [Fact]
-    public void ConfigTokenInvalidHelpString()
-    {
-      Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("BestPracticesOrDie", ""));
-    }
+    public void ConfigTokenInvalidHelpString() => Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("BestPracticesOrDie", ""));
 
     [Fact]
     public void ConfigTokenValidConfigurationWithOptional()

@@ -77,8 +77,7 @@ namespace SchemaForge.Crucible.Extensions
     /// <returns>Number of elements in the IEnumerable.</returns>
     public static int Count(this IEnumerable source)
     {
-      ICollection col = source as ICollection;
-      if (col != null)
+      if (source is ICollection col)
         return col.Count;
 
       int c = 0;
@@ -99,8 +98,7 @@ namespace SchemaForge.Crucible.Extensions
       }
       finally
       {
-        IDisposable d = resource as IDisposable;
-        if (d != null)
+        if (resource is IDisposable d)
           d.Dispose();
       }
     }

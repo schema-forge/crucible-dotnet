@@ -13,7 +13,7 @@ namespace Crucible
   {
     TestConfig(JObject inputConfig)
     {
-      Schema testSchema = new Schema();
+      Schema testSchema = new();
       testSchema.AddTokens(new HashSet<ConfigToken>()
             {
                 new ConfigToken<string>("RequiredToken","String: A Very Important Token[tm]"),

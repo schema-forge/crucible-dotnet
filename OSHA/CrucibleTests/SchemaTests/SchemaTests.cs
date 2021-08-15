@@ -15,8 +15,8 @@ namespace SchemaTests
   public class SchemaTests
   {
     private readonly ITestOutputHelper output;
-    Schema TestSchema = new();
-    JObject TestConfig = JObject.Parse(
+    readonly Schema TestSchema = new();
+    readonly JObject TestConfig = JObject.Parse(
         @"{
             'August Burns Red':'Spirit Breaker',
             'ourfathers.':4,

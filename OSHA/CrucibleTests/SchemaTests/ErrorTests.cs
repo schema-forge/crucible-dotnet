@@ -22,14 +22,11 @@ namespace SchemaTests
     [Fact]
     public void Error_ConstructorInitializesErrorSeverity()
     {
-      Error error = new Error("You should not crossed the streams.", Severity.Warning);
+      Error error = new("You should not crossed the streams.", Severity.Warning);
       Assert.Equal(Severity.Warning, error.ErrorSeverity);
     }
 
     [Fact]
-    public void Error_ConstructorThrowsOnEmptyString()
-    {
-      Assert.Throws<ArgumentNullException>(() => new Error(""));
-    }
+    public void Error_ConstructorThrowsOnEmptyString() => Assert.Throws<ArgumentNullException>(() => new Error(""));
   }
 }
