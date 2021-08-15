@@ -87,39 +87,7 @@ namespace SchemaForge.Crucible
       }
     }
 
-    /// <summary>
-    /// Gets JObject representation of the type and all other constraints.
-    /// </summary>
-    /// <typeparam name="TValueType">Type of all constraints.</typeparam>
-    /// <param name="constraints">Array of constraints that have been applied by <see cref="ApplyConstraints{TValueType}"/>.</param>
-    /// <returns>JObject representation of the constraints applied to the token.</returns>
-    private static JObject GetConstraintObject<TValueType>(Constraint<TValueType>[] constraints)
-    {
-      JObject constraintObject = new();
-      try
-      {
-        if(typeof(TValueType).ToString().Contains("Nullable"))
-        {
-          constraintObject.Add("Type", ShippingAndReceiving.TypeMap(typeof(TValueType).GenericTypeArguments[0].Name));
-        }
-        else
-        {
-          constraintObject.Add("Type", ShippingAndReceiving.TypeMap(typeof(TValueType).Name));
-        }
-      }
-      catch
-      {
-        throw new ArgumentException($"Attempted to pass unsupported type {typeof(TValueType).Name}\nSupported types: {ShippingAndReceiving.GetSupportedTypes().Join(", ")}\nIf needed, use AddSupportedType to add a new type to the recognized types. This will enable SchemaForge to recognize this token type for your project.");
-      }
-      if (constraints.Exists())
-      {
-        foreach (Constraint<TValueType> constraint in constraints)
-        {
-          constraintObject.Add(constraint.Property);
-        }
-      }
-      return constraintObject;
-    }
+    
 
     /*
 

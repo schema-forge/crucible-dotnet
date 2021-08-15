@@ -11,7 +11,6 @@ namespace SchemaForge.Crucible
 {
   public interface ISchemaTranslator<TCollectionType, TValueType>
   {
-    public List<Error> ApplyConstraints(TCollectionType collection, string valueName, ConfigToken configToken);
     public (bool,TCastType) TryCastToken<TCastType>(TCollectionType collection, string valueName);
     public bool TokenIsNullOrEmpty(TCollectionType collection, string valueName);
     public TCollectionType InsertToken(TCollectionType collection, string valueName, string newValue);
@@ -39,12 +38,6 @@ namespace SchemaForge.Crucible
     {
       collection.Add(valueName, newValue);
       return collection;
-    }
-    public List<Error> ApplyConstraints(JObject collection, string valueName, ConfigToken configToken)
-    {
-      List<Error> errors = new();
-
-      return errors;
     }
     public bool CollectionContains(JObject collection, string valueName) => collection.ContainsKey(valueName);
     public List<string> GetCollectionKeys(JObject collection) => collection.Properties().Select(x => x.Name).ToList();
