@@ -29,6 +29,12 @@ namespace SchemaForge.Crucible
     public bool Required { get; protected set; }
 
     /// <summary>
+    /// Converts a ConfigToken into a JProperty of format "<see cref="TokenName"/>":{ "Constraints":<see cref="JsonConstraint"/>, "Description":"<see cref="HelpString"/>" }
+    /// </summary>
+    /// <returns>JProperty of format "<see cref="TokenName"/>":{ "Constraints":<see cref="JsonConstraint"/>, "Description":"<see cref="HelpString"/>"</returns>
+    public JProperty ToJProperty() => new(TokenName, new JObject() { { "Constraints", JsonConstraint.Count > 1 ? JsonConstraint : JsonConstraint[0] }, { "Description", HelpString } });
+
+    /// <summary>
     /// Extracts a token from the given <paramref name="collection"/> using the 
     /// <see cref="ISchemaTranslator{TCollectionType, TValueType}.TryCastToken{TCastType}(TCollectionType, string)"/>
     /// method, with <see cref="TokenName"/> as the passed string. All non-abstract
@@ -55,6 +61,7 @@ namespace SchemaForge.Crucible
     }
 
     public abstract void InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator);
+
     #region Overrides
 
     public override string ToString() => TokenName;
