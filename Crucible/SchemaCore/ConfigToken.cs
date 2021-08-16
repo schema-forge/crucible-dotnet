@@ -156,19 +156,28 @@ namespace SchemaForge.Crucible
       AllowNull = allowNull;
     }
 
+    /// <summary>
+    /// Takes the castResult from a call to an ISchemaTranslator's
+    /// TryCastValue function, then applies constraints if the cast
+    /// succeeded or returns false if it did not.
+    /// </summary>
+    /// <typeparam name="TValueType">Type that the collection member was cast to.</typeparam>
+    /// <param name="castResult">Tuple that indicates whether the cast succeeded and contains the cast result.</param>
+    /// <param name="constraints">Constraints to apply if cast succeeded.</param>
+    /// <returns>Bool indicating if cast succeeded; ErrorList updates based on constraint results.</returns>
     protected bool InternalValidate<TValueType>((bool, TValueType) castResult, List<Constraint<TValueType>> constraints)
     {
-      if (!castResult.Item1)
-      {
-        return false;
-      }
-      else
+      if (castResult.Item1)
       {
         foreach (Constraint<TValueType> constraint in constraints)
         {
           ErrorList.AddRange(constraint.Function(castResult.Item2, TokenName));
         }
         return true;
+      }
+      else
+      {
+        return false;
       }
     }
 
@@ -193,7 +202,7 @@ namespace SchemaForge.Crucible
     #region Constructors
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
+    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
@@ -213,7 +222,7 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
+    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
@@ -242,7 +251,7 @@ namespace SchemaForge.Crucible
     #endregion
 
     /// <summary>
-    /// Executes the ConfigToken's ValidationFunction on the passed JToken.
+    /// Executes the ConfigToken's ValidationFunction on the passed collection item.
     /// </summary>
     /// <param name="tokenValue">Token value to validate.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
@@ -278,7 +287,7 @@ namespace SchemaForge.Crucible
     #region Constructors
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
+    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
@@ -299,7 +308,7 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
+    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
@@ -331,7 +340,7 @@ namespace SchemaForge.Crucible
     #endregion
 
     /// <summary>
-    /// Executes the ConfigToken's ValidationFunction on the passed JToken.
+    /// Executes the ConfigToken's ValidationFunction on the passed collection item.
     /// </summary>
     /// <param name="tokenValue">Token value to validate.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
@@ -370,7 +379,7 @@ namespace SchemaForge.Crucible
     #region Constructors
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
+    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
@@ -392,7 +401,7 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input JObject to a Schema object.
+    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
@@ -427,7 +436,7 @@ namespace SchemaForge.Crucible
     #endregion
 
     /// <summary>
-    /// Executes the ConfigToken's ValidationFunction on the passed JToken.
+    /// Executes the ConfigToken's ValidationFunction on the passed collection item.
     /// </summary>
     /// <param name="tokenValue">Token value to validate.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
