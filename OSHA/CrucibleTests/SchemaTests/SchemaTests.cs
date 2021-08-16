@@ -141,7 +141,7 @@ namespace SchemaTests
       TestSchema.AddTokens(new HashSet<ConfigToken>()
         {
           new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
+          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer."),
           new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
         });
 
