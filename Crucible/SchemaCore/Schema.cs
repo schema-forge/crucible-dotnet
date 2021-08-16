@@ -87,16 +87,20 @@ namespace SchemaForge.Crucible
           {
             if (message.IsNullOrEmpty())
             {
-              ErrorList.Add(new Error($"Input json is missing required token {token.TokenName}\n{token.HelpString}"));
+              ErrorList.Add(new Error($"Input collection is missing required token {token.TokenName}\n{token.HelpString}"));
             }
             else
             {
               ErrorList.Add(new Error($"Input {type} {name} is missing required token {token.TokenName}\n{token.HelpString}"));
             }
           }
-          else if(!token.ContainsDefaultValue)
+          else if(token.ContainsDefaultValue)
           {
             token.InsertDefaultValue(collection, translator); // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
+          }
+          else
+          {
+            ErrorList.Add(new Error($"Input collection is missing optional token {token.TokenName}",Severity.Info));
           }
         }
         else if (!token.Validate(collection,translator))
