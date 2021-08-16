@@ -36,7 +36,7 @@ namespace SchemaForge.Crucible
 
     public Schema()
     {
-
+      
     }
 
     public Schema(IEnumerable<ConfigToken> tokens)
