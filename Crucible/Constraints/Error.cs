@@ -12,7 +12,6 @@ namespace SchemaForge.Crucible
   {
     Warning,
     Fatal,
-    Null,
     Info,
     Trace
   }

@@ -71,7 +71,7 @@ namespace SchemaForge.Crucible
     {
       if (translator.TokenIsNullOrEmpty(collection, TokenName))
       {
-        ErrorList.Add(new Error($"Value of token {TokenName} is null or empty.", Severity.Null));
+        ErrorList.Add(new Error($"Value of token {TokenName} is null or empty.", AllowNull?Severity.Warning:Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
@@ -251,14 +251,7 @@ namespace SchemaForge.Crucible
       base.Validate(collection, translator);
       if (!InternalValidate(translator.TryCastToken<Type1>(collection, TokenName), ConstraintsIfType1))
       {
-        if (AllowNull)
-        {
-          ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}", Severity.Warning));
-        }
-        else
-        {
-          ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}", Severity.Fatal));
-        }
+        ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}", Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
@@ -348,14 +341,7 @@ namespace SchemaForge.Crucible
       if (!InternalValidate(translator.TryCastToken<Type1>(collection, TokenName), ConstraintsIfType1)
         && !InternalValidate(translator.TryCastToken<Type2>(collection, TokenName), ConstraintsIfType2))
       {
-        if (AllowNull)
-        {
-          ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}", Severity.Warning));
-        }
-        else
-        {
-          ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}", Severity.Fatal));
-        }
+        ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}", Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
@@ -452,19 +438,10 @@ namespace SchemaForge.Crucible
         && !InternalValidate(translator.TryCastToken<Type2>(collection, TokenName), ConstraintsIfType2)
         && !InternalValidate(translator.TryCastToken<Type3>(collection, TokenName), ConstraintsIfType3))
       {
-        if (AllowNull)
-        {
-          ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}, {typeof(Type3).Name}", Severity.Warning));
-        }
-        else
-        {
-          ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}, {typeof(Type3).Name}", Severity.Fatal));
-        }
+        ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}, {typeof(Type3).Name}", Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
     public override TCollectionType InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
-
-
 }
