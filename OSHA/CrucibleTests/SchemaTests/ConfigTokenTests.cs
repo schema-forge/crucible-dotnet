@@ -47,7 +47,7 @@ namespace SchemaTests
     [Fact]
     public void ToJPropertyWithConstraintTest()
     {
-      ConfigToken<string> token = new("TestToken", "Ceci n'est pas une description", AllowValues("Russia", "United States", "Georgia", "Chad"));
+      ConfigToken<string> token = new("TestToken", "Ceci n'est pas une description", new Constraint<string>[] { AllowValues("Russia", "United States", "Georgia", "Chad") });
       JProperty expected = new("TestToken", new JObject() { { "Constraints", new JObject() { { "Type", "String" }, { "AllowValues", new JArray() { "Russia", "United States", "Georgia", "Chad" } } } }, { "Description", "Ceci n'est pas une description" } });
       Assert.Equal(expected, token.ToJProperty());
     }

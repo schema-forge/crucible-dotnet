@@ -41,19 +41,19 @@ namespace ConstraintTests
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken<JArray>("TestArray", "Eat the ice cream.", ConstrainCollectionCount<JArray>(constraints[0]));
+        testToken = new ConfigToken<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(constraints[0]) });
         testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken<JArray>("TestToken", "I don't want any more.", ConstrainCollectionCount<JArray>(constraints[0], constraints[1])));
+          Assert.Throws<ArgumentException>(() => new ConfigToken<JArray>("TestToken", "I don't want any more.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(constraints[0], constraints[1]) }));
           return;
         }
         else
         {
-          testToken = new ConfigToken<JArray>("TestArray", "Humans require ice cream.", ConstrainCollectionCount<JArray>(constraints[0], constraints[1]));
+          testToken = new ConfigToken<JArray>("TestArray", "Humans require ice cream.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(constraints[0], constraints[1]) });
           testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
         }
       }
@@ -75,7 +75,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "Where's David?", ApplyConstraintsToJArray<int>());
+      testToken = new ConfigToken<JArray>("TestArray", "Where's David?", new Constraint<JArray>[] { ApplyConstraintsToJArray<int>() });
       testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
@@ -96,7 +96,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "Everyone you love is gone.", ApplyConstraintsToJArray(ConstrainValue(5)));
+      testToken = new ConfigToken<JArray>("TestArray", "Everyone you love is gone.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainValue(5)) });
       testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine($"Input array: {string.Join(",", JObject.Parse(constrainedJson)["TestArray"])}");
       output.WriteLine(string.Join('\n', testToken.ErrorList));
@@ -117,7 +117,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "There is only ice cream.", ApplyConstraintsToJArray(ConstrainStringLength(15), ForbidStringCharacters('/', '?', '!')));
+      testToken = new ConfigToken<JArray>("TestArray", "There is only ice cream.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainStringLength(15), ForbidStringCharacters('/', '?', '!')) });
       testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine($"Input array: {string.Join(",", JObject.Parse(constrainedJson)["TestArray"])}");
       output.WriteLine(string.Join('\n', testToken.ErrorList));

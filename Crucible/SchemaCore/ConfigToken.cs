@@ -169,9 +169,12 @@ namespace SchemaForge.Crucible
     {
       if (castResult.Item1)
       {
-        foreach (Constraint<TValueType> constraint in constraints)
+        if(constraints.Exists())
         {
-          ErrorList.AddRange(constraint.Function(castResult.Item2, TokenName));
+          foreach (Constraint<TValueType> constraint in constraints)
+          {
+            ErrorList.AddRange(constraint.Function(castResult.Item2, TokenName));
+          }
         }
         return true;
       }
@@ -245,7 +248,7 @@ namespace SchemaForge.Crucible
     protected void BuildConstraints(Constraint<Type1>[] constraintsIfType1 = null)
     {
       JsonConstraint.Add(GetConstraintObject(constraintsIfType1));
-      ConstraintsIfType1 = constraintsIfType1.ToList();
+      ConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.ToList() : new List<Constraint<Type1>>();
     }
 
     #endregion
@@ -333,8 +336,8 @@ namespace SchemaForge.Crucible
     {
       JsonConstraint.Add(GetConstraintObject(constraintsIfType1));
       JsonConstraint.Add(GetConstraintObject(constraintsIfType2));
-      ConstraintsIfType1 = constraintsIfType1.ToList();
-      ConstraintsIfType2 = constraintsIfType2.ToList();
+      ConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.ToList() : new List<Constraint<Type1>>();
+      ConstraintsIfType2 = constraintsIfType2.Exists() ? constraintsIfType2.ToList() : new List<Constraint<Type2>>();
     }
 
     #endregion
@@ -428,9 +431,9 @@ namespace SchemaForge.Crucible
       JsonConstraint.Add(GetConstraintObject(constraintsIfType1));
       JsonConstraint.Add(GetConstraintObject(constraintsIfType2));
       JsonConstraint.Add(GetConstraintObject(constraintsIfType3));
-      ConstraintsIfType1 = constraintsIfType1.ToList();
-      ConstraintsIfType2 = constraintsIfType2.ToList();
-      ConstraintsIfType3 = constraintsIfType3.ToList();
+      ConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.ToList() : new List<Constraint<Type1>>();
+      ConstraintsIfType2 = constraintsIfType2.Exists() ? constraintsIfType2.ToList() : new List<Constraint<Type2>>();
+      ConstraintsIfType3 = constraintsIfType3.Exists() ? constraintsIfType3.ToList() : new List<Constraint<Type3>>();
     }
 
     #endregion

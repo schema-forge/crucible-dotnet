@@ -32,34 +32,24 @@ namespace SchemaForge.Crucible.Extensions
     public static string Join<T>(this IEnumerable<T> enumerable, string separator) => string.Join(separator, enumerable);
 
     /// <summary>
-    /// Checks to see if any error in the calling error collection has severity Fatal or NullOrEmpty unless NullOrEmpty is explicitly allowed.
+    /// Checks to see if any error in the calling error collection has severity Fatal.
     /// </summary>
     /// <param name="errorCollection">Error collection to search.</param>
-    /// <param name="nullOrEmptyIsFatal">If true, NullOrEmpty is a fatal error.</param>
     /// <returns>Bool indicating if the error collection contains a fatal error.</returns>
-    public static bool AnyFatal(this IEnumerable<Error> errorCollection, bool nullOrEmptyIsFatal = true)
+    public static bool AnyFatal(this IEnumerable<Error> errorCollection)
     {
       List<Severity> fatalTypes = new() { Severity.Fatal };
-      if(nullOrEmptyIsFatal)
-      {
-        fatalTypes.Add(Severity.Null);
-      }
       return errorCollection.Any(x => fatalTypes.Contains(x.ErrorSeverity));
     }
 
     /// <summary>
-    /// Checks to see if any error in the calling error collection has severity Fatal or NullOrEmpty unless NullOrEmpty is explicitly allowed.
+    /// Checks to see if any error in the calling error collection has severity Fatal.
     /// </summary>
     /// <param name="errorCollection">Error collection to search.</param>
-    /// <param name="nullOrEmptyIsFatal">If true, NullOrEmpty is a fatal error.</param>
     /// <returns>Bool indicating if the error collection contains a fatal error.</returns>
-    public static bool AnyFatal(this IList<Error> errorCollection, bool nullOrEmptyIsFatal = true)
+    public static bool AnyFatal(this IList<Error> errorCollection)
     {
       List<Severity> fatalTypes = new() { Severity.Fatal };
-      if (nullOrEmptyIsFatal)
-      {
-        fatalTypes.Add(Severity.Null);
-      }
       for(int i=errorCollection.Count; i-- > 0;)
       {
         if(fatalTypes.Contains(errorCollection[i].ErrorSeverity))

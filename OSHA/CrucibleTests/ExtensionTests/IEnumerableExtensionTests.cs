@@ -77,31 +77,10 @@ namespace Extensions
     }
 
     [Fact]
-    public void AnyFatal_IEnumerable_IgnoresNullOrEmpty()
-    {
-      HashSet<Error> errorSet = new() { new Error("Lenore", Severity.Null) };
-      Assert.False(errorSet.AnyFatal(false));
-    }
-
-    [Fact]
-    public void AnyFatal_IList_ReturnsTrue()
-    {
-      Error[] errorList = { new Error("Saruman"), new Error("Tom Bombadil",Severity.Null) };
-      Assert.True(errorList.AnyFatal());
-    }
-
-    [Fact]
     public void AnyFatal_IList_ReturnsFalse()
     {
       Error[] errorList = { new Error("Boromir", Severity.Warning) };
       Assert.False(errorList.AnyFatal());
-    }
-
-    [Fact]
-    public void AnyFatal_IList_IgnoresNullOrEmpty()
-    {
-      Error[] errorList = { new Error("Lenore", Severity.Null) };
-      Assert.False(errorList.AnyFatal(false));
     }
   }
 }

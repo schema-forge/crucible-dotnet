@@ -55,13 +55,13 @@ namespace ConstraintTests
     /// Executes two constraints on a string that will pass both constarints.
     /// </summary>
     [Fact]
-    public void ApplyConstraintsValid() => Assert.True(new ConfigToken<string>("TestToken", "I'm sorry. I'm so sorry.", ConstrainStringLength(5), ForbidStringCharacters(',', '\n')).Validate(new JValue("Valid string!"), new JTokenTranslator()));
+    public void ApplyConstraintsValid() => Assert.True(new ConfigToken<string>("TestToken", "I'm sorry. I'm so sorry.", new Constraint<string>[] { ConstrainStringLength(5), ForbidStringCharacters(',', '\n') }).Validate(new JValue("Valid string!"), new JTokenTranslator()));
 
     /// <summary>
     /// Executes two constraints on a string that fails both conditions.
     /// </summary>
     [Fact]
-    public void ApplyConstraintsInvalid() => Assert.False(new ConfigToken<string>("TestToken", "Bow ties are cool.", ConstrainStringLength(5), ForbidStringCharacters('.', '\n')).Validate(new JValue("yup."), new JTokenTranslator()));
+    public void ApplyConstraintsInvalid() => Assert.False(new ConfigToken<string>("TestToken", "Bow ties are cool.", new Constraint<string>[] { ConstrainStringLength(5), ForbidStringCharacters('.', '\n') }).Validate(new JValue("yup."), new JTokenTranslator()));
     
     /// <summary>
     /// Tests applying constraints to a token that can be one of two types.
@@ -107,6 +107,6 @@ namespace ConstraintTests
     /// Ensures that ApplyConstraints throws ArgumentException if duplicate constraints are passed.
     /// </summary>
     [Fact]
-    public void ApplyConstraintsThrowsWithDuplicateConstraints() => Assert.Throws<ArgumentException>(() => new ConfigToken<string>("TestToken", "Don't Blink", AllowValues("Please", "just"), AllowValues("put", "us", "in", "one", "constraint")));
+    public void ApplyConstraintsThrowsWithDuplicateConstraints() => Assert.Throws<ArgumentException>(() => new ConfigToken<string>("TestToken", "Don't Blink", new Constraint<string>[] { AllowValues("Please", "just"), AllowValues("put", "us", "in", "one", "constraint") }));
   }
 }

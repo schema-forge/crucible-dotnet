@@ -84,7 +84,7 @@ namespace SchemaForge.Crucible
     public virtual List<Error> Validate<TCollectionType,TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType,TValueType> translator, string name = null, string type = null, bool allowUnrecognized = false)
     {
       string message = " ";
-      // This option is included in case a sub-JObject of another configuration is being validated; this allows the ErrorList to indicate the exact configuration that has the issue.
+      // This option is included in case a sub-configuration is being validated; this allows the ErrorList to indicate the exact configuration that has the issue.
       // Name is usually the token name of the sub-configuration.
       if (!(string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(type)))
       {

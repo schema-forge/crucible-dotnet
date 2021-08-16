@@ -40,19 +40,19 @@ namespace ConstraintTests
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken<int>("TestToken", "Angry String", ConstrainValue(constraints[0]));
+        testToken = new ConfigToken<int>("TestToken", "Angry String", new Constraint<int>[] { ConstrainValue(constraints[0]) });
         testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken<int>("TestToken", "Relaxed String", ConstrainValue(constraints[0], constraints[1])));
+          Assert.Throws<ArgumentException>(() => new ConfigToken<int>("TestToken", "Relaxed String", new Constraint<int>[] { ConstrainValue(constraints[0], constraints[1]) }));
           return;
         }
         else
         {
-          testToken = new ConfigToken<int>("TestToken", "Nervous String", ConstrainValue(constraints[0], constraints[1]));
+          testToken = new ConfigToken<int>("TestToken", "Nervous String", new Constraint<int>[] { ConstrainValue(constraints[0], constraints[1]) });
           testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
         }
       }
@@ -79,19 +79,19 @@ namespace ConstraintTests
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken<double>("TestToken", "Deja Vu", ConstrainValue(constraints[0]));
+        testToken = new ConfigToken<double>("TestToken", "Deja Vu", new Constraint<double>[] { ConstrainValue(constraints[0]) });
         testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken<double>("TestToken", "I think", ConstrainValue(constraints[0], constraints[1])));
+          Assert.Throws<ArgumentException>(() => new ConfigToken<double>("TestToken", "I think", new Constraint<double>[] { ConstrainValue(constraints[0], constraints[1]) }));
           return;
         }
         else
         {
-          testToken = new ConfigToken<double>("TestToken", "we've done this before", ConstrainValue(constraints[0], constraints[1]));
+          testToken = new ConfigToken<double>("TestToken", "we've done this before", new Constraint<double>[] { ConstrainValue(constraints[0], constraints[1]) });
           testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
         }
       }
@@ -111,7 +111,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken<int>("TestToken", "Deja Vu", ConstrainValue(domains));
+      testToken = new ConfigToken<int>("TestToken", "Deja Vu", new Constraint<int>[] { ConstrainValue(domains) });
       testResult = testToken.Validate(new JValue(constrainedValue),new JTokenTranslator());
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
@@ -144,7 +144,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken<double>("TestToken", "Deja Vu", ConstrainValue(domains));
+      testToken = new ConfigToken<double>("TestToken", "Deja Vu", new Constraint<double>[] { ConstrainValue(domains) });
       testResult = testToken.Validate(new JValue(constrainedValue),new JTokenTranslator());
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
@@ -168,10 +168,7 @@ namespace ConstraintTests
     /// Ensures that passing a domain with a higher upper bound than a lower bound will throw an exception. Invalid inputs will be punished.
     /// </summary>
     [Fact]
-    public void ConstrainNumericDomain_InvalidBounds()
-    {
-      Assert.Throws<ArgumentException>(() => new ConfigToken<int>("TestToken", "Doomed Token", ConstrainValue((15, 13))));
-    }
+    public void ConstrainNumericDomain_InvalidBounds() => Assert.Throws<ArgumentException>(() => new ConfigToken<int>("TestToken", "Doomed Token", new Constraint<int>[] { ConstrainValue((15, 13)) }));
 
     /// <summary>
     /// Ensures that the JProperty passed back from the constraint function with lower bound is as expected.
