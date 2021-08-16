@@ -66,11 +66,22 @@ namespace SchemaForge.Crucible
     public int Count() => ConfigTokens.Count;
 
     /// <summary>
-    /// Checks config against the ConfigToken HashSets required and optional.
-    /// If name and type are provided, the message "Validation for [type] [name] failed." will be added to ErrorList on validation failure.
+    /// Checks config against the ConfigToken HashSet.
+    /// If name and type are provided, the message
+    /// "Validation for <paramref name="type"/> <paramref name="name"/> failed."
+    /// will be added to ErrorList on validation failure.
     /// </summary>
     /// <param name="config">Config object to check using the ConfigToken rules set in ConfigTokens.</param>
-    public virtual List<Error> Validate<TCollectionType,TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType,TValueType> translator, string name = null, string type = null)
+    /// <param name="name">If name and type are provided, the message 
+    /// "Validation for <paramref name="type"/> <paramref name="name"/> failed."
+    /// will be added to ErrorList on validation failure.</param>
+    /// <param name="type">If name and type are provided, the message 
+    /// "Validation for <paramref name="type"/> <paramref name="name"/> failed."
+    /// will be added to ErrorList on validation failure.</param>
+    /// <param name="allowUnrecognized">If false, unrecognized tokens will raise
+    /// a <see cref="Severity.Fatal"/> error. If true, unrecognized tokens will
+    /// raise a <see cref="Severity.Info"/> error.</param>
+    public virtual List<Error> Validate<TCollectionType,TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType,TValueType> translator, string name = null, string type = null, bool allowUnrecognized = false)
     {
       string message = " ";
       // This option is included in case a sub-JObject of another configuration is being validated; this allows the ErrorList to indicate the exact configuration that has the issue.
@@ -128,11 +139,11 @@ namespace SchemaForge.Crucible
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add(new Error($"Input json file contains unrecognized token: {key}"));
+            ErrorList.Add(new Error($"Input json file contains unrecognized token: {key}",allowUnrecognized?Severity.Info:Severity.Fatal));
           }
           else
           {
-            ErrorList.Add(new Error($"Input {type} {name} contains unrecognized token: {key}"));
+            ErrorList.Add(new Error($"Input {type} {name} contains unrecognized token: {key}", allowUnrecognized?Severity.Info:Severity.Fatal));
           }
         }
       }
