@@ -175,15 +175,15 @@ namespace SchemaForge.Crucible
     /// <typeparam name="T">Type to align with a string key.</typeparam>
     /// <param name="constraints">Irrelevant. Populated only when deserializing a Json file to a Schema.</param>
     /// <returns>ConstraintContainer containing constraints of that particular type.</returns>
-    //public static ConstraintContainer GetConstraintsForType<T>(Constraint[] constraints)
-    //{
-    //  List<Constraint<T>> constraintList = new();
-    //  foreach(Constraint constraint in constraints)
-    //  {
-    //    constraintList.Add(new Constraint<T>((Func<T, string, List<Error>>)constraint.GetFunction(), constraint.Property));
-    //  }
-    //  return ApplyConstraints<T>(constraintList.ToArray());
-    //}
+    public static Constraint<T>[] GetConstraintsForType<T>(Constraint[] constraints)
+    {
+      List<Constraint<T>> constraintList = new();
+      foreach (Constraint constraint in constraints)
+      {
+        constraintList.Add(new Constraint<T>((Func<T, string, List<Error>>)constraint.GetFunction(), constraint.Property));
+      }
+      return constraintList.ToArray();
+    }
 
     /// <summary>
     /// Adds a new supported type for serializing and deserializing.

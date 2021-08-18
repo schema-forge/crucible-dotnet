@@ -96,25 +96,4 @@ namespace SchemaForge.Crucible
     public List<string> GetCollectionKeys(JObject collection) => collection.Properties().Select(x => x.Name).ToList();
     public string CollectionValueToString(JObject collection, string valueName) => collection[valueName].ToString();
   }
-  public class JTokenTranslator : ISchemaTranslator<JToken, JToken>
-  {
-    public (bool, TCastType) TryCastToken<TCastType>(JToken collection, string valueName)
-    {
-      try
-      {
-        JToken token = collection;
-        TCastType result = token.Value<TCastType>();
-        return (true, result);
-      }
-      catch
-      {
-        return (false, default);
-      }
-    }
-    public bool TokenIsNullOrEmpty(JToken collection, string valueName) => collection.IsNullOrEmpty();
-    public JToken InsertToken<TDefaultValueType>(JToken collection, string valueName, TDefaultValueType newValue) => throw new NotImplementedException("Cannot insert a value into a JToken. Use JObjectTranslator instead.");
-    public bool CollectionContains(JToken collection, string valueName) => collection.Contains(valueName);
-    public string CollectionValueToString(JToken collection, string valueName) => collection.ToString();
-    public List<string> GetCollectionKeys(JToken collection) => throw new NotImplementedException("A JToken does not always have keys.");
-  }
 }

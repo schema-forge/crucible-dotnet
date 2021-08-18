@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using static SchemaForge.Crucible.Constraints;
+using OSHA.TestUtilities;
 
 namespace ConstraintTests
 {
