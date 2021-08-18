@@ -39,6 +39,11 @@ namespace SchemaForge.Crucible
       
     }
 
+    public Schema(params ConfigToken[] tokens)
+    {
+      AddTokens(tokens);
+    }
+
     public Schema(IEnumerable<ConfigToken> tokens)
     {
       AddTokens(tokens);
