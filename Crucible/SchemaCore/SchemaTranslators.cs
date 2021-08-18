@@ -10,7 +10,13 @@ using static SchemaForge.Crucible.Constraints;
 
 namespace SchemaForge.Crucible
 {
-  public interface ISchemaTranslator<TCollectionType, TValueType>
+  /// <summary>
+  /// An <see cref="ISchemaTranslator{TCollectionType, TValueType}"/>
+  /// interprets a <typeparamref name="TCollectionType"/>
+  /// for a <see cref="Schema"/> so that it can be validated.
+  /// </summary>
+  /// <typeparam name="TCollectionType"></typeparam>
+  public interface ISchemaTranslator<TCollectionType>
   {
     /// <summary>
     /// Extracts a value from <paramref name="collection"/> with the designation
@@ -22,7 +28,7 @@ namespace SchemaForge.Crucible
     /// <returns>(bool, <typeparamref name="TCastType"/>) where bool indicates
     /// success of the cast and <typeparamref name="TCastType"/> is the cast
     /// value if successful, default otherwise.</returns>
-    public (bool, TCastType) TryCastToken<TCastType>(TCollectionType collection, string valueName);
+    public bool TryCastToken<TCastType>(TCollectionType collection, string valueName, out TCastType outputValue);
 
     /// <summary>
     /// Extracts a value from <paramref name="collection"/> with the designation
@@ -37,8 +43,6 @@ namespace SchemaForge.Crucible
     /// Inserts <paramref name="newValue"/> into <paramref name="collection"/>
     /// with string designation <paramref name="valueName"/> and returns a
     /// new <typeparamref name="TCollectionType"/> with the value inserted.
-    /// <paramref name="newValue"/> should be interpreted and cast to
-    /// <typeparamref name="TValueType"/>.
     /// </summary>
     /// <typeparam name="TDefaultValueType">Type of the value to be inserted.</typeparam>
     /// <param name="collection">The collection from which to extract the value.</param>
@@ -71,19 +75,20 @@ namespace SchemaForge.Crucible
     /// <returns>List{string} containing all collection keys.</returns>
     public List<string> GetCollectionKeys(TCollectionType collection);
   }
-  public class JObjectTranslator : ISchemaTranslator<JObject, JToken>
+  public class JObjectTranslator : ISchemaTranslator<JObject>
   {
-    public (bool, TCastType) TryCastToken<TCastType>(JObject collection, string valueName)
+    public bool TryCastToken<TCastType>(JObject collection, string valueName, out TCastType outputValue)
     {
       try
       {
         JToken token = collection[valueName];
-        TCastType result = token.Value<TCastType>();
-        return (true, result);
+        outputValue = token.Value<TCastType>();
+        return true;
       }
       catch
       {
-        return (false, default);
+        outputValue = default;
+        return false;
       }
     }
     public bool TokenIsNullOrEmpty(JObject collection, string valueName) => collection[valueName].IsNullOrEmpty();

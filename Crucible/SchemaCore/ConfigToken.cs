@@ -67,7 +67,7 @@ namespace SchemaForge.Crucible
     /// the specified collection.</param>
     /// <returns>Bool indicating whether or not any fatal errors were
     /// raised by the constraint functions.</returns>
-    public virtual bool Validate<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
+    public virtual bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
       if (translator.TokenIsNullOrEmpty(collection, TokenName))
       {
@@ -76,7 +76,7 @@ namespace SchemaForge.Crucible
       return !ErrorList.AnyFatal();
     }
 
-    public abstract TCollectionType InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator);
+    public abstract TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator);
 
     #region Overrides
 
@@ -146,10 +146,6 @@ namespace SchemaForge.Crucible
       {
         throw new ArgumentNullException(nameof(inputName));
       }
-      if (inputHelpString.IsNullOrEmpty())
-      {
-        throw new ArgumentNullException(nameof(inputHelpString));
-      }
       Required = required;
       TokenName = inputName;
       Description = inputHelpString;
@@ -165,22 +161,14 @@ namespace SchemaForge.Crucible
     /// <param name="castResult">Tuple that indicates whether the cast succeeded and contains the cast result.</param>
     /// <param name="constraints">Constraints to apply if cast succeeded.</param>
     /// <returns>Bool indicating if cast succeeded; ErrorList updates based on constraint results.</returns>
-    protected bool InternalValidate<TValueType>((bool, TValueType) castResult, List<Constraint<TValueType>> constraints)
+    protected void InternalValidate<TValueType>(TValueType castResult, List<Constraint<TValueType>> constraints)
     {
-      if (castResult.Item1)
+      if(constraints.Exists())
       {
-        if(constraints.Exists())
+        foreach (Constraint<TValueType> constraint in constraints)
         {
-          foreach (Constraint<TValueType> constraint in constraints)
-          {
-            ErrorList.AddRange(constraint.Function(castResult.Item2, TokenName));
-          }
+          ErrorList.AddRange(constraint.Function(castResult, TokenName));
         }
-        return true;
-      }
-      else
-      {
-        return false;
       }
     }
 
@@ -210,17 +198,17 @@ namespace SchemaForge.Crucible
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If inputName is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
-    /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
+    /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="required">If true, not detecting this token when applying a Schema is a <see cref="Severity.Fatal"/>
     /// If false, not detecting this token when applying a schema raises no error.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
-    public ConfigToken(string inputName, string inputHelpString, Constraint<Type1>[] constraintsIfType1 = null, bool required = true, bool allowNull = false)
+    public ConfigToken(string inputName, string inputDescription, Constraint<Type1>[] constraintsIfType1 = null, bool required = true, bool allowNull = false)
     {
-      BuildConfigTokenCore(inputName, inputHelpString, required, allowNull);
+      BuildConfigTokenCore(inputName, inputDescription, required, allowNull);
       BuildConstraints(constraintsIfType1);
     }
 
@@ -230,17 +218,17 @@ namespace SchemaForge.Crucible
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If inputName or inputDescription is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
-    /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
+    /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="inputDefaultValue"><typeparamref name="Type1"/> that will be inserted into the user config if an optional token is not provided.
     /// If provided, assumes this token is not required.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
-    public ConfigToken(string inputName, string inputHelpString, Type1 inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, bool allowNull = false)
+    public ConfigToken(string inputName, string inputDescription, Type1 inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, bool allowNull = false)
     {
-      BuildConfigTokenCore(inputName, inputHelpString, false, allowNull);
+      BuildConfigTokenCore(inputName, inputDescription, false, allowNull);
       DefaultValue = inputDefaultValue;
       BuildConstraints(constraintsIfType1);
     }
@@ -258,16 +246,20 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="tokenValue">Token value to validate.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
-    public override bool Validate<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
+    public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
       base.Validate(collection, translator);
-      if (!InternalValidate(translator.TryCastToken<Type1>(collection, TokenName), ConstraintsIfType1))
+      if (translator.TryCastToken(collection, TokenName, out Type1 newValue1))
+      {
+        InternalValidate(newValue1, ConstraintsIfType1);
+      }
+      else
       {
         ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}", Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
-    public override TCollectionType InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
+    public override TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
 
   /// <summary>
@@ -295,18 +287,18 @@ namespace SchemaForge.Crucible
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If inputName is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
-    /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
+    /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
     /// <param name="required">If true, not detecting this token when applying a Schema is a <see cref="Severity.Fatal"/>
     /// If false, not detecting this token when applying a schema raises no error.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
-    public ConfigToken(string inputName, string inputHelpString, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, bool required = true, bool allowNull = false)
+    public ConfigToken(string inputName, string inputDescription, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, bool required = true, bool allowNull = false)
     {
-      BuildConfigTokenCore(inputName, inputHelpString, required, allowNull);
+      BuildConfigTokenCore(inputName, inputDescription, required, allowNull);
       BuildConstraints(constraintsIfType1, constraintsIfType2);
     }
 
@@ -316,18 +308,18 @@ namespace SchemaForge.Crucible
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If inputName or inputDescription is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
-    /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
+    /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="inputDefaultValue"><typeparamref name="Type1"/> that will be inserted into the user config if an optional token is not provided.
     /// If provided, assumes this token is not required.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
-    public ConfigToken(string inputName, string inputHelpString, Type1 inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, bool allowNull = false)
+    public ConfigToken(string inputName, string inputDescription, Type1 inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, bool allowNull = false)
     {
-      BuildConfigTokenCore(inputName, inputHelpString, false, allowNull);
+      BuildConfigTokenCore(inputName, inputDescription, false, allowNull);
       DefaultValue = inputDefaultValue;
       BuildConstraints(constraintsIfType1, constraintsIfType2);
     }
@@ -347,17 +339,24 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="tokenValue">Token value to validate.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
-    public override bool Validate<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
+    public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
       base.Validate(collection, translator);
-      if (!InternalValidate(translator.TryCastToken<Type1>(collection, TokenName), ConstraintsIfType1)
-        && !InternalValidate(translator.TryCastToken<Type2>(collection, TokenName), ConstraintsIfType2))
+      if (translator.TryCastToken(collection, TokenName, out Type1 newValue1))
+      {
+        InternalValidate(newValue1, ConstraintsIfType1);
+      }
+      else if (translator.TryCastToken(collection, TokenName, out Type2 newValue2))
+      {
+        InternalValidate(newValue2, ConstraintsIfType2);
+      }
+      else
       {
         ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}", Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
-    public override TCollectionType InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
+    public override TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
 
   /// <summary>
@@ -387,9 +386,9 @@ namespace SchemaForge.Crucible
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If inputName is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
-    /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
+    /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
     /// <param name="constraintsIfType3">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type3"/>.</param>
@@ -397,9 +396,9 @@ namespace SchemaForge.Crucible
     /// If false, not detecting this token when applying a schema raises no error.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
-    public ConfigToken(string inputName, string inputHelpString, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, Constraint<Type3>[] constraintsIfType3 = null, bool required = true, bool allowNull = false)
+    public ConfigToken(string inputName, string inputDescription, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, Constraint<Type3>[] constraintsIfType3 = null, bool required = true, bool allowNull = false)
     {
-      BuildConfigTokenCore(inputName, inputHelpString, required, allowNull);
+      BuildConfigTokenCore(inputName, inputDescription, required, allowNull);
       BuildConstraints(constraintsIfType1, constraintsIfType2, constraintsIfType3);
     }
 
@@ -409,9 +408,9 @@ namespace SchemaForge.Crucible
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If inputName or inputHelpString is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If inputName or inputDescription is null, whitespace, or empty.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
-    /// <param name="inputHelpString">String that will be shown to the user in the event of a validation error.</param>
+    /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="inputDefaultValue"><typeparamref name="Type1"/> that will be inserted into the user config if an optional token is not provided.
     /// If provided, assumes this token is not required.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
@@ -419,9 +418,9 @@ namespace SchemaForge.Crucible
     /// <param name="constraintsIfType3">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type3"/>.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
-    public ConfigToken(string inputName, string inputHelpString, Type1 inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, Constraint<Type3>[] constraintsIfType3 = null, bool allowNull = false)
+    public ConfigToken(string inputName, string inputDescription, Type1 inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, Constraint<Type3>[] constraintsIfType3 = null, bool allowNull = false)
     {
-      BuildConfigTokenCore(inputName, inputHelpString, false, allowNull);
+      BuildConfigTokenCore(inputName, inputDescription, false, allowNull);
       DefaultValue = inputDefaultValue;
       BuildConstraints(constraintsIfType1, constraintsIfType2, constraintsIfType3);
     }
@@ -443,17 +442,27 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="tokenValue">Token value to validate.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
-    public override bool Validate<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator)
+    public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
       base.Validate(collection, translator);
-      if (!InternalValidate(translator.TryCastToken<Type1>(collection, TokenName), ConstraintsIfType1)
-        && !InternalValidate(translator.TryCastToken<Type2>(collection, TokenName), ConstraintsIfType2)
-        && !InternalValidate(translator.TryCastToken<Type3>(collection, TokenName), ConstraintsIfType3))
+      if (translator.TryCastToken(collection, TokenName, out Type1 newValue1))
+      {
+        InternalValidate(newValue1, ConstraintsIfType1);
+      }
+      else if (translator.TryCastToken(collection, TokenName, out Type2 newValue2))
+      {
+        InternalValidate(newValue2, ConstraintsIfType2);
+      }
+      else if (translator.TryCastToken(collection, TokenName, out Type3 newValue3))
+      {
+        InternalValidate(newValue3, ConstraintsIfType3);
+      }
+      else
       {
         ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}, {typeof(Type3).Name}", Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
-    public override TCollectionType InsertDefaultValue<TCollectionType, TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType, TValueType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
+    public override TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
 }

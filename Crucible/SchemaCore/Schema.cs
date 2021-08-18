@@ -81,7 +81,7 @@ namespace SchemaForge.Crucible
     /// <param name="allowUnrecognized">If false, unrecognized tokens will raise
     /// a <see cref="Severity.Fatal"/> error. If true, unrecognized tokens will
     /// raise a <see cref="Severity.Info"/> error.</param>
-    public virtual List<Error> Validate<TCollectionType,TValueType>(TCollectionType collection, ISchemaTranslator<TCollectionType,TValueType> translator, string name = null, string type = null, bool allowUnrecognized = false)
+    public virtual List<Error> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, string type = null, bool allowUnrecognized = false)
     {
       string message = " ";
       // This option is included in case a sub-configuration is being validated; this allows the ErrorList to indicate the exact configuration that has the issue.

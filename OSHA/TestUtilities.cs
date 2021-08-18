@@ -10,19 +10,20 @@ using SchemaForge.Crucible.Extensions;
 
 namespace OSHA.TestUtilities
 {
-  internal class JTokenTranslator : ISchemaTranslator<JToken, JToken>
+  internal class JTokenTranslator : ISchemaTranslator<JToken>
   {
-    public (bool, TCastType) TryCastToken<TCastType>(JToken collection, string valueName)
+    public bool TryCastToken<TCastType>(JToken collection, string valueName, out TCastType newValue)
     {
       try
       {
         JToken token = collection;
-        TCastType result = token.Value<TCastType>();
-        return (true, result);
+        newValue = token.Value<TCastType>();
+        return true;
       }
       catch
       {
-        return (false, default);
+        newValue = default;
+        return false;
       }
     }
     public bool TokenIsNullOrEmpty(JToken collection, string valueName) => collection.IsNullOrEmpty();
