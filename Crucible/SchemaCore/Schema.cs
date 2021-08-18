@@ -98,11 +98,11 @@ namespace SchemaForge.Crucible
           {
             if (message.IsNullOrEmpty())
             {
-              ErrorList.Add(new Error($"Input collection is missing required token {token.TokenName}\n{token.HelpString}"));
+              ErrorList.Add(new Error($"Input collection is missing required token {token.TokenName}\n{token.Description}"));
             }
             else
             {
-              ErrorList.Add(new Error($"Input {type} {name} is missing required token {token.TokenName}\n{token.HelpString}"));
+              ErrorList.Add(new Error($"Input {type} {name} is missing required token {token.TokenName}\n{token.Description}"));
             }
           }
           else if(token.ContainsDefaultValue)
@@ -117,7 +117,7 @@ namespace SchemaForge.Crucible
         else if (!token.Validate(collection,translator))
         {
           ErrorList.AddRange(token.ErrorList);
-          ErrorList.Add(new Error(token.HelpString,Severity.Info));
+          ErrorList.Add(new Error(token.Description,Severity.Info));
         }
       }
       /*
@@ -196,11 +196,11 @@ namespace SchemaForge.Crucible
       {
         if(token.Required)
         {
-          newConfig.Add(token.TokenName, token.HelpString);
+          newConfig.Add(token.TokenName, token.Description);
         }
         else
         {
-          newConfig.Add(token.TokenName, "Optional - " + token.HelpString);
+          newConfig.Add(token.TokenName, "Optional - " + token.Description);
         }
       }
       return newConfig;

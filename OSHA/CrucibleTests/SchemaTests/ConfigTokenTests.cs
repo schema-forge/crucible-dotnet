@@ -18,7 +18,7 @@ namespace SchemaTests
     {
       ConfigToken<string> token = new("TestToken", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!");
       Assert.Equal("TestToken", token.TokenName);
-      Assert.Equal("Hi, this is what this value does and hopefully what you did wrong in order to see this message!", token.HelpString);
+      Assert.Equal("Hi, this is what this value does and hopefully what you did wrong in order to see this message!", token.Description);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ namespace SchemaTests
     {
       ConfigToken<string> token = new("TestToken", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!", "This is what you get if you don't put anything in for TestToken!");
       Assert.Equal("TestToken", token.TokenName);
-      Assert.Equal("Hi, this is what this value does and hopefully what you did wrong in order to see this message!", token.HelpString);
+      Assert.Equal("Hi, this is what this value does and hopefully what you did wrong in order to see this message!", token.Description);
       Assert.Equal("This is what you get if you don't put anything in for TestToken!", token.DefaultValue);
     }
 
