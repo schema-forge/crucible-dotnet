@@ -51,6 +51,14 @@ namespace SchemaForge.Crucible
     public JProperty ToJProperty() => new(TokenName, new JObject() { { "Constraints", JsonConstraint.Count > 1 ? JsonConstraint : JsonConstraint[0] }, { "Description", Description } });
 
     /// <summary>
+    /// Returns a new <see cref="ConfigToken"/> with an additional type and new constraints added. Used primarily during deserialization.
+    /// </summary>
+    /// <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
+    /// <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
+    /// <returns>New <see cref="ConfigToken"/> with all pre-existing types, plus <typeparamref name="TNewType"/></returns>
+    public abstract ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints);
+
+    /// <summary>
     /// Extracts a token from the given <paramref name="collection"/> using the 
     /// <see cref="ISchemaTranslator{TCollectionType, TValueType}.TryCastToken{TCastType}(TCollectionType, string)"/>
     /// method, with <see cref="TokenName"/> as the passed string. All non-abstract
@@ -76,6 +84,13 @@ namespace SchemaForge.Crucible
       return !ErrorList.AnyFatal();
     }
 
+    /// <summary>
+    /// Inserts this token's DefaultValue into <paramref name="collection"/> using the relevant method from <paramref name="translator"/>.
+    /// </summary>
+    /// <typeparam name="TCollectionType">Type of collection to perform the operation on.</typeparam>
+    /// <param name="collection">Collection to insert the value into.</param>
+    /// <param name="translator">Translator used to interpret <typeparamref name="TCollectionType"/></param>
+    /// <returns>A new <typeparamref name="TCollectionType"/> <paramref name="collection"/> with the value added.</returns>
     public abstract TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator);
 
     #region Overrides
@@ -242,6 +257,19 @@ namespace SchemaForge.Crucible
     #endregion
 
     /// <summary>
+    /// Returns a new <see cref="ConfigToken"/> with an additional type and new constraints added. Used primarily during deserialization.
+    /// </summary>
+    /// <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
+    /// <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
+    /// <returns>New <see cref="ConfigToken{Type1,TNewType}"/></returns>
+    public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
+    {
+      return DefaultValue.Exists()
+        ? new ConfigToken<Type1, TNewType>(TokenName, Description, DefaultValue, ConstraintsIfType1.ToArray(), newConstraints, AllowNull)
+        : new ConfigToken<Type1, TNewType>(TokenName, Description, ConstraintsIfType1.ToArray(), newConstraints, Required, AllowNull);
+    }
+
+    /// <summary>
     /// Executes the ConfigToken's ValidationFunction on the passed collection item.
     /// </summary>
     /// <param name="tokenValue">Token value to validate.</param>
@@ -333,6 +361,19 @@ namespace SchemaForge.Crucible
     }
 
     #endregion
+
+    /// <summary>
+    /// Returns a new <see cref="ConfigToken"/> with an additional type and new constraints added. Used primarily during deserialization.
+    /// </summary>
+    /// <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
+    /// <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
+    /// <returns>New <see cref="ConfigToken{Type1, Type2,TNewType}"/></returns>
+    public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
+    {
+      return DefaultValue.Exists()
+        ? new ConfigToken<Type1, Type2, TNewType>(TokenName, Description, DefaultValue, ConstraintsIfType1.ToArray(), ConstraintsIfType2.ToArray(), newConstraints, AllowNull)
+        : new ConfigToken<Type1, Type2, TNewType>(TokenName, Description, ConstraintsIfType1.ToArray(), ConstraintsIfType2.ToArray(), newConstraints, Required, AllowNull);
+    }
 
     /// <summary>
     /// Executes the ConfigToken's ValidationFunction on the passed collection item.
@@ -436,6 +477,14 @@ namespace SchemaForge.Crucible
     }
 
     #endregion
+
+    /// <summary>
+    /// Throws a NotImplementedException. ConfigTokens can only have three types.
+    /// </summary>
+    /// <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
+    /// <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
+    /// <returns>New <see cref="ConfigToken{Type1, Type2, Type3,TNewType}"/></returns>
+    public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null) => throw new NotImplementedException("Cannot have more than three type parameters on a ConfigToken.");
 
     /// <summary>
     /// Executes the ConfigToken's ValidationFunction on the passed collection item.

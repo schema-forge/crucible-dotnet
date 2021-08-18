@@ -13,6 +13,12 @@ namespace SchemaTests
   [Trait("Crucible", "")]
   public class ConfigTokenTests
   {
+    private readonly ITestOutputHelper output;
+
+    public ConfigTokenTests(ITestOutputHelper output)
+    {
+      this.output = output;
+    }
     [Fact]
     public void ConfigTokenValidConfiguration()
     {
@@ -24,8 +30,8 @@ namespace SchemaTests
     [Fact]
     public void ConfigTokenInvalidName() => Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!"));
 
-    [Fact]
-    public void ConfigTokenInvalidHelpString() => Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("BestPracticesOrDie", ""));
+    //[Fact]
+    //public void ConfigTokenInvalidHelpString() => Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("BestPracticesOrDie", ""));
 
     [Fact]
     public void ConfigTokenValidConfigurationWithOptional()
@@ -50,6 +56,47 @@ namespace SchemaTests
       ConfigToken<string> token = new("TestToken", "Ceci n'est pas une description", new Constraint<string>[] { AllowValues("Russia", "United States", "Georgia", "Chad") });
       JProperty expected = new("TestToken", new JObject() { { "Constraints", new JObject() { { "Type", "String" }, { "AllowValues", new JArray() { "Russia", "United States", "Georgia", "Chad" } } } }, { "Description", "Ceci n'est pas une description" } });
       Assert.Equal(expected, token.ToJProperty());
+    }
+
+    // Start with a ConfigToken<int> and add the string type with an AllowValues constraint whose requirements are met. Then, pass a string token for validation via Schema.
+    // Expected not to generate a fatal error.
+    [Fact]
+    public void AddNewTypeValidTest()
+    {
+      JObject testConfig = new() { { "Test Token", "time." } };
+      ConfigToken<int> token = new("Test Token", "Once more into the breach.", new Constraint<int>[] { ConstrainValue(40, 50) });
+      ConfigToken newToken = token.AddNewType(new Constraint<string>[] { AllowValues("One", "more", "time.") });
+      Schema testSchema = new(newToken);
+      testSchema.Validate(testConfig, new JObjectTranslator());
+      output.WriteLine(string.Join('\n', testSchema.ErrorList));
+      Assert.False(testSchema.ErrorList.AnyFatal());
+    }
+
+    // Start with a ConfigToken<int> and add the string type with an AllowValues constraint whose requirements are not met. Then, pass a string token for validation via Schema.
+    // Expected to generate a fatal error.
+    [Fact]
+    public void AddNewTypeInvalidTest()
+    {
+      JObject testConfig = new() { { "Test Token", "Surprise! an invalid value!" } };
+      ConfigToken<int> token = new("Test Token", "Once more into the breach.", new Constraint<int>[] { ConstrainValue(40, 50) });
+      ConfigToken newToken = token.AddNewType(new Constraint<string>[] { AllowValues("One", "more", "time.") });
+      Schema testSchema = new(newToken);
+      testSchema.Validate(testConfig, new JObjectTranslator());
+      output.WriteLine(string.Join('\n', testSchema.ErrorList));
+      Assert.True(testSchema.ErrorList.AnyFatal());
+    }
+
+    // This should generate a fatal error because it creates a ConfigToken<string,int>. The string cast will succeed, and the token will be tested against AllowValues, which will fail.
+    [Fact]
+    public void AddNewTypeInvalidTypeOrderTest()
+    {
+      JObject testConfig = new() { { "Test Token", 45 } };
+      ConfigToken<string> token = new("Test Token", "Once more into the breach.", new Constraint<string>[] { AllowValues("One", "more", "time.") });
+      ConfigToken newToken = token.AddNewType(new Constraint<int>[] { ConstrainValue(40, 50) });
+      Schema testSchema = new(newToken);
+      testSchema.Validate(testConfig, new JObjectTranslator());
+      output.WriteLine(string.Join('\n', testSchema.ErrorList));
+      Assert.True(testSchema.ErrorList.AnyFatal());
     }
   }
 }
