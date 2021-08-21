@@ -110,7 +110,7 @@ namespace SchemaForge.Crucible
     /// <typeparam name="TValueType"><see cref="IComparable{TValueType}"/> and <see cref="IFormattable"/> type to check.</typeparam>
     /// <param name="lowerBound"><typeparamref name="TValueType"/> used as the lower bound in the returned function, inclusive.</param>
     /// <param name="upperBound"><typeparamref name="TValueType"/> used as the upper bound in the returned function, inclusive.</param>
-    /// <exception cref="ArgumentException">Throws ArgumentException if upperBound is greater than lowerBound.</exception>
+    /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/> if upperBound is greater than lowerBound.</exception>
     /// <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is greater than the provided lower bound.</returns>
     public static Constraint<TValueType> ConstrainValue<TValueType>(TValueType lowerBound, TValueType upperBound) where TValueType : IComparable, IComparable<TValueType>, IFormattable
     {
@@ -136,7 +136,7 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <typeparam name="TValueType"><see cref="IComparable{TValueType}"/> and <see cref="IFormattable"/> type to check.</typeparam>
     /// <param name="domains">(<typeparamref name="TValueType"/>, <typeparamref name="TValueType"/>) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
-    /// <exception cref="ArgumentException">Throws ArgumentException if the first item of any passed tuple is greater than the second item.</exception>
+    /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/> if the first item of any passed tuple is greater than the second item.</exception>
     /// <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is within at least one of the provided domains.</returns>
     public static Constraint<TValueType> ConstrainValue<TValueType>(params (TValueType, TValueType)[] domains) where TValueType : IComparable, IComparable<TValueType>, IFormattable
     {
@@ -566,5 +566,67 @@ namespace SchemaForge.Crucible
 
     #endregion
 
+    #region Metaconstraints
+
+    /// <summary>
+    /// A logic constraint that will check the passed value against all
+    /// <paramref name="constraints"/> and return the <see cref="List{T}"/> of <see cref="Error"/>
+    /// of the first constraint that does not generate fatal errors, or the
+    /// <see cref="List{T}"/> of <see cref="Error"/> of all constraints combined if none pass.
+    /// </summary>
+    /// <typeparam name="TValueType">Value type that will be checked with
+    /// constraints applying to said value type.</typeparam>
+    /// <param name="constraints">Constraints to check; if at least one passes,
+    /// the value will be considered valid.</param>
+    /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/>
+    /// if fewer than two constraints are passed.</exception>
+    /// <returns>A function that returns the <see cref="List{T}"/> of <see cref="Error"/> resulting
+    /// from checking whether or not the passed <typeparamref name="TValueType"/> passes
+    /// at least one of <paramref name="constraints"/></returns>
+    public static Constraint<TValueType> MatchAnyConstraint<TValueType>(params Constraint<TValueType>[] constraints)
+    {
+      if(constraints.Length < 2)
+      {
+        throw new ArgumentException("MatchAnyConstraint requires at least 2 constraint arguments.");
+      }
+      List<Error> InnerFunction(TValueType inputValue, string inputName)
+      {
+        List<Error> internalErrorList = new();
+        List<Error>[] constraintResults = new List<Error>[constraints.Length];
+        for (int i = constraints.Length - 1; i-- > 0;)
+        {
+          List<Error> constraintErrorList = constraints[i].Function(inputValue, inputName);
+          if (constraintErrorList.AnyFatal())
+          {
+            constraintResults[-1 + (i - constraints.Length)] = constraintErrorList;
+          }
+          else
+          {
+            if (constraintErrorList.Count > 0)
+            {
+              internalErrorList.Add(new Error($"{inputName} passed at least one constraint in Any clause, but generated non-fatal errors.", Severity.Info));
+              internalErrorList.AddRange(constraintErrorList);
+              internalErrorList.Add(new Error($"{inputName} Any clause output complete.", Severity.Info));
+            }
+            return internalErrorList;
+          }
+        }
+        internalErrorList.Add(new Error($"{inputName} Any clause generated fatal errors. At least one set of errors must be avoided.", Severity.Info));
+        foreach (List<Error> errorList in constraintResults)
+        {
+          internalErrorList.AddRange(errorList);
+        }
+        internalErrorList.Add(new Error($"{inputName} Any clause output complete.", Severity.Info));
+        return internalErrorList;
+      }
+      JObject constraintObject = new();
+      foreach (Constraint<TValueType> constraint in constraints)
+      {
+        constraintObject.Add(constraint.Property);
+      }
+      return new Constraint<TValueType>(InnerFunction, new JProperty("Any", constraintObject));
+    }
+
+    #endregion
   }
 }
