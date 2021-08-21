@@ -39,10 +39,11 @@ namespace Extensions
     public void AllIndexesOfChar(string value1, char value2, int[] expectedLocations) => Assert.Equal(value1.AllIndexesOf(value2), expectedLocations.ToList());
 
     [Theory]
+    [InlineData("AND", 'D', 1)]
     [InlineData("I SET FIRE", 'I', 2)]
     [InlineData("TO THE RAIN", 'B', 0)]
     [InlineData("WATCHED IT BURN AS I\nTOUCHED YOUR FACE", '\n', 1)]
-    public void CountOfChar(string searchedValue, char charToFind, int expectedNumber) => Assert.Equal(searchedValue.CountOfChar(charToFind), expectedNumber);
+    public void CountOfChar(string searchedValue, char charToFind, int expectedNumber) => Assert.Equal(expectedNumber, searchedValue.CountOfChar(charToFind));
 
     [Fact]
     public void CountOfVoid()

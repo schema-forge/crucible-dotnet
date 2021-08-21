@@ -10,10 +10,7 @@ namespace SchemaForge.Crucible.Extensions
     /// Executes string.IsNullOrEmpty() and string.IsNullOrWhiteSpace().
     /// </summary>
     /// <param name="str">String to check for emptiness.</param>
-    public static bool IsNullOrEmpty(this string str)
-    {
-      return string.IsNullOrWhiteSpace(str);
-    }
+    public static bool IsNullOrEmpty(this string str) => string.IsNullOrWhiteSpace(str);
 
     /// <summary>
     /// Gets a list of all the indices of the given string or char.
@@ -99,7 +96,7 @@ namespace SchemaForge.Crucible.Extensions
       int length = charArray.Length;
       int count = 0;
 
-      for (int i = length - 1; i-- > 0;)
+      for (int i = length; i-- > 0;)
       {
         if (charArray[i] == target)
         {
