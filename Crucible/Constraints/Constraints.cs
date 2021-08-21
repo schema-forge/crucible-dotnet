@@ -593,12 +593,12 @@ namespace SchemaForge.Crucible
       {
         List<Error> internalErrorList = new();
         List<Error>[] constraintResults = new List<Error>[constraints.Length];
-        for (int i = constraints.Length - 1; i-- > 0;)
+        for (int i = constraints.Length; i-- > 0;)
         {
           List<Error> constraintErrorList = constraints[i].Function(inputValue, inputName);
           if (constraintErrorList.AnyFatal())
           {
-            constraintResults[-1 + (i - constraints.Length)] = constraintErrorList;
+            constraintResults[i] = constraintErrorList;
           }
           else
           {
