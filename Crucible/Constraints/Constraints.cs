@@ -24,20 +24,25 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <returns>Function boxed in an object.</returns>
     public abstract object GetFunction();
+
+    /// <summary>
+    /// List of errors generated during creation of the constraint.
+    /// </summary>
+    public List<Error> Errors { get; protected set; }
   }
 
-  public class Constraint<T> : Constraint
+  public class Constraint<TValueType> : Constraint
   {
     /// <summary>
     /// Function that will be applied by the constraint.
     /// </summary>
-    public Func<T, string, List<Error>> Function { get; private set; }
+    public Func<TValueType, string, List<Error>> Function { get; private set; }
     /// <summary>
     /// Constraint objects represent a rule that is applied to a token; the Function property is the validation function that will be executed on the token's value while the Property is the representation of the constraint as a JProperty.
     /// </summary>
     /// <param name="inputFunction">Function to execute from this constraint. The JToken in the function is the value being tested; the string is the name of the token in the object being tested.</param>
     /// <param name="inputProperty">JProperty representation of this constraint. Neither name nor value can be null or whitespace.</param>
-    public Constraint(Func<T, string, List<Error>> inputFunction, JProperty inputProperty)
+    public Constraint(Func<TValueType, string, List<Error>> inputFunction, JProperty inputProperty, List<Error> constraintErrors = null)
     {
       if (inputProperty.Name.IsNullOrEmpty())
       {
@@ -49,21 +54,23 @@ namespace SchemaForge.Crucible
       }
       Property = inputProperty;
       Function = inputFunction;
+      Errors = constraintErrors.Exists() ? constraintErrors : new List<Error>();
     }
     public override object GetFunction() => Function;
   }
   public static class Constraints
   {
-    #region Numeric Constraints
+    #region IComparable Constraints
 
     /// <summary>
-    /// Constrains numeric values with only a lower bound.
+    /// Constrains comparable values with only a lower bound.
     /// </summary>
-    /// <param name="lowerBound">Double used as the lower bound in the returned function, inclusive.</param>
-    /// <returns>Function checking to ensure that the value of the passed JToken is greater than the provided lower bound.</returns>
-    public static Constraint<T> ConstrainValue<T>(T lowerBound) where T : IComparable, IComparable<T>, IFormattable
+    /// <typeparam name="TValueType"><see cref="IComparable{TValueType}"/> and <see cref="IFormattable"/> type to check.</typeparam>
+    /// <param name="lowerBound"><typeparamref name="TValueType"/> used as the lower bound in the returned function, inclusive.</param>
+    /// <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is greater than the provided lower bound.</returns>
+    public static Constraint<TValueType> ConstrainValueLowerBound<TValueType>(TValueType lowerBound) where TValueType : IComparable, IComparable<TValueType>, IFormattable
     {
-      List<Error> InnerMethod(T inputValue, string inputName)
+      List<Error> InnerMethod(TValueType inputValue, string inputName)
       {
         List<Error> internalErrorList = new();
         if (inputValue.CompareTo(lowerBound) < 0)
@@ -73,23 +80,45 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return new Constraint<T>(InnerMethod,new JProperty("ConstrainValue",lowerBound));
+      return new Constraint<TValueType>(InnerMethod,new JProperty("ConstrainValueLowerBound",lowerBound));
     }
 
     /// <summary>
-    /// Constrains numeric values with a lower bound and an upper bound.
+    /// Constrains comparable values with only an upper bound.
     /// </summary>
-    /// <param name="lowerBound">Double used as the lower bound in the returned function, inclusive.</param>
-    /// <param name="upperBound">Double used as the upper bound in the returned function, inclusive.</param>
+    /// <typeparam name="TValueType"><see cref="IComparable{TValueType}"/> and <see cref="IFormattable"/> type to check.</typeparam>
+    /// <param name="upperBound"><typeparamref name="TValueType"/> used as the lower bound in the returned function, inclusive.</param>
+    /// <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is greater than the provided lower bound.</returns>
+    public static Constraint<TValueType> ConstrainValueUpperBound<TValueType>(TValueType upperBound) where TValueType : IComparable, IComparable<TValueType>, IFormattable
+    {
+      List<Error> InnerMethod(TValueType inputValue, string inputName)
+      {
+        List<Error> internalErrorList = new();
+        if (inputValue.CompareTo(upperBound) > 0)
+        {
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is greater than enforced upper bound {upperBound}"));
+          return internalErrorList;
+        }
+        return internalErrorList;
+      }
+      return new Constraint<TValueType>(InnerMethod, new JProperty("ConstrainValueUpperBound", upperBound));
+    }
+
+    /// <summary>
+    /// Constrains comparable values with a lower bound and an upper bound.
+    /// </summary>
+    /// <typeparam name="TValueType"><see cref="IComparable{TValueType}"/> and <see cref="IFormattable"/> type to check.</typeparam>
+    /// <param name="lowerBound"><typeparamref name="TValueType"/> used as the lower bound in the returned function, inclusive.</param>
+    /// <param name="upperBound"><typeparamref name="TValueType"/> used as the upper bound in the returned function, inclusive.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if upperBound is greater than lowerBound.</exception>
-    /// <returns>Function checking to ensure that the value of the passed JToken is greater than the provided lower bound.</returns>
-    public static Constraint<T> ConstrainValue<T>(T lowerBound, T upperBound) where T : IComparable, IComparable<T>, IFormattable
+    /// <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is greater than the provided lower bound.</returns>
+    public static Constraint<TValueType> ConstrainValue<TValueType>(TValueType lowerBound, TValueType upperBound) where TValueType : IComparable, IComparable<TValueType>, IFormattable
     {
       if (lowerBound.CompareTo(upperBound) > 0)
       {
         throw new ArgumentException($"ConstrainValue lower bound must be less than or equal to upper bound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
-      List<Error> InnerMethod(T inputValue, string inputName)
+      List<Error> InnerMethod(TValueType inputValue, string inputName)
       {
         List<Error> internalErrorList = new();
         if (inputValue.CompareTo(lowerBound) < 0 || inputValue.CompareTo(upperBound) > 0)
@@ -99,29 +128,30 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return new Constraint<T>(InnerMethod, new JProperty("ConstrainValue", lowerBound + ", " + upperBound));
+      return new Constraint<TValueType>(InnerMethod, new JProperty("ConstrainValue", lowerBound + ", " + upperBound));
     }
 
     /// <summary>
-    /// Constrains numeric values using any number of provided domains as tuples in format (lowerBound, upperBound)
+    /// Constrains comparable values using any number of provided domains as tuples in format (lowerBound, upperBound)
     /// </summary>
-    /// <param name="domains">(double, double) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
+    /// <typeparam name="TValueType"><see cref="IComparable{TValueType}"/> and <see cref="IFormattable"/> type to check.</typeparam>
+    /// <param name="domains">(<typeparamref name="TValueType"/>, <typeparamref name="TValueType"/>) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if the first item of any passed tuple is greater than the second item.</exception>
-    /// <returns>Function checking to ensure that the value of the passed JToken is within at least one of the provided domains.</returns>
-    public static Constraint<T> ConstrainValue<T>(params (T, T)[] domains) where T : IComparable, IComparable<T>, IFormattable
+    /// <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is within at least one of the provided domains.</returns>
+    public static Constraint<TValueType> ConstrainValue<TValueType>(params (TValueType, TValueType)[] domains) where TValueType : IComparable, IComparable<TValueType>, IFormattable
     {
-      foreach ((T, T) domain in domains)
+      foreach ((TValueType, TValueType) domain in domains)
       {
         if (domain.Item1.CompareTo(domain.Item2) > 0)
         {
           throw new ArgumentException($"Domain {domain} is invalid: Item 1 (lower bound) must be less than Item 2 (upper bound)");
         }
       }
-      List<Error> InnerMethod(T inputValue, string inputName)
+      List<Error> InnerMethod(TValueType inputValue, string inputName)
       {
         List<Error> internalErrorList = new();
         bool matchesAtLeastOne = false;
-        foreach ((T, T) domain in domains)
+        foreach ((TValueType, TValueType) domain in domains)
         {
           if (inputValue.CompareTo(domain.Item1) > 0 && inputValue.CompareTo(domain.Item2) < 0)
           {
@@ -134,14 +164,14 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return new Constraint<T>(InnerMethod, new JProperty("ConstrainValue", JArray.FromObject(domains.Select(x => "(" + x.Item1 + ", " + x.Item2 + ")"))));
+      return new Constraint<TValueType>(InnerMethod, new JProperty("ConstrainValue", JArray.FromObject(domains.Select(x => "(" + x.Item1 + ", " + x.Item2 + ")"))));
     }
 
     /// <summary>
     /// Constrains the number of digits a double has after the decimal.
     /// </summary>
     /// <param name="upperBound">Maximum number of digits after the decimal.</param>
-    /// <returns>A new Constraint{double} containing a method to constrain decimal digits.</returns>
+    /// <returns>A new <see cref="Constraint{double}"/> containing a method to constrain decimal digits.</returns>
     public static Constraint<double> ConstrainDigits(int upperBound)
     {
       List<Error> InnerMethod(double inputValue, string inputName)
@@ -535,5 +565,6 @@ namespace SchemaForge.Crucible
     }
 
     #endregion
+
   }
 }
