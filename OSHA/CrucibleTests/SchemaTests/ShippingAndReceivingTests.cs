@@ -30,7 +30,7 @@ namespace SchemaTests
         {
           new object[] { true, "Integer", 25 }, // Applies type constraint to valid input.
           new object[] { false, "Integer", "bleventeen" }, // Applies type constraint to invalid input.
-          new object[] { true, "Integer", 25, ConstrainValue<long>(22) }, // Applies actual constraint to valid input.
+          new object[] { true, "Integer", 25, ConstrainValueLowerBound<long>(22) }, // Applies actual constraint to valid input.
           new object[] { true, "Integer", 25, ConstrainValue<long>(22,35) }, // Applies actual constraint to valid input.
           new object[] { false, "Integer", 25, ConstrainValue<long>(26,35) }, // Applies actual constraint to invalid input.
           new object[] { true, "String", "A string!"}, // Applies string type constraint to valid input.
@@ -38,7 +38,7 @@ namespace SchemaTests
           new object[] { false, "String", "Another option that will go unused forever and ever!", AllowValues("Another string, yay!", "Just kidding, that one's not valid anymore!") }, // Applies actual string constraint to invalid input.
           new object[] { false, "String", new JArray() { 6, 6, 4, 7, 5 } }, // Applies string type constraint to invalid input.
           new object[] { true, "Decimal", 25.3 }, // Applies decimal type constraint to valid input.
-          new object[] { true, "Decimal", 25.3, ConstrainValue<double>(22) }, // Applies actual decimal constraint to valid input.
+          new object[] { true, "Decimal", 25.3, ConstrainValueLowerBound<double>(22) }, // Applies actual decimal constraint to valid input.
           new object[] { false, "Decimal", "astrong" }, // Applies decimal type constraint to invalid input.
           new object[] { true, "Array", new JArray() { 3 } }, // Applies array type constraint to valid input.
           new object[] { true, "Array", new JArray() { 3 }, ApplyConstraintsToJArray<int>() }, // Applies actual array constraint to valid input.
@@ -64,7 +64,7 @@ namespace SchemaTests
         {
           new object[] { true, 25 }, // Applies type constraint to valid input.
           new object[] { false, "bleventeen" }, // Applies type constraint to invalid input.
-          new object[] { true, 25, ConstrainValue<long>(22) }, // Applies actual constraint to valid input.
+          new object[] { true, 25, ConstrainValueLowerBound<long>(22) }, // Applies actual constraint to valid input.
           new object[] { true, 25, ConstrainValue<long>(22,35) }, // Applies actual constraint to valid input.
           new object[] { false, 25, ConstrainValue<long>(26,35) }, // Applies actual constraint to invalid input.
         };

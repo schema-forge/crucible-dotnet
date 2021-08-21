@@ -22,7 +22,7 @@ namespace Crucible
                 new ConfigToken<string>("ConstrainStringLengthLowerBound","String: Minimum length of 3.",new Constraint<string>[] { ConstrainStringLength(3) }, required: false),
                 new ConfigToken<string>("ConstrainStringLength","String: Length must be between 3 and 10.",new Constraint<string>[] { ConstrainStringLength(3,10) }, required: false),
                 new ConfigToken<string>("ForbidStringCharacters","String: Characters / and * are forbidden.",new Constraint<string>[] { ForbidStringCharacters('/','*') }, required: false),
-                new ConfigToken<int>("ConstrainValueLowerBound","Int: Number at least 10.",new Constraint<int>[] { ConstrainValue(10) }, required: false),
+                new ConfigToken<int>("ConstrainValueLowerBound","Int: Number at least 10.",new Constraint<int>[] { ConstrainValueLowerBound(10) }, required: false),
                 new ConfigToken<int>("ConstrainValue","Int: Number at least 10 and at most 50.",new Constraint<int>[] { ConstrainValue(10,50) }, required: false),
                 new ConfigToken<int>("ConstrainValueDomains","Int: Within ranges 10-50 or 100-150.",new Constraint<int>[] { ConstrainValue((10, 50), (100, 150)) }, required: false),
                 //new ConfigToken("ConstrainJsonTokensRequired","Obligatory decoy Json.",false,ApplyConstraints<JObject>(ConstrainJsonTokens(new ConfigToken[] { new ConfigToken("RequiredInnerToken","String: Required inner token.",ApplyConstraints<string>())}))),

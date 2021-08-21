@@ -97,7 +97,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "Everyone you love is gone.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainValue(5)) });
+      testToken = new ConfigToken<JArray>("TestArray", "Everyone you love is gone.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainValueLowerBound(5)) });
       testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine($"Input array: {string.Join(",", JObject.Parse(constrainedJson)["TestArray"])}");
       output.WriteLine(string.Join('\n', testToken.ErrorList));

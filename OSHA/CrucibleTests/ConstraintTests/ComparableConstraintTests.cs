@@ -13,11 +13,11 @@ using OSHA.TestUtilities;
 namespace ConstraintTests
 {
   [Trait("Crucible", "")]
-  public class NumericConstraintTests
+  public class ComparableConstraintTests
   {
     private readonly ITestOutputHelper output;
 
-    public NumericConstraintTests(ITestOutputHelper output)
+    public ComparableConstraintTests(ITestOutputHelper output)
     {
       this.output = output;
     }
@@ -41,7 +41,7 @@ namespace ConstraintTests
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken<int>("TestToken", "Angry String", new Constraint<int>[] { ConstrainValue(constraints[0]) });
+        testToken = new ConfigToken<int>("TestToken", "Angry String", new Constraint<int>[] { ConstrainValueLowerBound(constraints[0]) });
         testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
       }
       else
@@ -58,7 +58,19 @@ namespace ConstraintTests
         }
       }
       output.WriteLine(string.Join('\n', testToken.ErrorList));
-      Assert.Equal(testResult, expectedResult);
+      Assert.Equal(expectedResult, testResult);
+    }
+
+    [Theory]
+    [InlineData(true,15,15)]
+    [InlineData(false, 15, 13)]
+    [InlineData(true, 15, 17)]
+    public void ConstrainUpperBoundTests(bool expectedResult, int constrainedValue, int constraint)
+    {
+      Constraint<int> newConstraint = ConstrainValueUpperBound(constraint);
+      List<Error> testResult = newConstraint.Function(constrainedValue, "Test Value");
+      output.WriteLine(string.Join("\n", testResult));
+      Assert.Equal(expectedResult, !testResult.AnyFatal());
     }
 
     /// <summary>
@@ -80,7 +92,7 @@ namespace ConstraintTests
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken<double>("TestToken", "Deja Vu", new Constraint<double>[] { ConstrainValue(constraints[0]) });
+        testToken = new ConfigToken<double>("TestToken", "Deja Vu", new Constraint<double>[] { ConstrainValueLowerBound(constraints[0]) });
         testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
       }
       else
@@ -177,8 +189,8 @@ namespace ConstraintTests
     [Fact]
     public void ConstrainValuePropertyTestLowerBound()
     {
-      Constraint testConstraint = ConstrainValue(25);
-      JProperty expected = new("ConstrainValue", 25);
+      Constraint testConstraint = ConstrainValueLowerBound(25);
+      JProperty expected = new("ConstrainValueLowerBound", 25);
       Assert.Equal(expected, testConstraint.Property);
     }
 
