@@ -43,6 +43,12 @@ namespace SchemaTests
     }
 
     [Fact]
+    public void ConfigTokenDuplicateTypeArgumentsThrows()
+    {
+      Assert.Throws<ArgumentException>(() => new ConfigToken<string, string>("Test Token", "Uh oh."));
+    }
+
+    [Fact]
     public void ToJPropertyTest()
     {
       ConfigToken<string> token = new("TestToken", "This is a tautological description.");
@@ -97,6 +103,13 @@ namespace SchemaTests
       testSchema.Validate(testConfig, new JObjectTranslator());
       output.WriteLine(string.Join('\n', testSchema.ErrorList));
       Assert.True(testSchema.ErrorList.AnyFatal());
+    }
+
+    [Fact]
+    public void AddNewTypeThrowsIfTypeAlreadyPresent()
+    {
+      ConfigToken<string> token = new("Test Token", "An innocent and carefree string ConfigToken.");
+      Assert.Throws<ArgumentException>(() => token.AddNewType<string>());
     }
   }
 }
