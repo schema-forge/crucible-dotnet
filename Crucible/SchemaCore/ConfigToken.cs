@@ -149,7 +149,10 @@ namespace SchemaForge.Crucible
       {
         foreach (Constraint<TValueType> constraint in constraints)
         {
-          constraintObject.Add(constraint.Property);
+          if(constraint.Property.Exists())
+          {
+            constraintObject.Add(constraint.Property);
+          }
         }
       }
       return constraintObject;
@@ -173,9 +176,8 @@ namespace SchemaForge.Crucible
     /// succeeded or returns false if it did not.
     /// </summary>
     /// <typeparam name="TValueType">Type that the collection member was cast to.</typeparam>
-    /// <param name="castResult">Tuple that indicates whether the cast succeeded and contains the cast result.</param>
-    /// <param name="constraints">Constraints to apply if cast succeeded.</param>
-    /// <returns>Bool indicating if cast succeeded; ErrorList updates based on constraint results.</returns>
+    /// <param name="castResult">Token value cast to TValueType from TryCastToken.</param>
+    /// <param name="constraints">Constraints to apply.</param>
     protected void InternalValidate<TValueType>(TValueType castResult, List<Constraint<TValueType>> constraints)
     {
       if(constraints.Exists())
@@ -183,6 +185,24 @@ namespace SchemaForge.Crucible
         foreach (Constraint<TValueType> constraint in constraints)
         {
           ErrorList.AddRange(constraint.Function(castResult, TokenName));
+        }
+      }
+    }
+
+    /// <summary>
+    /// Takes the castResult from a call to an ISchemaTranslator's
+    /// TryCastValue function to string, then applies format constraints.
+    /// </summary>
+    /// <typeparam name="TValueType">Type that the collection member was originally cast to.</typeparam>
+    /// <param name="castResult">Tuple that indicates whether the cast succeeded and contains the cast result.</param>
+    /// <param name="constraints">Constraints to apply if cast succeeded.</param>
+    protected void InternalValidateFormat<TValueType>(string castResult, List<Constraint<TValueType>> constraints)
+    {
+      if (constraints.Exists())
+      {
+        foreach (Constraint<TValueType> constraint in constraints)
+        {
+          ErrorList.AddRange(constraint.FormatFunction(castResult, TokenName));
         }
       }
     }
@@ -205,6 +225,7 @@ namespace SchemaForge.Crucible
     /// </summary>
     public Type1 DefaultValue { get; protected set; }
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
+    public List<Constraint<Type1>> FormatConstraintsIfType1 { get; protected set; } = new();
 
     #region Constructors
 
@@ -261,7 +282,8 @@ namespace SchemaForge.Crucible
         throw new ArgumentException($"ConfigToken for {TokenName} contains duplicate Type arguments: {string.Join(", ", typeArray.Select(x => x.Name))}");
       }
       JsonConstraint.Add(GetConstraintObject(constraintsIfType1));
-      ConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.ToList() : new List<Constraint<Type1>>();
+      ConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.Where(x => x.ConstraintType == ConstraintType.Standard).ToList() : new List<Constraint<Type1>>();
+      FormatConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.Where(x => x.ConstraintType == ConstraintType.Format).ToList() : new List<Constraint<Type1>>();
     }
 
     #endregion
@@ -293,6 +315,11 @@ namespace SchemaForge.Crucible
       if (translator.TryCastToken(collection, TokenName, out Type1 newValue1))
       {
         InternalValidate(newValue1, ConstraintsIfType1);
+        if(FormatConstraintsIfType1.Count > 0)
+        {
+          translator.TryCastToken(collection, TokenName, out string stringValue);
+          InternalValidateFormat(stringValue, FormatConstraintsIfType1);
+        }
       }
       else
       {

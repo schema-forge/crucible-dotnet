@@ -12,18 +12,6 @@ namespace SchemaForge.Crucible
 {
   public class Schema
   {
-    /*
-    
-    "Integer":
-    {
-      "Type": must be integer
-      "Domain": [[56], [20, 25]]
-    }
-
-     */
-
-
-
     /// <summary>
     /// Set of token rules to use when a Json is passed to Validate().
     /// </summary>

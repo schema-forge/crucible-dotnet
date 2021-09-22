@@ -13,12 +13,30 @@ using SchemaForge.Crucible.Extensions;
 
 namespace SchemaForge.Crucible
 {
+  class SchemaDateTime
+  {
+    public DateTime CastValue { get; private set; }
+    public string StringRepresentation { get; private set; }
+    public SchemaDateTime(DateTime dateTime, string stringRepresentation)
+    {
+      CastValue = dateTime;
+      StringRepresentation = stringRepresentation;
+    }
+  }
+
+  public enum ConstraintType
+  {
+    Standard,
+    Format
+  }
+
   public abstract class Constraint
   {
     /// <summary>
     /// JProperty representation of this constraint. Will be used when saving a Schema to Json.
     /// </summary>
-    public JProperty Property { get; protected set; }
+    public JProperty Property { get; protected set; } = null;
+
     /// <summary>
     /// Used solely to retrieve the function as an object when deserializing.
     /// </summary>
@@ -29,35 +47,94 @@ namespace SchemaForge.Crucible
     /// List of errors generated during creation of the constraint.
     /// </summary>
     public List<Error> Errors { get; protected set; }
+
+    /// <summary>
+    /// Gives the type of the constraint; Format constraints are applied to the original token
+    /// value cast to string while Standard constraints are applied post-cast.
+    /// </summary>
+    public ConstraintType ConstraintType { get; protected set; } = ConstraintType.Standard;
   }
 
   public class Constraint<TValueType> : Constraint
   {
     /// <summary>
-    /// Function that will be applied by the constraint.
+    /// Function that will be applied by the constraint if this is a Standard constraint.
     /// </summary>
-    public Func<TValueType, string, List<Error>> Function { get; private set; }
+    public Func<TValueType, string, List<Error>> Function { get; protected set; }
+
+    /// <summary>
+    /// Function that will be applied by the constraint if this is a Format constraint.
+    /// </summary>
+    public Func<string, string, List<Error>> FormatFunction { get; protected set; }
+
     /// <summary>
     /// Constraint objects represent a rule that is applied to a token; the Function property is the validation function that will be executed on the token's value while the Property is the representation of the constraint as a JProperty.
     /// </summary>
-    /// <param name="inputFunction">Function to execute from this constraint. The JToken in the function is the value being tested; the string is the name of the token in the object being tested.</param>
+    /// <param name="inputFunction">Function to execute from this constraint. The TValueType in the function is the value being tested; the string is the name of the token in the object being tested.</param>
     /// <param name="inputProperty">JProperty representation of this constraint. Neither name nor value can be null or whitespace.</param>
-    public Constraint(Func<TValueType, string, List<Error>> inputFunction, JProperty inputProperty, List<Error> constraintErrors = null)
+    /// <param name="constraintErrors">Errors generated while creating this constraint.</param>
+    public Constraint(Func<TValueType, string, List<Error>> inputFunction, JProperty inputProperty = null, List<Error> constraintErrors = null)
     {
-      if (inputProperty.Name.IsNullOrEmpty())
+      BuildConstraint(inputFunction, inputProperty, constraintErrors);
+    }
+
+    /// <summary>
+    /// Use this overload only if you intend to create a non-Standard constraint type.
+    /// Format constraints are applied to the input data before it is cast to another
+    /// format; this is especially useful for potentially destructive casts such as
+    /// DateTime.
+    /// </summary>
+    /// <param name="inputFunction">Function to execute from this constraint. The first string argument is the input data value cast to string; the second string argument is the name of the token in the object being tested.</param>
+    /// <param name="constraintType">Type of this constraint. Currently, only <see cref="ConstraintType.Format"/> is supported here.</param>
+    /// <param name="inputProperty">JProperty representation of this constraint. Neither name nor value can be null or whitespace.</param>
+    /// <param name="constraintErrors">Errors generated while creating this constraint.</param>
+    public Constraint(Func<string, string, List<Error>> inputFunction, ConstraintType constraintType, JProperty inputProperty = null, List<Error> constraintErrors = null)
+    {
+      if(constraintType == ConstraintType.Format)
       {
-        throw new ArgumentNullException(nameof(inputProperty), $"Name of {nameof(inputProperty)} cannot be null or whitespace.");
+        ConstraintType = ConstraintType.Format;
+        if (inputProperty.Exists())
+        {
+          if (inputProperty.Name.IsNullOrEmpty())
+          {
+            throw new ArgumentNullException(nameof(inputProperty), $"Name of {nameof(inputProperty)} cannot be null or whitespace.");
+          }
+          if (inputProperty.Value.IsNullOrEmpty())
+          {
+            throw new ArgumentNullException(nameof(inputProperty), $"Value of {nameof(inputProperty)} cannot be null or whitespace.");
+          }
+          Property = inputProperty;
+        }
+        FormatFunction = inputFunction;
+        Errors = constraintErrors.Exists() ? constraintErrors : new List<Error>();
       }
-      if (inputProperty.Value.IsNullOrEmpty())
+      else if (constraintType == ConstraintType.Standard)
       {
-        throw new ArgumentNullException(nameof(inputProperty), $"Value of {nameof(inputProperty)} cannot be null or whitespace.");
+        throw new ArgumentException("To construction Standard constraints, use the constructor that does not pass a constraint type.");
       }
-      Property = inputProperty;
+    }
+
+    private void BuildConstraint(Func<TValueType, string, List<Error>> inputFunction, JProperty inputProperty, List<Error> constraintErrors)
+    {
+      if (inputProperty.Exists())
+      {
+        if (inputProperty.Name.IsNullOrEmpty())
+        {
+          throw new ArgumentNullException(nameof(inputProperty), $"Name of {nameof(inputProperty)} cannot be null or whitespace.");
+        }
+        if (inputProperty.Value.IsNullOrEmpty())
+        {
+          throw new ArgumentNullException(nameof(inputProperty), $"Value of {nameof(inputProperty)} cannot be null or whitespace.");
+        }
+        Property = inputProperty;
+      }
       Function = inputFunction;
       Errors = constraintErrors.Exists() ? constraintErrors : new List<Error>();
     }
+
     public override object GetFunction() => Function;
   }
+
   public static class Constraints
   {
     #region IComparable Constraints
@@ -199,6 +276,8 @@ namespace SchemaForge.Crucible
     /// <returns>Function checking to ensure that the value of the passed item is one of acceptableValues.</returns>
     public static Constraint<T> AllowValues<T>(params T[] acceptableValues)
     {
+      // TODO: Optimize collection for searching?
+      // Switch case to reroute types to appropriate overloads?
       List<Error> InnerMethod(T inputValue, string inputName)
       {
         List<Error> internalErrorList = new();
@@ -562,6 +641,42 @@ namespace SchemaForge.Crucible
         return internalErrorList;
       }
       return new Constraint<JObject>(InnerMethod, new JProperty("ApplySchema", inputSchema.ToString()));
+    }
+
+    #endregion
+
+    #region Datetime Constraints
+
+    /// <summary>
+    /// Ensures a DateTime value follows at least one of the passed formats.
+    /// </summary>
+    /// <param name="formats">Formats in the DateTime Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
+    /// <returns></returns>
+    public static Constraint<DateTime> ConstrainDateTimeFormat(params string[] formats)
+    {
+      List<Error> InnerMethod(string inputValue, string inputName)
+      {
+        List<Error> internalErrorList = new();
+
+        bool atLeastOneSuccess = false;
+
+        foreach(string format in formats)
+        {
+          if(DateTime.TryParseExact(inputValue, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _))
+          {
+            atLeastOneSuccess = true;
+            break;
+          }
+        }
+        
+        if(!atLeastOneSuccess)
+        {
+          internalErrorList.Add(new Error($"Input {inputName} with value {inputValue} is not in a valid DateTime format. Valid DateTime formats: {formats.Join(", ")}"));
+        }
+
+        return internalErrorList;
+      }
+      return new Constraint<DateTime>(InnerMethod, ConstraintType.Format, new JProperty("ConstrainDateTimeFormat", JArray.FromObject(formats)));
     }
 
     #endregion
