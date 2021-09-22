@@ -221,7 +221,7 @@ namespace SchemaForge.Crucible
   public class ConfigToken<Type1> : ConfigToken
   {
     /// <summary>
-    /// If set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
+    /// If DefaultValue is set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
     /// </summary>
     public Type1 DefaultValue { get; protected set; }
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
@@ -315,7 +315,7 @@ namespace SchemaForge.Crucible
       if (translator.TryCastToken(collection, TokenName, out Type1 newValue1))
       {
         InternalValidate(newValue1, ConstraintsIfType1);
-        if(FormatConstraintsIfType1.Count > 0)
+        if (FormatConstraintsIfType1.Count > 0)
         {
           translator.TryCastToken(collection, TokenName, out string stringValue);
           InternalValidateFormat(stringValue, FormatConstraintsIfType1);
@@ -342,11 +342,13 @@ namespace SchemaForge.Crucible
   public class ConfigToken<Type1, Type2> : ConfigToken
   {
     /// <summary>
-    /// If set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
+    /// If DefaultValue is set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
     /// </summary>
     public Type1 DefaultValue { get; protected set; }
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
+    public List<Constraint<Type1>> FormatConstraintsIfType1 { get; protected set; } = new();
     public List<Constraint<Type2>> ConstraintsIfType2 { get; protected set; } = new();
+    public List<Constraint<Type2>> FormatConstraintsIfType2 { get; protected set; } = new();
 
     #region Constructors
 
@@ -406,8 +408,10 @@ namespace SchemaForge.Crucible
       }
       JsonConstraint.Add(GetConstraintObject(constraintsIfType1));
       JsonConstraint.Add(GetConstraintObject(constraintsIfType2));
-      ConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.ToList() : new List<Constraint<Type1>>();
-      ConstraintsIfType2 = constraintsIfType2.Exists() ? constraintsIfType2.ToList() : new List<Constraint<Type2>>();
+      ConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.Where(x => x.ConstraintType == ConstraintType.Standard).ToList() : new List<Constraint<Type1>>();
+      FormatConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.Where(x => x.ConstraintType == ConstraintType.Format).ToList() : new List<Constraint<Type1>>();
+      ConstraintsIfType2 = constraintsIfType2.Exists() ? constraintsIfType2.Where(x => x.ConstraintType == ConstraintType.Standard).ToList() : new List<Constraint<Type2>>();
+      FormatConstraintsIfType2 = constraintsIfType2.Exists() ? constraintsIfType2.Where(x => x.ConstraintType == ConstraintType.Format).ToList() : new List<Constraint<Type2>>();
     }
 
     #endregion
@@ -439,10 +443,20 @@ namespace SchemaForge.Crucible
       if (translator.TryCastToken(collection, TokenName, out Type1 newValue1))
       {
         InternalValidate(newValue1, ConstraintsIfType1);
+        if (FormatConstraintsIfType1.Count > 0)
+        {
+          translator.TryCastToken(collection, TokenName, out string stringValue);
+          InternalValidateFormat(stringValue, FormatConstraintsIfType1);
+        }
       }
       else if (translator.TryCastToken(collection, TokenName, out Type2 newValue2))
       {
         InternalValidate(newValue2, ConstraintsIfType2);
+        if (FormatConstraintsIfType2.Count > 0)
+        {
+          translator.TryCastToken(collection, TokenName, out string stringValue);
+          InternalValidateFormat(stringValue, FormatConstraintsIfType2);
+        }
       }
       else
       {
@@ -466,12 +480,15 @@ namespace SchemaForge.Crucible
   public class ConfigToken<Type1, Type2, Type3> : ConfigToken
   {
     /// <summary>
-    /// If set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
+    /// If DefaultValue is set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
     /// </summary>
     public Type1 DefaultValue { get; protected set; }
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
+    public List<Constraint<Type1>> FormatConstraintsIfType1 { get; protected set; } = new();
     public List<Constraint<Type2>> ConstraintsIfType2 { get; protected set; } = new();
+    public List<Constraint<Type2>> FormatConstraintsIfType2 { get; protected set; } = new();
     public List<Constraint<Type3>> ConstraintsIfType3 { get; protected set; } = new();
+    public List<Constraint<Type3>> FormatConstraintsIfType3 { get; protected set; } = new();
 
     #region Constructors
 
@@ -534,9 +551,12 @@ namespace SchemaForge.Crucible
       JsonConstraint.Add(GetConstraintObject(constraintsIfType1));
       JsonConstraint.Add(GetConstraintObject(constraintsIfType2));
       JsonConstraint.Add(GetConstraintObject(constraintsIfType3));
-      ConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.ToList() : new List<Constraint<Type1>>();
-      ConstraintsIfType2 = constraintsIfType2.Exists() ? constraintsIfType2.ToList() : new List<Constraint<Type2>>();
-      ConstraintsIfType3 = constraintsIfType3.Exists() ? constraintsIfType3.ToList() : new List<Constraint<Type3>>();
+      ConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.Where(x => x.ConstraintType == ConstraintType.Standard).ToList() : new List<Constraint<Type1>>();
+      FormatConstraintsIfType1 = constraintsIfType1.Exists() ? constraintsIfType1.Where(x => x.ConstraintType == ConstraintType.Format).ToList() : new List<Constraint<Type1>>();
+      ConstraintsIfType2 = constraintsIfType2.Exists() ? constraintsIfType2.Where(x => x.ConstraintType == ConstraintType.Standard).ToList() : new List<Constraint<Type2>>();
+      FormatConstraintsIfType2 = constraintsIfType2.Exists() ? constraintsIfType2.Where(x => x.ConstraintType == ConstraintType.Format).ToList() : new List<Constraint<Type2>>();
+      ConstraintsIfType3 = constraintsIfType3.Exists() ? constraintsIfType3.Where(x => x.ConstraintType == ConstraintType.Standard).ToList() : new List<Constraint<Type3>>();
+      FormatConstraintsIfType3 = constraintsIfType3.Exists() ? constraintsIfType3.Where(x => x.ConstraintType == ConstraintType.Format).ToList() : new List<Constraint<Type3>>();
     }
 
     #endregion
@@ -548,7 +568,10 @@ namespace SchemaForge.Crucible
     /// <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
     /// <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
     /// <returns>New <see cref="ConfigToken{Type1, Type2, Type3,TNewType}"/></returns>
-    public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null) => throw new NotImplementedException("Cannot have more than three type parameters on a ConfigToken.");
+    public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
+    {
+      throw new ArgumentException($"A ConfigToken cannot have more than three types.");
+    }
 
     /// <summary>
     /// Executes the ConfigToken's ValidationFunction on the passed collection item.
@@ -561,14 +584,29 @@ namespace SchemaForge.Crucible
       if (translator.TryCastToken(collection, TokenName, out Type1 newValue1))
       {
         InternalValidate(newValue1, ConstraintsIfType1);
+        if (FormatConstraintsIfType1.Count > 0)
+        {
+          translator.TryCastToken(collection, TokenName, out string stringValue);
+          InternalValidateFormat(stringValue, FormatConstraintsIfType1);
+        }
       }
       else if (translator.TryCastToken(collection, TokenName, out Type2 newValue2))
       {
         InternalValidate(newValue2, ConstraintsIfType2);
+        if (FormatConstraintsIfType2.Count > 0)
+        {
+          translator.TryCastToken(collection, TokenName, out string stringValue);
+          InternalValidateFormat(stringValue, FormatConstraintsIfType2);
+        }
       }
       else if (translator.TryCastToken(collection, TokenName, out Type3 newValue3))
       {
         InternalValidate(newValue3, ConstraintsIfType3);
+        if (FormatConstraintsIfType3.Count > 0)
+        {
+          translator.TryCastToken(collection, TokenName, out string stringValue);
+          InternalValidateFormat(stringValue, FormatConstraintsIfType3);
+        }
       }
       else
       {
