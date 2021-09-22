@@ -111,5 +111,20 @@ namespace SchemaTests
       ConfigToken<string> token = new("Test Token", "An innocent and carefree string ConfigToken.");
       Assert.Throws<ArgumentException>(() => token.AddNewType<string>());
     }
+
+    [Theory]
+    [InlineData(true, "2021-05-03")] // Passes both.
+    [InlineData(false, "2022-08-01")] // Fails ConstrainValue.
+    [InlineData(false, "2021-05-03T12:00:00")] // Fails ConstrainDateTimeFormat.
+    [InlineData(false, "2022-08-01T23:59:59")] // Fails both.
+    public void MixedFormatAndStandardConstraintsTest(bool expectedResult, string input)
+    {
+      ConfigToken<DateTime> token = new("Test Token", "The date by which you will finish counting an indescribable number of lima beans.", new Constraint<DateTime>[] { ConstrainValue(DateTime.Parse("2021-01-01"), DateTime.Parse("2021-12-01")), ConstrainDateTimeFormat("yyyy-MM-dd") });
+      JObject testConfig = new() { { "Test Token", input } };
+      Schema testSchema = new(token);
+      testSchema.Validate(testConfig, new JObjectTranslator());
+      output.WriteLine(string.Join('\n', testSchema.ErrorList));
+      Assert.Equal(expectedResult, !testSchema.ErrorList.AnyFatal());
+    }
   }
 }
