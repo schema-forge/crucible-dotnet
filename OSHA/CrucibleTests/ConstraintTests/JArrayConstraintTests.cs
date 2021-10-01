@@ -118,7 +118,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "There is only ice cream.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainStringLength(15), ForbidStringCharacters('/', '?', '!')) });
+      testToken = new ConfigToken<JArray>("TestArray", "There is only ice cream.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainStringLength(15), ForbidSubstrings("/", "?", "!")) });
       testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine($"Input array: {string.Join(",", JObject.Parse(constrainedJson)["TestArray"])}");
       output.WriteLine(string.Join('\n', testToken.ErrorList));

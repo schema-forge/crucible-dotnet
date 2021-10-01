@@ -375,20 +375,20 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// Forbids characters from a string.
     /// </summary>
-    /// <param name="forbiddenCharacters">Characters that cannot occur in the input string.</param>
+    /// <param name="forbiddenSubstrings">Characters that cannot occur in the input string.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if no chars are passed.</exception>
     /// <returns>Function that ensures the input string does not contain any of the passed characters.</returns>
-    public static Constraint<string> ForbidStringCharacters(params char[] forbiddenCharacters)
+    public static Constraint<string> ForbidSubstrings(params string[] forbiddenSubstrings)
     {
-      if (forbiddenCharacters.Length == 0)
+      if (forbiddenSubstrings.Length == 0)
       {
-        throw new ArgumentException("ForbidStringCharacters must have at least one parameter.");
+        throw new ArgumentException("ForbidSubstrings must have at least one parameter.");
       }
       List<Error> InnerMethod(string inputString, string inputName)
       {
         List<Error> internalErrorList = new();
         bool containsForbidden = false;
-        foreach (char forbiddenCharacter in forbiddenCharacters)
+        foreach (string forbiddenCharacter in forbiddenSubstrings)
         {
           if (inputString.IndexOf(forbiddenCharacter) != -1)
           {
@@ -397,11 +397,11 @@ namespace SchemaForge.Crucible
         }
         if (containsForbidden)
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} contains at least one of a forbidden character: {string.Join(" ", forbiddenCharacters)}"));
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} contains at least one of a forbidden substring: {string.Join(" ", forbiddenSubstrings)}"));
         }
         return internalErrorList;
       }
-      return new Constraint<string>(InnerMethod, new JProperty("ForbidStringCharacters",JArray.FromObject(forbiddenCharacters.ToArray())));
+      return new Constraint<string>(InnerMethod, new JProperty("ForbidSubstrings",JArray.FromObject(forbiddenSubstrings.ToArray())));
     }
 
     #endregion

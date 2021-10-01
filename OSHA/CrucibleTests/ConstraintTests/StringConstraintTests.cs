@@ -108,28 +108,31 @@ namespace ConstraintTests
     }
 
     /// <summary>
-    /// Ensures that ForbidStringCharacters functions properly with one, multiple, and no arguments.
+    /// Ensures that ForbidSubstrings functions properly with one, multiple, and no arguments.
     /// </summary>
     /// <param name="expectedResult">Expected result from validation.</param>
-    /// <param name="constrainedString">String to test against forbidden characters.</param>
-    /// <param name="forbiddenChars">Arguments to pass to ForbidStringCharacters.</param>
+    /// <param name="constrainedString">String to test against forbidden substrings.</param>
+    /// <param name="forbiddenSubstrings">Arguments to pass to ForbidSubstrings.</param>
     [Theory]
-    [InlineData(true, "ModestyPrevails", 'V')]
-    [InlineData(true, "GoodBoy", '/', '*')]
-    [InlineData(false, "Why, father?", 'W')]
+    [InlineData(true, "ModestyPrevails", "V")]
+    [InlineData(true, "GoodBoy", "/", "*")]
+    [InlineData(true, "AnotherGoodBoy", "Bad", "lBoy")]
+    [InlineData(false, "Why, father?", "W")]
+    [InlineData(false, "This is the end.", "nd.")]
+    [InlineData(false, "Or, perhaps, the beginning.", "Or,")]
     [InlineData(false, "Doomed")]
-    public void ForbidStringCharactersInnerFunctionTest(bool expectedResult, string constrainedString, params char[] forbiddenChars)
+    public void ForbidSubstringsInnerFunctionTest(bool expectedResult, string constrainedString, params string[] forbiddenSubstrings)
     {
-      if (forbiddenChars.Length > 0)
+      if (forbiddenSubstrings.Length > 0)
       {
-        ConfigToken<string> testToken = new("TestToken", "One Million Watts", new Constraint<string>[] { ForbidStringCharacters(forbiddenChars) });
+        ConfigToken<string> testToken = new("TestToken", "One Million Watts", new Constraint<string>[] { ForbidSubstrings(forbiddenSubstrings) });
         bool testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
         output.WriteLine(string.Join('\n', testToken.ErrorList));
         Assert.Equal(testResult, expectedResult);
       }
       else
       {
-        Assert.Throws<ArgumentException>(() => new ConfigToken<string>("TestToken", "There Is No String", new Constraint<string>[] { ForbidStringCharacters(forbiddenChars) }));
+        Assert.Throws<ArgumentException>(() => new ConfigToken<string>("TestToken", "There Is No String", new Constraint<string>[] { ForbidSubstrings(forbiddenSubstrings) }));
       }
     }
 
