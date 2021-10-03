@@ -1,0 +1,32 @@
+name: Publish NuGet Package
+
+on:
+  release:
+    types: [published]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Setup .NET 5
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.10'
+      - name: Build project
+        run: dotnet build --configuration Release
+      - name: Run tests
+        run: dotnet test OSHA/OSHA.csproj
+      - name: Publish SchemaForge.Crucible
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: Crucible/Crucible.csproj
+          NUGET_KEY: ${{secrets.NUGET_KEY}}
