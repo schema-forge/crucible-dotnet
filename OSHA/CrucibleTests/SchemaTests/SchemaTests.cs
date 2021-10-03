@@ -253,7 +253,7 @@ namespace SchemaTests
         new ConfigToken<int>("The Third of Three","Finally, a sample optional token.",required: false)
       });
 
-      string configString = TestSchema.GenerateEmptyConfig().ToString();
+      string configString = TestSchema.GenerateEmptyJson().ToString();
       string expectedString = JObject.Parse("{'The First of Three':'A sample required token.','The Second of Three':'Another sample required token.','The Third of Three':'Optional - Finally, a sample optional token.'}").ToString();
       Assert.Equal(expectedString, configString);
     }

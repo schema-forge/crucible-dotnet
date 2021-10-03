@@ -37,6 +37,11 @@ namespace SchemaForge.Crucible
       AddTokens(tokens);
     }
 
+    /// <summary>
+    /// Adds a token to the Schema's set of ConfigTokens.
+    /// </summary>
+    /// <exception cref="ArgumentException">Throws ArgumentException if the Schema already contains a token with the same name.</exception>
+    /// <param name="token">Token to add. The name must be different from all tokens currently in the Schema.</param>
     public void AddToken(ConfigToken token)
     {
       if (!ConfigTokens.Add(token))
@@ -45,6 +50,11 @@ namespace SchemaForge.Crucible
       }
     }
 
+    /// <summary>
+    /// Adds a set of tokens to the Schema's set of ConfigTokens.
+    /// </summary>
+    /// <exception cref="ArgumentException">Throws ArgumentException if the Schema already contains a token with the same name as one or more of the tokens in <paramref name="tokens"/>.</exception>
+    /// <param name="tokens">Collection of tokens to add. There must be no tokens in the set that have a name identical to something already in the Schema's token set.</param>
     public void AddTokens(IEnumerable<ConfigToken> tokens)
     {
       foreach (ConfigToken token in tokens)
@@ -71,7 +81,8 @@ namespace SchemaForge.Crucible
     /// <param name="type">If name and type are provided, the message 
     /// "Validation for <paramref name="type"/> <paramref name="name"/> failed."
     /// will be added to ErrorList on validation failure.</param>
-    /// <param name="allowUnrecognized">If false, unrecognized tokens will raise
+    /// <param name="allowUnrecognized">If false, unrecognized tokens (that is,
+    /// tokens present in the object being validated but not in the Schea) will raise
     /// a <see cref="Severity.Fatal"/> error. If true, unrecognized tokens will
     /// raise a <see cref="Severity.Info"/> error.</param>
     public virtual List<Error> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, string type = null, bool allowUnrecognized = false)
@@ -122,7 +133,7 @@ namespace SchemaForge.Crucible
           but it will also not have the effect the user intended from including the optional token.
 
       Such a problem would be very frustrating and possibly difficult to debug;
-          therefore, we invalidate the config file if there are any tokens that are not accounted for in ConfigTokens.
+          therefore, we invalidate the config file if there are any tokens that are not accounted for in ConfigTokens by default.
 
       */
       List<string> collectionKeys = translator.GetCollectionKeys(collection);
@@ -180,9 +191,9 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// This method can be used to generate a new example request or configuration file with all the required and optional tokens along with their HelpStrings.
     /// </summary>
-    /// <returns>A JObject file with all tokens in RequiredConfigTokens and OptionalConfigTokens.
+    /// <returns>A JObject file with all tokens from <see cref="ConfigTokens"/>, using the name of the token and the HelpString.
     /// If the HelpStrings are well-written, the return value will serve as an excellent example for an end user to fill in.</returns>
-    public JObject GenerateEmptyConfig()
+    public JObject GenerateEmptyJson()
     {
       JObject newConfig = new();
       foreach (ConfigToken token in ConfigTokens)
