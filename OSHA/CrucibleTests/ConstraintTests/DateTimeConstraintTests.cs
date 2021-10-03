@@ -22,6 +22,12 @@ namespace ConstraintTests
       this.output = output;
     }
 
+    /// <summary>
+    /// Tests providing specific date formats.
+    /// </summary>
+    /// <param name="expectedResult">Expected result of the test condition.</param>
+    /// <param name="dateString">Date to be processed, as a string.</param>
+    /// <param name="formatString">Format to use to parse the date string.</param>
     [Theory]
     [InlineData(true,"2021-01-05","yyyy-MM-dd")]
     [InlineData(false, "2021-13-05", "yyyy-MM-dd")]

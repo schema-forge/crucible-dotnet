@@ -9,6 +9,8 @@ using Xunit;
 using Xunit.Abstractions;
 using static SchemaForge.Crucible.Constraints;
 
+// Note: ShippingAndReceiving is currently under development. Hence, these tests are commented out.
+
 namespace SchemaTests
 {
   public class ShippingAndReceivingTests

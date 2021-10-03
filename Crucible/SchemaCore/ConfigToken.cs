@@ -25,11 +25,6 @@ namespace SchemaForge.Crucible
     public List<Error> ErrorList { get; protected set; } = new();
 
     /// <summary>
-    /// Indicates whether or not DefaultValue is populated. Necessary because DefaultValue is generically typed and cannot be in the abstract class.
-    /// </summary>
-    public bool ContainsDefaultValue { get; protected set; } = false;
-
-    /// <summary>
     /// If false, null or empty token values are fatal errors. If true, they are warnings instead.
     /// </summary>
     public bool AllowNull { get; protected set; } = false;
@@ -43,6 +38,11 @@ namespace SchemaForge.Crucible
     /// Indicates whether or not this token is required.
     /// </summary>
     public bool Required { get; protected set; }
+
+    /// <summary>
+    /// If DefaultValue is set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
+    /// </summary>
+    public object DefaultValue { get; protected set; } = null;
 
     /// <summary>
     /// Converts a ConfigToken into a JProperty of format "<see cref="TokenName"/>":{ "Constraints":<see cref="JsonConstraint"/>, "Description":"<see cref="Description"/>" }
@@ -91,7 +91,7 @@ namespace SchemaForge.Crucible
     /// <param name="collection">Collection to insert the value into.</param>
     /// <param name="translator">Translator used to interpret <typeparamref name="TCollectionType"/></param>
     /// <returns>A new <typeparamref name="TCollectionType"/> <paramref name="collection"/> with the value added.</returns>
-    public abstract TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator);
+    public TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
 
     #region Overrides
 
@@ -207,6 +207,27 @@ namespace SchemaForge.Crucible
       }
     }
 
+    /// <summary>
+    /// Ensures that the DefaultValue can be cast to one of the types provided for the ConfigToken.
+    /// </summary>
+    /// <returns>Bool indicating if DefaultValue is valid.</returns>
+    protected bool CheckDefaultValue()
+    {
+      Type[] typeArray = GetType().GetGenericArguments();
+      foreach(Type currentType in typeArray)
+      {
+        try
+        {
+          Convert.ChangeType(DefaultValue, currentType);
+          return true;
+        }
+        catch
+        {
+        }
+      }
+      return false;
+    }
+
     #endregion
   }
 
@@ -220,10 +241,6 @@ namespace SchemaForge.Crucible
   /// <typeparam name="Type1">The 1st possible value type of this token.</typeparam>
   public class ConfigToken<Type1> : ConfigToken
   {
-    /// <summary>
-    /// If DefaultValue is set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
-    /// </summary>
-    public Type1 DefaultValue { get; protected set; }
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
     public List<Constraint<Type1>> FormatConstraintsIfType1 { get; protected set; } = new();
 
@@ -260,17 +277,22 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <exception cref="ArgumentNullException">If inputName or inputDescription is null, whitespace, or empty.</exception>
     /// <exception cref="ArgumentException">If all Type arguments are not unique.</exception>
+    /// <exception cref="ArgumentException">If inputDefaultValue can't be cast to any of the ConfigToken types.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
     /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
-    /// <param name="inputDefaultValue"><typeparamref name="Type1"/> that will be inserted into the user config if an optional token is not provided.
+    /// <param name="inputDefaultValue">Object that will be inserted into the user config if an optional token is not provided.
     /// If provided, assumes this token is not required.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
-    public ConfigToken(string inputName, string inputDescription, Type1 inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, bool allowNull = false)
+    public ConfigToken(string inputName, string inputDescription, object inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, bool allowNull = false)
     {
       BuildConfigTokenCore(inputName, inputDescription, false, allowNull);
       DefaultValue = inputDefaultValue;
+      if (!CheckDefaultValue())
+      {
+        throw new ArgumentException($"Passed DefaultValue of ConfigToken {TokenName} cannot be cast to any of: {GetType().GetGenericArguments().Join(", ")}");
+      }
       BuildConstraints(constraintsIfType1);
     }
 
@@ -298,7 +320,7 @@ namespace SchemaForge.Crucible
     public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
     {
       return GetType().GetGenericArguments().Contains(typeof(TNewType))
-        ? throw new ArgumentException($"ConfigToken already has type {typeof(TNewType).Name}.")
+        ? throw new ArgumentException($"ConfigToken {TokenName} already has type {typeof(TNewType).Name}.")
         : DefaultValue.Exists()
         ? new ConfigToken<Type1, TNewType>(TokenName, Description, DefaultValue, ConstraintsIfType1.ToArray(), newConstraints, AllowNull)
         : new ConfigToken<Type1, TNewType>(TokenName, Description, ConstraintsIfType1.ToArray(), newConstraints, Required, AllowNull);
@@ -327,7 +349,6 @@ namespace SchemaForge.Crucible
       }
       return !ErrorList.AnyFatal();
     }
-    public override TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
 
   /// <summary>
@@ -341,10 +362,6 @@ namespace SchemaForge.Crucible
   /// <typeparam name="Type2">The 2nd possible value type of this token.</typeparam>
   public class ConfigToken<Type1, Type2> : ConfigToken
   {
-    /// <summary>
-    /// If DefaultValue is set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
-    /// </summary>
-    public Type1 DefaultValue { get; protected set; }
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
     public List<Constraint<Type1>> FormatConstraintsIfType1 { get; protected set; } = new();
     public List<Constraint<Type2>> ConstraintsIfType2 { get; protected set; } = new();
@@ -384,18 +401,23 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <exception cref="ArgumentNullException">If inputName or inputDescription is null, whitespace, or empty.</exception>
     /// <exception cref="ArgumentException">If all Type arguments are not unique.</exception>
+    /// <exception cref="ArgumentException">If inputDefaultValue can't be cast to any of the ConfigToken types.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
     /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
-    /// <param name="inputDefaultValue"><typeparamref name="Type1"/> that will be inserted into the user config if an optional token is not provided.
+    /// <param name="inputDefaultValue">Object that will be inserted into the user config if an optional token is not provided.
     /// If provided, assumes this token is not required.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
-    public ConfigToken(string inputName, string inputDescription, Type1 inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, bool allowNull = false)
+    public ConfigToken(string inputName, string inputDescription, object inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, bool allowNull = false)
     {
       BuildConfigTokenCore(inputName, inputDescription, false, allowNull);
       DefaultValue = inputDefaultValue;
+      if (!CheckDefaultValue())
+      {
+        throw new ArgumentException($"Passed DefaultValue of ConfigToken {TokenName} cannot be cast to any of: {GetType().GetGenericArguments().Join(", ")}");
+      }
       BuildConstraints(constraintsIfType1, constraintsIfType2);
     }
 
@@ -426,7 +448,7 @@ namespace SchemaForge.Crucible
     public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
     {
       return GetType().GetGenericArguments().Contains(typeof(TNewType))
-        ? throw new ArgumentException($"ConfigToken already has type {typeof(TNewType).Name}.")
+        ? throw new ArgumentException($"ConfigToken {TokenName} already has type {typeof(TNewType).Name}.")
         : DefaultValue.Exists()
         ? new ConfigToken<Type1, Type2, TNewType>(TokenName, Description, DefaultValue, ConstraintsIfType1.ToArray(), ConstraintsIfType2.ToArray(), newConstraints, AllowNull)
         : new ConfigToken<Type1, Type2, TNewType>(TokenName, Description, ConstraintsIfType1.ToArray(), ConstraintsIfType2.ToArray(), newConstraints, Required, AllowNull);
@@ -464,7 +486,6 @@ namespace SchemaForge.Crucible
       }
       return !ErrorList.AnyFatal();
     }
-    public override TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
 
   /// <summary>
@@ -479,10 +500,6 @@ namespace SchemaForge.Crucible
   /// <typeparam name="Type3">The 3rd possible value type of this token.</typeparam>
   public class ConfigToken<Type1, Type2, Type3> : ConfigToken
   {
-    /// <summary>
-    /// If DefaultValue is set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
-    /// </summary>
-    public Type1 DefaultValue { get; protected set; }
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
     public List<Constraint<Type1>> FormatConstraintsIfType1 { get; protected set; } = new();
     public List<Constraint<Type2>> ConstraintsIfType2 { get; protected set; } = new();
@@ -525,19 +542,24 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <exception cref="ArgumentNullException">If inputName or inputDescription is null, whitespace, or empty.</exception>
     /// <exception cref="ArgumentException">If all Type arguments are not unique.</exception>
+    /// <exception cref="ArgumentException">If inputDefaultValue can't be cast to any of the ConfigToken types.</exception>
     /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
     /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
-    /// <param name="inputDefaultValue"><typeparamref name="Type1"/> that will be inserted into the user config if an optional token is not provided.
+    /// <param name="inputDefaultValue">Object that will be inserted into the user config if an optional token is not provided.
     /// If provided, assumes this token is not required.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
     /// <param name="constraintsIfType3">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type3"/>.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
-    public ConfigToken(string inputName, string inputDescription, Type1 inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, Constraint<Type3>[] constraintsIfType3 = null, bool allowNull = false)
+    public ConfigToken(string inputName, string inputDescription, object inputDefaultValue, Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, Constraint<Type3>[] constraintsIfType3 = null, bool allowNull = false)
     {
       BuildConfigTokenCore(inputName, inputDescription, false, allowNull);
       DefaultValue = inputDefaultValue;
+      if (!CheckDefaultValue())
+      {
+        throw new ArgumentException($"Passed DefaultValue of ConfigToken {TokenName} cannot be cast to any of: {GetType().GetGenericArguments().Join(", ")}");
+      }
       BuildConstraints(constraintsIfType1, constraintsIfType2, constraintsIfType3);
     }
 
@@ -568,10 +590,7 @@ namespace SchemaForge.Crucible
     /// <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
     /// <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
     /// <returns>New <see cref="ConfigToken{Type1, Type2, Type3,TNewType}"/></returns>
-    public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
-    {
-      throw new ArgumentException($"A ConfigToken cannot have more than three types.");
-    }
+    public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null) => throw new NotImplementedException("ConfigTokens cannot have more than 3 types.");
 
     /// <summary>
     /// Executes the ConfigToken's ValidationFunction on the passed collection item.
@@ -614,6 +633,6 @@ namespace SchemaForge.Crucible
       }
       return !ErrorList.AnyFatal();
     }
-    public override TCollectionType InsertDefaultValue<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator) => translator.InsertToken(collection, TokenName, DefaultValue);
   }
+
 }

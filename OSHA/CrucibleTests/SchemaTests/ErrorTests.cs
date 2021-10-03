@@ -10,6 +10,9 @@ namespace SchemaTests
 {
   public class ErrorTests
   {
+    /// <summary>
+    /// Ensures that the Error constructor populates values correctly.
+    /// </summary>
     [Fact]
     public void Error_ConstructorInitializesErrorMessage()
     {
@@ -19,6 +22,9 @@ namespace SchemaTests
       Assert.Equal("You dun goofed!", error.ErrorMessage);
     }
 
+    /// <summary>
+    /// Ensures that passing a custom error severity works correctly.
+    /// </summary>
     [Fact]
     public void Error_ConstructorInitializesErrorSeverity()
     {
@@ -26,6 +32,9 @@ namespace SchemaTests
       Assert.Equal(Severity.Warning, error.ErrorSeverity);
     }
 
+    /// <summary>
+    /// Ensures that the Error constructor throws on an empty error string.
+    /// </summary>
     [Fact]
     public void Error_ConstructorThrowsOnEmptyString() => Assert.Throws<ArgumentNullException>(() => new Error(""));
   }

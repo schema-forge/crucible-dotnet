@@ -22,6 +22,11 @@ namespace ConstraintTests
       this.output = output;
     }
 
+    /// <summary>
+    /// Tests <see cref="MatchAnyConstraint{TValueType}(Constraint{TValueType}[])"/> with three constraints and values that pass the first, last, middle, and all constraints, or fail them all.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result from the tested method.</param>
+    /// <param name="constrainedValue">Value to validate against the test conditions.</param>
     [Theory]
     [InlineData(true, 15)] // Pass only first constraint.
     [InlineData(true, 45)] // Pass only last constraint.

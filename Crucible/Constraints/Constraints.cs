@@ -9,8 +9,6 @@ using Newtonsoft.Json.Linq;
 
 using SchemaForge.Crucible.Extensions;
 
-//using ConstraintApplicator = System.Func<SchemaForge.Crucible.Constraint[], SchemaForge.Crucible.ConstraintContainer>;
-
 namespace SchemaForge.Crucible
 {
   class SchemaDateTime

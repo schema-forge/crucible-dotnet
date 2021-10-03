@@ -61,6 +61,12 @@ namespace ConstraintTests
       Assert.Equal(expectedResult, testResult);
     }
 
+    /// <summary>
+    /// Tests ConstrainValueUpperBound on ints.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedValue">Value to check with ConstrainValue.</param>
+    /// <param name="constraints">Arguments to be passed to ConstrainValue.</param>
     [Theory]
     [InlineData(true,15,15)]
     [InlineData(false, 15, 13)]
@@ -229,6 +235,12 @@ namespace ConstraintTests
       Assert.Equal(expected, testConstraint.Property);
     }
 
+    /// <summary>
+    /// Ensures that ConstrainDigits properly flags numbers with too many digits.
+    /// </summary>
+    /// <param name="expected">Expected outcome of the test condition.</param>
+    /// <param name="constrainedValue">Value to test.</param>
+    /// <param name="arg">Number of digits permitted in the constrained value.</param>
     [Theory]
     [InlineData(true,35.55,2)]
     [InlineData(true, 35.55, 3)]

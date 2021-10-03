@@ -20,7 +20,7 @@ namespace Extensions
     [Fact]
     public void Exists_ReturnsTrueIfNotNullForRegex()
     {
-      Regex pattern = new Regex("([A-z])+");
+      Regex pattern = new("([A-z])+");
       Assert.True(pattern.Exists());
     }
 

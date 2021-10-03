@@ -43,24 +43,6 @@ namespace SchemaForge.Crucible.Extensions
     }
 
     /// <summary>
-    /// Checks to see if any error in the calling error collection has severity Fatal.
-    /// </summary>
-    /// <param name="errorCollection">Error collection to search.</param>
-    /// <returns>Bool indicating if the error collection contains a fatal error.</returns>
-    public static bool AnyFatal(this IList<Error> errorCollection)
-    {
-      List<Severity> fatalTypes = new() { Severity.Fatal };
-      for(int i=errorCollection.Count; i-- > 0;)
-      {
-        if(fatalTypes.Contains(errorCollection[i].ErrorSeverity))
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    /// <summary>
     /// If the source is ICollection, returns Count property. Otherwise instantiates an enumerator and retrieves the count through iteration.
     /// </summary>
     /// <param name="source">IEnumerable to count.</param>
@@ -91,6 +73,30 @@ namespace SchemaForge.Crucible.Extensions
         if (resource is IDisposable d)
           d.Dispose();
       }
+    }
+  }
+}
+
+namespace SchemaForge.Crucible
+{
+  public static class IEnumerableExtensionsPublic
+  {
+    /// <summary>
+    /// Checks to see if any error in the calling error collection has severity Fatal.
+    /// </summary>
+    /// <param name="errorCollection">Error collection to search.</param>
+    /// <returns>Bool indicating if the error collection contains a fatal error.</returns>
+    public static bool AnyFatal(this IList<Error> errorCollection)
+    {
+      List<Severity> fatalTypes = new() { Severity.Fatal };
+      for (int i = errorCollection.Count; i-- > 0;)
+      {
+        if (fatalTypes.Contains(errorCollection[i].ErrorSeverity))
+        {
+          return true;
+        }
+      }
+      return false;
     }
   }
 }

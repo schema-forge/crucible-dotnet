@@ -11,6 +11,10 @@ namespace Extensions
   [Trait("Crucible", "")]
   public class JTokenExtensionTests
   {
+    /// <summary>
+    /// Tests all conditions under which <see cref="JTokenExtensions.IsNullOrEmpty(JToken)"/> should return true for a <see cref="JToken"/>.
+    /// </summary>
+    /// <param name="input">JToken to test for emptiness.</param>
     [Theory]
     [MemberData(nameof(JTokenIsNullOrEmptyData))]
     public void JTokenIsNullOrEmpty(JToken input)
@@ -30,6 +34,10 @@ namespace Extensions
       new object[] { JObject.Parse("{}") }
     };
 
+    /// <summary>
+    /// Tests several conditions under which <see cref="JTokenExtensions.IsNullOrEmpty(JToken)"/> should return false for a <see cref="JToken"/>.
+    /// </summary>
+    /// <param name="input">JToken to test for emptiness.</param>
     [Theory]
     [MemberData(nameof(JTokenIsNotNullOrEmptyData))]
     public void JTokenIsNotNullOrEmpty(JToken input)
@@ -48,6 +56,12 @@ namespace Extensions
       new object[] { JTokenNotNullTestObject["SuddenlyABool"] }
     };
 
+
+    /// <summary>
+    /// Tests all conditions under which <see cref="JTokenExtensions.Contains(JToken, object)"/> should return true for a <see cref="JToken"/>.
+    /// </summary>
+    /// <param name="input">JToken to test for its contents. It can be a singular JValue or a collection of some kind.</param>
+    /// <param name="searchTerm">Object to search for in the JToken.</param>
     [Theory]
     [MemberData(nameof(JTokenContainsData))]
     public void JTokenContains(JToken input, object searchTerm)
@@ -80,6 +94,9 @@ namespace Extensions
       Assert.True(thingy["Array"].Contains(15));
     }
 
+    /// <summary>
+    /// Tests <see cref="JTokenExtensions.Add{T}(JToken, T)"/> for JArrays.
+    /// </summary>
     [Fact]
     public void JTokenAddToArrayValid()
     {
@@ -88,6 +105,9 @@ namespace Extensions
       Assert.True(((JArray)thingy["Array"]).Count == 2);
     }
 
+    /// <summary>
+    /// Tests <see cref="JTokenExtensions.Add{T}(JToken, T)"/> for non-JArrays.
+    /// </summary>
     [Fact]
     public void JTokenAddToArrayInvalid()
     {

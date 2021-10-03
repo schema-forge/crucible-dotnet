@@ -303,5 +303,58 @@ namespace SchemaTests
         new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
         }));
     }
+
+    /// <summary>
+    /// Ensures that, when a default value is provided and not included in the config being validated, it is successfully inserted.
+    /// </summary>
+    [Fact]
+    public void DefaultValueSuccessfullyInserts()
+    {
+      JObject testConfig = JObject.Parse(
+        @"{
+          'MoviesWatched':37,
+          'MoviesEnjoyed':'36',
+          'LeastEnjoyedMovie':'Avatar: The Last Airbender, courtesy of famed director M. Night Shyamalan.'
+        }");
+
+      Schema movieSchema = new (new ConfigToken[]
+      {
+        new ConfigToken<int>("MoviesWatched","Indicates how many movies the user has watched simultaneously in the past 24 hours."),
+        new ConfigToken<int>("MoviesEnjoyed","Indicates the number of simultaneous movies the user enjoyed."),
+        new ConfigToken<string>("LeastEnjoyedMovie","Indicates that, even in the overwhelming cacophany and sense-overload of thirty seven simultaneous movies, the live-action Avatar film still stands out as the worst of them all."),
+        new ConfigToken<bool>("There is hope for the movie industry", "Indicates whether or not the user believes that good movies are still being made.",true)
+      });
+
+      movieSchema.Validate(testConfig, new JObjectTranslator());
+
+      Assert.True(testConfig.ContainsKey("There is hope for the movie industry") && bool.Parse(testConfig["There is hope for the movie industry"].ToString()));
+    }
+
+    /// <summary>
+    /// Ensures that, when a default value is provided and is included in the provided config, the default value does not override the original value or throw an exception from being added.
+    /// </summary>
+    [Fact]
+    public void DefaultValueSuccessfullyDoesNotInsert()
+    {
+      JObject testConfig = JObject.Parse(
+        @"{
+          'MoviesWatched':37,
+          'MoviesEnjoyed':'36',
+          'LeastEnjoyedMovie':'Avatar: The Last Airbender, courtesy of famed director M. Night Shyamalan.',
+          'There is hope for the movie industry':false
+        }");
+
+      Schema movieSchema = new(new ConfigToken[]
+      {
+        new ConfigToken<int>("MoviesWatched","Indicates how many movies the user has watched simultaneously in the past 24 hours."),
+        new ConfigToken<int>("MoviesEnjoyed","Indicates the number of simultaneous movies the user enjoyed."),
+        new ConfigToken<string>("LeastEnjoyedMovie","Indicates that, even in the overwhelming cacophany and sense-overload of thirty seven simultaneous movies, the live-action Avatar film still stands out as the worst of them all."),
+        new ConfigToken<bool>("There is hope for the movie industry", "Indicates whether or not the user believes that good movies are still being made.",true)
+      });
+
+      movieSchema.Validate(testConfig, new JObjectTranslator());
+
+      Assert.True(testConfig.ContainsKey("There is hope for the movie industry") && !bool.Parse(testConfig["There is hope for the movie industry"].ToString()));
+    }
   }
 }

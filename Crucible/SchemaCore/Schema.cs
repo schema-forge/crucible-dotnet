@@ -98,9 +98,9 @@ namespace SchemaForge.Crucible
               ErrorList.Add(new Error($"Input {type} {name} is missing required token {token.TokenName}\n{token.Description}"));
             }
           }
-          else if(token.ContainsDefaultValue)
+          else if(token.DefaultValue.Exists())
           {
-            token.InsertDefaultValue(collection, translator); // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
+            collection = token.InsertDefaultValue(collection, translator); // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
           }
           else
           {

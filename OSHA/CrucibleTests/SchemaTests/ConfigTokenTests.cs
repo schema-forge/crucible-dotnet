@@ -19,6 +19,10 @@ namespace SchemaTests
     {
       this.output = output;
     }
+
+    /// <summary>
+    /// Ensures that the ConfigToken constructor works as espected.
+    /// </summary>
     [Fact]
     public void ConfigTokenValidConfiguration()
     {
@@ -27,12 +31,15 @@ namespace SchemaTests
       Assert.Equal("Hi, this is what this value does and hopefully what you did wrong in order to see this message!", token.Description);
     }
 
+    /// <summary>
+    /// Ensures that the ConfigToken constructor will not accept an empty string as a name.
+    /// </summary>
     [Fact]
     public void ConfigTokenInvalidName() => Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("", "Hi, this is what this value does and hopefully what you did wrong in order to see this message!"));
 
-    //[Fact]
-    //public void ConfigTokenInvalidHelpString() => Assert.Throws<ArgumentNullException>(() => new ConfigToken<string>("BestPracticesOrDie", ""));
-
+    /// <summary>
+    /// Ensures that the constructor with the Optional parameter works properly.
+    /// </summary>
     [Fact]
     public void ConfigTokenValidConfigurationWithOptional()
     {
@@ -42,12 +49,18 @@ namespace SchemaTests
       Assert.Equal("This is what you get if you don't put anything in for TestToken!", token.DefaultValue);
     }
 
+    /// <summary>
+    /// Ensures that a ConfigToken will not accept more than one of the same type argument.
+    /// </summary>
     [Fact]
     public void ConfigTokenDuplicateTypeArgumentsThrows()
     {
       Assert.Throws<ArgumentException>(() => new ConfigToken<string, string>("Test Token", "Uh oh."));
     }
 
+    /// <summary>
+    /// Ensures that ToJProperty() works as expected without constraints.
+    /// </summary>
     [Fact]
     public void ToJPropertyTest()
     {
@@ -56,6 +69,9 @@ namespace SchemaTests
       Assert.Equal(expected, token.ToJProperty());
     }
 
+    /// <summary>
+    /// Ensures that ToJProperty() works as expected with a constraint.
+    /// </summary>
     [Fact]
     public void ToJPropertyWithConstraintTest()
     {
@@ -64,8 +80,9 @@ namespace SchemaTests
       Assert.Equal(expected, token.ToJProperty());
     }
 
-    // Start with a ConfigToken<int> and add the string type with an AllowValues constraint whose requirements are met. Then, pass a string token for validation via Schema.
-    // Expected not to generate a fatal error.
+    /// <summary>
+    /// Ensures that AddNewType works correctly by building a token, adding a new type, and validating a valid value. Start with a ConfigToken{int} and add the string type with an AllowValues constraint whose requirements are met. Then, pass a string token for validation via Schema.
+    /// </summary>
     [Fact]
     public void AddNewTypeValidTest()
     {
@@ -78,8 +95,9 @@ namespace SchemaTests
       Assert.False(testSchema.ErrorList.AnyFatal());
     }
 
-    // Start with a ConfigToken<int> and add the string type with an AllowValues constraint whose requirements are not met. Then, pass a string token for validation via Schema.
-    // Expected to generate a fatal error.
+    /// <summary>
+    /// Ensures that AddNewType works correctly by building a token, adding a new type, and validating an invalid value. Start with a ConfigToken{int} and add the string type with an AllowValues constraint whose requirements are met. Then, pass a string token for validation via Schema.
+    /// </summary>
     [Fact]
     public void AddNewTypeInvalidTest()
     {
@@ -92,7 +110,9 @@ namespace SchemaTests
       Assert.True(testSchema.ErrorList.AnyFatal());
     }
 
-    // This should generate a fatal error because it creates a ConfigToken<string,int>. The string cast will succeed, and the token will be tested against AllowValues, which will fail.
+    /// <summary>
+    /// This test references the fact that casts and applied constraints are attempted in order; in this case, casting "45" to String will succeed, but "45" is not in the list of allowed values.
+    /// </summary>
     [Fact]
     public void AddNewTypeInvalidTypeOrderTest()
     {
@@ -105,6 +125,9 @@ namespace SchemaTests
       Assert.True(testSchema.ErrorList.AnyFatal());
     }
 
+    /// <summary>
+    /// Ensures that AddNewType does not allow a user to add a type that is already present.
+    /// </summary>
     [Fact]
     public void AddNewTypeThrowsIfTypeAlreadyPresent()
     {
@@ -112,7 +135,12 @@ namespace SchemaTests
       Assert.Throws<ArgumentException>(() => token.AddNewType<string>());
     }
 
-    // Testing mixing together Standard constraints and Format constraints.
+    /// <summary>
+    /// Tests Format Constraints as well as testing Standard constraints. Format constraints apply to a given value as if it were a string; standard constraints apply to a given value as its actual value type.
+    /// In this case, the format constraint constrains how a datetime value has been presented.
+    /// </summary>
+    /// <param name="expectedResult">Expected outcome of the test condition.</param>
+    /// <param name="input">Value to test against the constraints.</param>
     [Theory]
     [InlineData(true, "3021-05-03")] // Passes both.
     [InlineData(false, "3022-08-01")] // Fails ConstrainValue.
@@ -126,6 +154,37 @@ namespace SchemaTests
       testSchema.Validate(testConfig, new JObjectTranslator());
       output.WriteLine(string.Join('\n', testSchema.ErrorList));
       Assert.Equal(expectedResult, !testSchema.ErrorList.AnyFatal());
+    }
+
+    /// <summary>
+    /// Ensures that passing a DefaultValue that cannot be cast to a ConfigToken's type will throw an exception.
+    /// </summary>
+    [Fact]
+    public void InvalidDefaultValueThrows()
+    {
+      ConfigToken<DateTime> token;
+      Assert.Throws<ArgumentException>(() => token = new("Test Token", "A token that desperately desires to contain a date, but alas, it does not.", "pudding"));
+    }
+
+    /// <summary>
+    /// Ensures that passing a string DefaultValue that can be cast to the ConfigToken's type does not throw an exception.
+    /// </summary>
+    [Fact]
+    public void ValidDefaultValueDoesNotThrow()
+    {
+      ConfigToken<DateTime> token = new("Test Token", "A token that is thankful to have been provided a date.", "2021-09-03");
+      Assert.True(true);
+    }
+
+
+    /// <summary>
+    /// Ensures that passing a DefaultValue of the ConfigToken's type does not throw an exception.
+    /// </summary>
+    [Fact]
+    public void ValidDateTimeDefaultValueDoesNotThrow()
+    {
+      ConfigToken<DateTime> token = new("Test Token", "A token that is thankful to have been provided a date.", new DateTime(2021,09,03));
+      Assert.True(true);
     }
   }
 }
