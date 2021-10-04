@@ -10,6 +10,9 @@ using static SchemaForge.Crucible.Constraints;
 
 namespace SchemaForge.Crucible
 {
+  /// <summary>
+  /// Schema objects contain a set of ConfigTokens that define each value that should be contained in an object passed to its Validate method.
+  /// </summary>
   public class Schema
   {
     /// <summary>
@@ -22,26 +25,37 @@ namespace SchemaForge.Crucible
     /// </summary>
     public List<Error> ErrorList { get; } = new();
 
+    /// <summary>
+    /// Constructs an empty <see cref="Schema"/> with no <see cref="ConfigToken"/> objects.
+    /// </summary>
     public Schema()
     {
       
     }
 
+    /// <summary>
+    /// Instantiates a <see cref="Schema"/> object with a set of <see cref="ConfigToken"/> objects to use.
+    /// </summary>
+    /// <param name="tokens">Tokens to add to the token set.</param>
     public Schema(params ConfigToken[] tokens)
     {
       AddTokens(tokens);
     }
 
+    /// <summary>
+    /// Instantiates a <see cref="Schema"/> object with a set of <see cref="ConfigToken"/> objects to use.
+    /// </summary>
+    /// <param name="tokens">Tokens to add to the token set.</param>
     public Schema(IEnumerable<ConfigToken> tokens)
     {
       AddTokens(tokens);
     }
 
     /// <summary>
-    /// Adds a token to the Schema's set of ConfigTokens.
+    /// Adds a token to the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects.
     /// </summary>
-    /// <exception cref="ArgumentException">Throws ArgumentException if the Schema already contains a token with the same name.</exception>
-    /// <param name="token">Token to add. The name must be different from all tokens currently in the Schema.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if the Schema already contains a <see cref="ConfigToken"/> with the same name.</exception>
+    /// <param name="token">Token to add. The name must be different from all <see cref="ConfigToken"/> objects currently in the Schema.</param>
     public void AddToken(ConfigToken token)
     {
       if (!ConfigTokens.Add(token))
@@ -51,7 +65,7 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Adds a set of tokens to the Schema's set of ConfigTokens.
+    /// Adds a set of tokens to the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects.
     /// </summary>
     /// <exception cref="ArgumentException">Throws ArgumentException if the Schema already contains a token with the same name as one or more of the tokens in <paramref name="tokens"/>.</exception>
     /// <param name="tokens">Collection of tokens to add. There must be no tokens in the set that have a name identical to something already in the Schema's token set.</param>
@@ -66,6 +80,10 @@ namespace SchemaForge.Crucible
       }
     }
 
+    /// <summary>
+    /// Returns the number of tokens contained in the <see cref="Schema"/>.
+    /// </summary>
+    /// <returns>The number of tokens contained in the <see cref="Schema"/>.</returns>
     public int Count() => ConfigTokens.Count;
 
     /// <summary>
@@ -210,6 +228,10 @@ namespace SchemaForge.Crucible
       return newConfig;
     }
 
+    /// <summary>
+    /// Returns a new Schema that is a clone of the current Schema.
+    /// </summary>
+    /// <returns>A new Schema that is a clone of this Schema.</returns>
     public Schema Clone()
     {
       Schema newSchema = new();

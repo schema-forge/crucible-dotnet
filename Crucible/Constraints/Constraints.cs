@@ -11,23 +11,28 @@ using SchemaForge.Crucible.Extensions;
 
 namespace SchemaForge.Crucible
 {
-  class SchemaDateTime
-  {
-    public DateTime CastValue { get; private set; }
-    public string StringRepresentation { get; private set; }
-    public SchemaDateTime(DateTime dateTime, string stringRepresentation)
-    {
-      CastValue = dateTime;
-      StringRepresentation = stringRepresentation;
-    }
-  }
-
+  /// <summary>
+  /// Indicates the type of the constraint; Standard constraints apply to values
+  /// that have been cast to the corresponding TValueType of Constraint whereas
+  /// Format constraints are applied to those values cast to strings instead.
+  /// </summary>
   public enum ConstraintType
   {
+    /// <summary>
+    /// Indicates that this constraint applies to TValueType values.
+    /// </summary>
     Standard,
+    /// <summary>
+    /// Indicates that this constraint applies to the string version of the token value.
+    /// </summary>
     Format
   }
 
+  /// <summary>
+  /// An object that represents a rule that a token value must follow. When
+  /// passed to a <see cref="ConfigToken"/>, the passed Function
+  /// will be executed on the value corresponding with the ConfigToken.
+  /// </summary>
   public abstract class Constraint
   {
     /// <summary>
@@ -53,6 +58,12 @@ namespace SchemaForge.Crucible
     public ConstraintType ConstraintType { get; protected set; } = ConstraintType.Standard;
   }
 
+  /// <summary>
+  /// An object that represents a rule that a token value must follow. When
+  /// passed to a <see cref="ConfigToken"/>, the <see cref="Function"/>
+  /// will be executed on the value corresponding with the ConfigToken.
+  /// </summary>
+  /// <typeparam name="TValueType">Type of the constraint; must match up with the <see cref="ConfigToken"/> to which the Constraint is being passed.</typeparam>
   public class Constraint<TValueType> : Constraint
   {
     /// <summary>
@@ -73,7 +84,20 @@ namespace SchemaForge.Crucible
     /// <param name="constraintErrors">Errors generated while creating this constraint.</param>
     public Constraint(Func<TValueType, string, List<Error>> inputFunction, JProperty inputProperty = null, List<Error> constraintErrors = null)
     {
-      BuildConstraint(inputFunction, inputProperty, constraintErrors);
+      if (inputProperty.Exists())
+      {
+        if (inputProperty.Name.IsNullOrEmpty())
+        {
+          throw new ArgumentNullException(nameof(inputProperty), $"Name of {nameof(inputProperty)} cannot be null or whitespace.");
+        }
+        if (inputProperty.Value.IsNullOrEmpty())
+        {
+          throw new ArgumentNullException(nameof(inputProperty), $"Value of {nameof(inputProperty)} cannot be null or whitespace.");
+        }
+        Property = inputProperty;
+      }
+      Function = inputFunction;
+      Errors = constraintErrors.Exists() ? constraintErrors : new List<Error>();
     }
 
     /// <summary>
@@ -112,27 +136,12 @@ namespace SchemaForge.Crucible
       }
     }
 
-    private void BuildConstraint(Func<TValueType, string, List<Error>> inputFunction, JProperty inputProperty, List<Error> constraintErrors)
-    {
-      if (inputProperty.Exists())
-      {
-        if (inputProperty.Name.IsNullOrEmpty())
-        {
-          throw new ArgumentNullException(nameof(inputProperty), $"Name of {nameof(inputProperty)} cannot be null or whitespace.");
-        }
-        if (inputProperty.Value.IsNullOrEmpty())
-        {
-          throw new ArgumentNullException(nameof(inputProperty), $"Value of {nameof(inputProperty)} cannot be null or whitespace.");
-        }
-        Property = inputProperty;
-      }
-      Function = inputFunction;
-      Errors = constraintErrors.Exists() ? constraintErrors : new List<Error>();
-    }
-
     public override object GetFunction() => Function;
   }
 
+  /// <summary>
+  /// Contains the definitions of all prepackaged Constraint-generating functions.
+  /// </summary>
   public static class Constraints
   {
     #region IComparable Constraints

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace SchemaForge.Crucible.Extensions
 {
+  /// <summary>
+  /// Contains extensions to the <see cref="Array"/> class for ease-of-use in SchemaForge.
+  /// </summary>
   public static class ArrayExtensions
   {
     /// <summary>

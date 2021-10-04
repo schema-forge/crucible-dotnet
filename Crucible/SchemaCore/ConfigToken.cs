@@ -7,6 +7,11 @@ using Newtonsoft.Json.Linq;
 
 namespace SchemaForge.Crucible
 {
+  /// <summary>
+  /// A ConfigToken represents a value that is expected to exist in a collection processed by a Schema object.
+  /// ConfigTokens can have up to 3 types passed as type parameters, each a possible type of the corresponding value in the
+  /// object to be analyzed by the Schema.
+  /// </summary>
   public abstract class ConfigToken
   {
     /// <summary>
@@ -158,6 +163,13 @@ namespace SchemaForge.Crucible
       return constraintObject;
     }
 
+    /// <summary>
+    /// Sets all the non-genericly typed values of a ConfigToken.
+    /// </summary>
+    /// <param name="inputName">Name to set.</param>
+    /// <param name="inputHelpString">HelpString to set.</param>
+    /// <param name="required">Indicates if the token is required.</param>
+    /// <param name="allowNull">Indicates if Null should be permitted for the token's value.</param>
     protected void BuildConfigTokenCore(string inputName, string inputHelpString, bool required, bool allowNull)
     {
       if (inputName.IsNullOrEmpty())

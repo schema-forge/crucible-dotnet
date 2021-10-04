@@ -6,6 +6,9 @@ using Newtonsoft.Json.Linq;
 
 namespace SchemaForge.Crucible.Extensions
 {
+  /// <summary>
+  /// Contains extensions to the <see cref="JToken"/> class for ease-of-use in SchemaForge.
+  /// </summary>
   public static class JTokenExtensions
   {
     /// <summary>
@@ -61,6 +64,13 @@ namespace SchemaForge.Crucible.Extensions
       }
     }
 
+    /// <summary>
+    /// This method is a typed Contains method for JArrays, to search for objects of specific types.
+    /// </summary>
+    /// <typeparam name="T">Type of item to search for.</typeparam>
+    /// <param name="input">JArray to search.</param>
+    /// <param name="item">Item to search for.</param>
+    /// <returns>Bool indicating if the item with the correct type is contained in the array.</returns>
     private static bool Contains<T>(this JArray input, T item)
     {
       /*

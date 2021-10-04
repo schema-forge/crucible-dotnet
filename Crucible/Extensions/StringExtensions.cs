@@ -4,6 +4,9 @@ using System.Text;
 
 namespace SchemaForge.Crucible.Extensions
 {
+  /// <summary>
+  /// Contains extensions to the <see cref="string"/> class for ease-of-use in SchemaForge.
+  /// </summary>
   public static class StringExtensions
   {
     /// <summary>

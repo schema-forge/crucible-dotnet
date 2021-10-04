@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace SchemaForge.Crucible.Extensions
 {
+
+  /// <summary>
+  /// Contains extensions to the <see cref="IEnumerable"/> class for ease-of-use in SchemaForge.
+  /// </summary>
   public static class IEnumerableExtensions
   {
     /// <summary>
@@ -79,6 +83,10 @@ namespace SchemaForge.Crucible.Extensions
 
 namespace SchemaForge.Crucible
 {
+  /// <summary>
+  /// Contains AnyFatal, an extension method that indicates whether or not a collection of Errors contains any of Severity.Fatal.
+  /// An important method for consumers of the library.
+  /// </summary>
   public static class IEnumerableExtensionsPublic
   {
     /// <summary>

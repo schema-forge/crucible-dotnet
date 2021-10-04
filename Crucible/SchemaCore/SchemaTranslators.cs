@@ -75,6 +75,10 @@ namespace SchemaForge.Crucible
     /// <returns>List{string} containing all collection keys.</returns>
     public List<string> GetCollectionKeys(TCollectionType collection);
   }
+  /// <summary>
+  /// Interprets <see cref="JObject"/> objects for a <see cref="Schema"/> object to validate.
+  /// Requires no parameters.
+  /// </summary>
   public class JObjectTranslator : ISchemaTranslator<JObject>
   {
     public bool TryCastToken<TCastType>(JObject collection, string valueName, out TCastType outputValue)
