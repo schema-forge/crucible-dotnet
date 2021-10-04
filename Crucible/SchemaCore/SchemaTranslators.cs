@@ -74,6 +74,14 @@ namespace SchemaForge.Crucible
     /// <param name="collection">The collection from which to extract all keys.</param>
     /// <returns>List{string} containing all collection keys.</returns>
     public List<string> GetCollectionKeys(TCollectionType collection);
+
+    /// <summary>
+    /// Takes the name of a valid C# data type and translates it to the
+    /// equivalent data type in <see cref="TCollectionType"/>
+    /// </summary>
+    /// <param name="cSharpType">Name of a valid C# data type.</param>
+    /// <returns>Name of the corresponding type in <see cref="TCollectionType"/></returns>
+    public string GetEquivalentType(string cSharpType);
   }
   /// <summary>
   /// Interprets <see cref="JObject"/> objects for a <see cref="Schema"/> object to validate.
@@ -81,6 +89,26 @@ namespace SchemaForge.Crucible
   /// </summary>
   public class JObjectTranslator : ISchemaTranslator<JObject>
   {
+    Dictionary<string, string> TypeMap = new()
+    {
+      { "Byte", "number" },
+      { "SByte", "number" },
+      { "Single", "number" },
+      { "Double", "number" },
+      { "Decimal", "number" },
+      { "Int16", "number" },
+      { "UInt16", "number" },
+      { "Int32", "number" },
+      { "UInt32", "number" },
+      { "Int64", "number" },
+      { "UInt64", "number" },
+      { "JObject", "object" },
+      { "Boolean", "boolean" },
+      { "DateTime", "string" },
+      { "JArray", "array" },
+      { "String", "string" },
+      { "Char", "string" }
+    };
     public bool TryCastToken<TCastType>(JObject collection, string valueName, out TCastType outputValue)
     {
       try
@@ -104,5 +132,6 @@ namespace SchemaForge.Crucible
     public bool CollectionContains(JObject collection, string valueName) => collection.ContainsKey(valueName);
     public List<string> GetCollectionKeys(JObject collection) => collection.Properties().Select(x => x.Name).ToList();
     public string CollectionValueToString(JObject collection, string valueName) => collection[valueName].ToString();
+    public string GetEquivalentType(string cSharpType) => $"Json " + (TypeMap.ContainsKey(cSharpType) ? TypeMap[cSharpType] : cSharpType.Contains("[]") ? "array" : "null");
   }
 }

@@ -184,10 +184,10 @@ namespace SchemaTests
           new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
       });
 
-      TestSchema.Validate(TestConfig,new JObjectTranslator(),"He of Many Tokens","BloatedConfig");
+      TestSchema.Validate(TestConfig,new JObjectTranslator(),"He of Many Tokens");
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
-      Assert.Contains($"Input BloatedConfig He of Many Tokens contains unrecognized token: Kids", TestSchema.ErrorList.Select(x => x.ErrorMessage));
-      Assert.Contains($"Validation for BloatedConfig He of Many Tokens failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.Contains($"Input He of Many Tokens contains unrecognized token: Kids", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.Contains($"Validation for He of Many Tokens failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
     }
 
     /// <summary>
@@ -202,10 +202,10 @@ namespace SchemaTests
           new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
       });
 
-      TestSchema.Validate(TestConfig, new JObjectTranslator(), "He of Many Tokens", "BloatedConfig",true);
+      TestSchema.Validate(TestConfig, new JObjectTranslator(), "He of Many Tokens", true);
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
-      Assert.Contains($"Input BloatedConfig He of Many Tokens contains unrecognized token: Kids", TestSchema.ErrorList.Select(x => x.ErrorMessage));
-      Assert.DoesNotContain($"Validation for BloatedConfig He of Many Tokens failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.Contains($"Input He of Many Tokens contains unrecognized token: Kids", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.DoesNotContain($"Validation for He of Many Tokens failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
     }
 
 
@@ -223,10 +223,10 @@ namespace SchemaTests
         new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
       });
 
-      TestSchema.Validate(TestConfig, new JObjectTranslator(), "EmptyInside :(","Incomplete config");
+      TestSchema.Validate(TestConfig, new JObjectTranslator(), "EmptyInside :(");
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
-      Assert.Contains($"Input Incomplete config EmptyInside :( is missing required token Lincolnshire Poacher\nThe first 300 numbers read out on the Lincolnshire Poacher station.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
-      Assert.Contains($"Validation for Incomplete config EmptyInside :( failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.Contains($"Input EmptyInside :( is missing required token Lincolnshire Poacher\nThe first 300 numbers read out on the Lincolnshire Poacher station.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.Contains($"Validation for EmptyInside :( failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
     }
 
     /// <summary>

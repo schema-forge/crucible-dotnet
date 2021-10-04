@@ -55,7 +55,6 @@ namespace SchemaForge.Crucible.Extensions
     {
       if (source is ICollection col)
         return col.Count;
-
       int c = 0;
       IEnumerator e = source.GetEnumerator();
       DynamicUsing(e, () =>
@@ -96,10 +95,9 @@ namespace SchemaForge.Crucible
     /// <returns>Bool indicating if the error collection contains a fatal error.</returns>
     public static bool AnyFatal(this IList<Error> errorCollection)
     {
-      List<Severity> fatalTypes = new() { Severity.Fatal };
       for (int i = errorCollection.Count; i-- > 0;)
       {
-        if (fatalTypes.Contains(errorCollection[i].ErrorSeverity))
+        if (errorCollection[i].ErrorSeverity == Severity.Fatal)
         {
           return true;
         }

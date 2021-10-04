@@ -248,10 +248,10 @@ namespace ConstraintTests
     [InlineData(false, 35.5, 0)]
     public void ConstrainDigitsTests(bool expected, double constrainedValue, int arg)
     {
-      Constraint<double> testConstraint = ConstrainDigits(arg);
+      Constraint<double> testConstraint = ConstrainDigits<double>(arg);
       JProperty expectedProperty = new("ConstrainDigits", arg);
       Assert.Equal(expectedProperty, testConstraint.Property);
-      Assert.Equal(expected, !testConstraint.Function(constrainedValue, "Test Token").AnyFatal());
+      Assert.Equal(expected, !testConstraint.FormatFunction(constrainedValue.ToString(), "Test Token").AnyFatal());
     }
   }
 }

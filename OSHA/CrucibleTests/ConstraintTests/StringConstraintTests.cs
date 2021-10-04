@@ -69,40 +69,69 @@ namespace ConstraintTests
     }
 
     /// <summary>
+    /// Ensures that <see cref="ConstrainStringLengthLowerBound(int)"/> functions properly with one, two, and invalid arguments.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedString">String to validate with <see cref="ConstrainStringLengthLowerBound(int)"/>.</param>
+    /// <param name="lowerBound">Upper bound to pass to <see cref="ConstrainStringLengthLowerBound(int)"/>.</param>
+    [Theory]
+    [InlineData(true, "APerfectlyWellBehavedString", 27)] // Length is exactly equal to lower bound. Should be permitted.
+    [InlineData(false, "AnInsubordinateAndChurlishString", 33)]
+    public void ConstrainStringLengthLowerBoundTest(bool expectedResult, string constrainedString, int lowerBound)
+    {
+      ConfigToken testToken;
+      bool testResult;
+      testToken = new ConfigToken<string>("TestToken", "There Is No String", new Constraint<string>[] { ConstrainStringLengthLowerBound(lowerBound) });
+      testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
+
+    /// <summary>
     /// Ensures that ConstrainStringLength functions properly with one, two, and invalid arguments.
     /// </summary>
     /// <param name="expectedResult">Expected result from validation.</param>
     /// <param name="constrainedString">String to validate with ConstrainStringLength.</param>
     /// <param name="passedConstraints">Arguments to pass to ConstrainStringLength.</param>
     [Theory]
-    [InlineData(true, "APerfectlyWellBehavedString", 3)]
-    [InlineData(false, "AnInsubordinateAndChurlishString", 33)]
     [InlineData(true, "DelightfulStringFromDownTheLane", 3, 31)]
     [InlineData(false, "TheStringNextDoor", 3, 5)]
     [InlineData(false, "IRanOutOfKNDReferences", 25, 45)]
     [InlineData(false, "ThisTestWasWrittenIncorrectly", 8, 5)]
-    public void ConstrainStringLengthInnerFunctionTest(bool expectedResult, string constrainedString, params int[] passedConstraints)
+    public void ConstrainStringLengthTest(bool expectedResult, string constrainedString, int lowerBound, int upperBound)
     {
       ConfigToken testToken;
       bool testResult;
-      if (passedConstraints.Length == 1)
+      if (lowerBound > upperBound)
       {
-        testToken = new ConfigToken<string>("TestToken", "There Is No String", new Constraint<string>[] { ConstrainStringLength(passedConstraints[0]) });
-        testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
+        Assert.Throws<ArgumentException>(() => new ConfigToken<string>("TestToken", "Doomed", new Constraint<string>[] { ConstrainStringLength(lowerBound, upperBound) }));
+        return;
       }
       else
       {
-        if (passedConstraints[0] > passedConstraints[1])
-        {
-          Assert.Throws<ArgumentException>(() => new ConfigToken<string>("TestToken", "Doomed", new Constraint<string>[] { ConstrainStringLength(passedConstraints[0], passedConstraints[1]) }));
-          return;
-        }
-        else
-        {
-          testToken = new ConfigToken<string>("TestToken", "Another Movie Quote", new Constraint<string>[] { ConstrainStringLength(passedConstraints[0], passedConstraints[1]) });
-          testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
-        }
+        testToken = new ConfigToken<string>("TestToken", "Another Movie Quote", new Constraint<string>[] { ConstrainStringLength(lowerBound, upperBound) });
+        testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
       }
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
+
+    /// <summary>
+    /// Ensures that <see cref="ConstrainStringLengthUpperBound(int)"/> functions properly with one, two, and invalid arguments.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedString">String to validate with <see cref="ConstrainStringLengthUpperBound(int)"/>.</param>
+    /// <param name="upperBound">Upper bound to pass to <see cref="ConstrainStringLengthUpperBound(int)"/>.</param>
+    [Theory]
+    [InlineData(true, "APerfectlyWellBehavedString", 27)] // Length is exactly equal to upper bound. Should be permitted.
+    [InlineData(false, "AnInsubordinateAndChurlishString", 3)]
+    public void ConstrainStringLengthUpperBoundTest(bool expectedResult, string constrainedString, int upperBound)
+    {
+      ConfigToken testToken;
+      output.WriteLine($"String length: {constrainedString.Length}\nUpper bound: {upperBound}");
+      bool testResult;
+      testToken = new ConfigToken<string>("TestToken", "There Is No String", new Constraint<string>[] { ConstrainStringLengthUpperBound(upperBound) });
+      testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
@@ -153,7 +182,7 @@ namespace ConstraintTests
     [Fact]
     public void ConstrainStringLengthLowerBoundPropertyTest()
     {
-      Constraint testConstraint = ConstrainStringLength(3);
+      Constraint testConstraint = ConstrainStringLengthLowerBound(3);
       JProperty expected = new("AllowValues", 3);
       Assert.Equal(expected, testConstraint.Property);
     }

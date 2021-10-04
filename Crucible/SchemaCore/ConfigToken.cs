@@ -74,7 +74,7 @@ namespace SchemaForge.Crucible
     /// <typeparam name="TCollectionType">Collection from which the token will be
     /// extracted.</typeparam>
     /// <typeparam name="TValueType">The type of elements in the collection.
-    /// For example, for a Newtonsoft JObject, this would be JToken.</typeparam>
+    /// For example, for a Newtonsoft <see cref="JObject"/>, this would be <see cref="JToken"/>.</typeparam>
     /// <param name="collection">Collection to extract a value from.</param>
     /// <param name="translator">Translator object to use when interacting with
     /// the specified collection.</param>
@@ -244,7 +244,7 @@ namespace SchemaForge.Crucible
   }
 
   /// <summary>
-  /// A ConfigToken represents a value that is expected to exist in a collection processed by a Schema object.
+  /// A <see cref="ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="Schema"/> object.
   /// All passed types must be unique.
   /// WARNING: Casts will be attempted IN ORDER. For example,
   /// ConfigToken{string, int} will NEVER treat the passed token as an int!
@@ -259,7 +259,7 @@ namespace SchemaForge.Crucible
     #region Constructors
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
+    /// A <see cref="ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="Schema"/> object.
     /// All passed types must be unique.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
@@ -339,9 +339,15 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Executes the ConfigToken's ValidationFunction on the passed collection item.
+    /// Extracts a token named <see cref="ConfigToken.TokenName"/> from
+    /// <see cref="collection"/> using <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>.
+    /// If at least one cast is successful, this function executes the
+    /// <see cref="Constraint{TValueType}.Function"/> of each
+    /// <see cref="Constraint{TValueType}"/> of the successful cast type on the
+    /// cast value.
     /// </summary>
-    /// <param name="tokenValue">Token value to validate.</param>
+    /// <param name="collection">Collection from which a token will be extracted.</param>
+    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/> corresponding to the type of <see cref="collection"/>.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
     public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
@@ -357,14 +363,14 @@ namespace SchemaForge.Crucible
       }
       else
       {
-        ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}", Severity.Fatal));
+        ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name} ({translator.GetEquivalentType(typeof(Type1).Name)})", Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
   }
 
   /// <summary>
-  /// A ConfigToken represents a value that is expected to exist in a collection processed by a Schema object.
+  /// A <see cref="ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="Schema"/> object.
   /// All passed types must be unique.
   /// WARNING: Casts will be attempted IN ORDER. For example,
   /// ConfigToken{string, int} will NEVER treat the passed token as an int!
@@ -382,7 +388,7 @@ namespace SchemaForge.Crucible
     #region Constructors
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
+    /// A <see cref="ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="Schema"/> object.
     /// All passed types must be unique.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
@@ -467,9 +473,15 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Executes the ConfigToken's ValidationFunction on the passed collection item.
+    /// Extracts a token named <see cref="ConfigToken.TokenName"/> from
+    /// <see cref="collection"/> using <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>.
+    /// If at least one cast is successful, this function executes the
+    /// <see cref="Constraint{TValueType}.Function"/> of each
+    /// <see cref="Constraint{TValueType}"/> of the successful cast type on the
+    /// cast value.
     /// </summary>
-    /// <param name="tokenValue">Token value to validate.</param>
+    /// <param name="collection">Collection from which a token will be extracted.</param>
+    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/> corresponding to the type of <see cref="collection"/>.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
     public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
@@ -494,14 +506,14 @@ namespace SchemaForge.Crucible
       }
       else
       {
-        ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}", Severity.Fatal));
+        ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name} ({translator.GetEquivalentType(typeof(Type1).Name)}), {typeof(Type2).Name} ({translator.GetEquivalentType(typeof(Type2).Name)})", Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
   }
 
   /// <summary>
-  /// A ConfigToken represents a value that is expected to exist in a collection processed by a Schema object.
+  /// A <see cref="ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="Schema"/> object.
   /// All passed types must be unique.
   /// WARNING: Casts will be attempted IN ORDER. For example,
   /// ConfigToken{string, int} will NEVER treat the passed token as an int!
@@ -522,7 +534,7 @@ namespace SchemaForge.Crucible
     #region Constructors
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
+    /// A <see cref="ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="Schema"/> object.
     /// All passed types must be unique.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
@@ -602,12 +614,21 @@ namespace SchemaForge.Crucible
     /// <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
     /// <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
     /// <returns>New <see cref="ConfigToken{Type1, Type2, Type3,TNewType}"/></returns>
-    public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null) => throw new NotImplementedException("ConfigTokens cannot have more than 3 types.");
+    public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
+    {
+      throw new NotImplementedException($"A {nameof(ConfigToken)} cannot have more than 3 types.");
+    }
 
     /// <summary>
-    /// Executes the ConfigToken's ValidationFunction on the passed collection item.
+    /// Extracts a token named <see cref="ConfigToken.TokenName"/> from
+    /// <see cref="collection"/> using <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>.
+    /// If at least one cast is successful, this function executes the
+    /// <see cref="Constraint{TValueType}.Function"/> of each
+    /// <see cref="Constraint{TValueType}"/> of the successful cast type on the
+    /// cast value.
     /// </summary>
-    /// <param name="tokenValue">Token value to validate.</param>
+    /// <param name="collection">Collection from which a token will be extracted.</param>
+    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/> corresponding to the type of <see cref="collection"/>.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
     public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
@@ -641,10 +662,9 @@ namespace SchemaForge.Crucible
       }
       else
       {
-        ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name}, {typeof(Type2).Name}, {typeof(Type3).Name}", Severity.Fatal));
+        ErrorList.Add(new Error($"Token {TokenName} with value {translator.CollectionValueToString(collection, TokenName)} is an incorrect type. Expected one of: {typeof(Type1).Name} ({translator.GetEquivalentType(typeof(Type1).Name)}), {typeof(Type2).Name} ({translator.GetEquivalentType(typeof(Type2).Name)}), {typeof(Type3).Name} ({translator.GetEquivalentType(typeof(Type3).Name)})", Severity.Fatal));
       }
       return !ErrorList.AnyFatal();
     }
   }
-
 }

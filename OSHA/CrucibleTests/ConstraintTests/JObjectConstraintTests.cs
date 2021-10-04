@@ -88,7 +88,7 @@ namespace ConstraintTests
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken<JObject>("TestToken", "Eat the ice cream.", new Constraint<JObject>[] { ConstrainCollectionCount<JObject>(constraints[0]) });
+        testToken = new ConfigToken<JObject>("TestToken", "Eat the ice cream.", new Constraint<JObject>[] { ConstrainCollectionCountLowerBound<JObject>(constraints[0]) });
         testResult = testToken.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
       }
       else

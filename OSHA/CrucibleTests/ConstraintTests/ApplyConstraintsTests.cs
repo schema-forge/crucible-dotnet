@@ -56,13 +56,13 @@ namespace ConstraintTests
     /// Executes two constraints on a string that will pass both constarints.
     /// </summary>
     [Fact]
-    public void ApplyConstraintsValid() => Assert.True(new ConfigToken<string>("TestToken", "I'm sorry. I'm so sorry.", new Constraint<string>[] { ConstrainStringLength(5), ForbidSubstrings(",", "\n") }).Validate(new JValue("Valid string!"), new JTokenTranslator()));
+    public void ApplyConstraintsValid() => Assert.True(new ConfigToken<string>("TestToken", "I'm sorry. I'm so sorry.", new Constraint<string>[] { ConstrainStringLengthLowerBound(5), ForbidSubstrings(",", "\n") }).Validate(new JValue("Valid string!"), new JTokenTranslator()));
 
     /// <summary>
     /// Executes two constraints on a string that fails both conditions.
     /// </summary>
     [Fact]
-    public void ApplyConstraintsInvalid() => Assert.False(new ConfigToken<string>("TestToken", "Bow ties are cool.", new Constraint<string>[] { ConstrainStringLength(5), ForbidSubstrings(".", "\n") }).Validate(new JValue("yup."), new JTokenTranslator()));
+    public void ApplyConstraintsInvalid() => Assert.False(new ConfigToken<string>("TestToken", "Bow ties are cool.", new Constraint<string>[] { ConstrainStringLengthLowerBound(5), ForbidSubstrings(".", "\n") }).Validate(new JValue("yup."), new JTokenTranslator()));
     
     /// <summary>
     /// Tests applying constraints to a token that can be one of two types.

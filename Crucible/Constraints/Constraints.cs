@@ -19,7 +19,7 @@ namespace SchemaForge.Crucible
   public enum ConstraintType
   {
     /// <summary>
-    /// Indicates that this constraint applies to TValueType values.
+    /// Indicates that this constraint applies to casted values.
     /// </summary>
     Standard,
     /// <summary>
@@ -31,12 +31,12 @@ namespace SchemaForge.Crucible
   /// <summary>
   /// An object that represents a rule that a token value must follow. When
   /// passed to a <see cref="ConfigToken"/>, the passed Function
-  /// will be executed on the value corresponding with the ConfigToken.
+  /// will be executed on the value corresponding with the <see cref="ConfigToken"/>.
   /// </summary>
   public abstract class Constraint
   {
     /// <summary>
-    /// JProperty representation of this constraint. Will be used when saving a Schema to Json.
+    /// JProperty representation of this constraint. Will be used when saving a <see cref="Schema"/> to Json.
     /// </summary>
     public JProperty Property { get; protected set; } = null;
 
@@ -52,8 +52,8 @@ namespace SchemaForge.Crucible
     public List<Error> Errors { get; protected set; }
 
     /// <summary>
-    /// Gives the type of the constraint; Format constraints are applied to the original token
-    /// value cast to string while Standard constraints are applied post-cast.
+    /// Gives the type of the constraint; <see cref="ConstraintType.Format"/> constraints are applied to the original token
+    /// value cast to string while <see cref="ConstraintType.Standard"/> constraints are applied after casting to the required type.
     /// </summary>
     public ConstraintType ConstraintType { get; protected set; } = ConstraintType.Standard;
   }
@@ -67,21 +67,22 @@ namespace SchemaForge.Crucible
   public class Constraint<TValueType> : Constraint
   {
     /// <summary>
-    /// Function that will be applied by the constraint if this is a Standard constraint.
+    /// Function that will be applied by the constraint if this is a <see cref="ConstraintType.Standard"/> constraint.
     /// </summary>
     public Func<TValueType, string, List<Error>> Function { get; protected set; }
 
     /// <summary>
-    /// Function that will be applied by the constraint if this is a Format constraint.
+    /// Function that will be applied by the constraint if this is a <see cref="ConstraintType.Format"/> constraint.
     /// </summary>
     public Func<string, string, List<Error>> FormatFunction { get; protected set; }
 
     /// <summary>
-    /// Constraint objects represent a rule that is applied to a token; the Function property is the validation function that will be executed on the token's value while the Property is the representation of the constraint as a JProperty.
+    /// Constraint objects represent a rule that is applied to a token; <paramref name="inputFunction"/> is the validation function that will be executed on the token's value while the <paramref name="inputProperty"/> is the representation of the constraint as a <see cref="JProperty"/>.
     /// </summary>
-    /// <param name="inputFunction">Function to execute from this constraint. The TValueType in the function is the value being tested; the string is the name of the token in the object being tested.</param>
-    /// <param name="inputProperty">JProperty representation of this constraint. Neither name nor value can be null or whitespace.</param>
-    /// <param name="constraintErrors">Errors generated while creating this constraint.</param>
+    /// <exception cref="ArgumentNullException">Throws <see cref="ArgumentNullException"/> if <paramref name="inputProperty"/> name or value is null or empty.</exception>
+    /// <param name="inputFunction">Function to execute from this <see cref="Constraint"/>. The TValueType in the function is the value being tested; the string is the name of the token in the object being tested.</param>
+    /// <param name="inputProperty">JProperty representation of this <see cref="Constraint"/>. Neither name nor value can be null or whitespace.</param>
+    /// <param name="constraintErrors">Errors generated while creating this <see cref="Constraint"/>.</param>
     public Constraint(Func<TValueType, string, List<Error>> inputFunction, JProperty inputProperty = null, List<Error> constraintErrors = null)
     {
       if (inputProperty.Exists())
@@ -106,13 +107,15 @@ namespace SchemaForge.Crucible
     /// format; this is especially useful for potentially destructive casts such as
     /// DateTime.
     /// </summary>
+    /// <exception cref="ArgumentNullException">Throws <see cref="ArgumentNullException"/> if <paramref name="inputProperty"/>
+    /// name or value is null or empty or if attempting to pass <see cref="ConstraintType.Standard"/> to this overload.</exception>
     /// <param name="inputFunction">Function to execute from this constraint. The first string argument is the input data value cast to string; the second string argument is the name of the token in the object being tested.</param>
     /// <param name="constraintType">Type of this constraint. Currently, only <see cref="ConstraintType.Format"/> is supported here.</param>
     /// <param name="inputProperty">JProperty representation of this constraint. Neither name nor value can be null or whitespace.</param>
     /// <param name="constraintErrors">Errors generated while creating this constraint.</param>
     public Constraint(Func<string, string, List<Error>> inputFunction, ConstraintType constraintType, JProperty inputProperty = null, List<Error> constraintErrors = null)
     {
-      if(constraintType == ConstraintType.Format)
+      if (constraintType == ConstraintType.Format)
       {
         ConstraintType = ConstraintType.Format;
         if (inputProperty.Exists())
@@ -164,7 +167,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return new Constraint<TValueType>(InnerMethod,new JProperty("ConstrainValueLowerBound",lowerBound));
+      return new Constraint<TValueType>(InnerMethod,new JProperty(nameof(ConstrainValueLowerBound), lowerBound));
     }
 
     /// <summary>
@@ -185,7 +188,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return new Constraint<TValueType>(InnerMethod, new JProperty("ConstrainValueUpperBound", upperBound));
+      return new Constraint<TValueType>(InnerMethod, new JProperty(nameof(ConstrainValueUpperBound), upperBound));
     }
 
     /// <summary>
@@ -212,7 +215,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return new Constraint<TValueType>(InnerMethod, new JProperty("ConstrainValue", lowerBound + ", " + upperBound));
+      return new Constraint<TValueType>(InnerMethod, new JProperty(nameof(ConstrainValue), lowerBound + ", " + upperBound));
     }
 
     /// <summary>
@@ -234,37 +237,37 @@ namespace SchemaForge.Crucible
       List<Error> InnerMethod(TValueType inputValue, string inputName)
       {
         List<Error> internalErrorList = new();
-        bool matchesAtLeastOne = false;
         foreach ((TValueType, TValueType) domain in domains)
         {
           if (inputValue.CompareTo(domain.Item1) > 0 && inputValue.CompareTo(domain.Item2) < 0)
           {
-            matchesAtLeastOne = true;
+            return internalErrorList; // Return empty error list if a match is found.
           }
         }
-        if (!matchesAtLeastOne)
-        {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}"));
-        }
+        internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}"));
         return internalErrorList;
       }
-      return new Constraint<TValueType>(InnerMethod, new JProperty("ConstrainValue", JArray.FromObject(domains.Select(x => "(" + x.Item1 + ", " + x.Item2 + ")"))));
+      return new Constraint<TValueType>(InnerMethod, new JProperty(nameof(ConstrainValue), JArray.FromObject(domains.Select(x => "(" + x.Item1 + ", " + x.Item2 + ")"))));
     }
 
     /// <summary>
-    /// Constrains the number of digits a double has after the decimal.
+    /// Constrains the number of digits a number has after the decimal.
     /// </summary>
     /// <param name="upperBound">Maximum number of digits after the decimal.</param>
     /// <returns>A new <see cref="Constraint{double}"/> containing a method to constrain decimal digits.</returns>
-    public static Constraint<double> ConstrainDigits(int upperBound)
+    public static Constraint<TValueType> ConstrainDigits<TValueType>(int upperBound) where TValueType : struct,
+          IComparable,
+          IComparable<TValueType>,
+          IConvertible,
+          IEquatable<TValueType>,
+          IFormattable
     {
-      List<Error> InnerMethod(double inputValue, string inputName)
+      List<Error> InnerMethod(string inputValue, string inputName)
       {
         List<Error> internalErrorList = new();
-        string doubleString = inputValue.ToString();
-        if(doubleString.Contains('.'))
+        if(inputValue.Contains('.'))
         {
-          string[] splitDouble = doubleString.Split('.');
+          string[] splitDouble = inputValue.Split('.');
           if(splitDouble[1].Length > upperBound)
           {
             internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value can have no more than {upperBound} digits after the decimal."));
@@ -272,13 +275,16 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return new Constraint<double>(InnerMethod, new JProperty("ConstrainDigits", upperBound));
+      return new Constraint<TValueType>(InnerMethod, ConstraintType.Format, new JProperty(nameof(ConstrainDigits), upperBound));
     }
 
     #endregion
 
     #region String Constraints
 
+    /// <summary>
+    /// Ensure that the passed <typeparamref name="T"/> matches at least one of the values provided in <paramref name="acceptableValues"/>.
+    /// </summary>
     /// <param name="acceptableValues">List of values used to build the returned function.</param>
     /// <returns>Function checking to ensure that the value of the passed item is one of acceptableValues.</returns>
     public static Constraint<T> AllowValues<T>(params T[] acceptableValues)
@@ -291,54 +297,47 @@ namespace SchemaForge.Crucible
         if (!acceptableValues.Contains(inputValue)) //Returns false if inputValue is not in provided list
         {
           internalErrorList.Add(new Error($"Input {inputName} with value {inputValue} is not valid. Valid values: {string.Join(", ", acceptableValues)}")); // Tell the user what's wrong and how to fix it.
-          return internalErrorList;
         }
         return internalErrorList;
       }
-      return new Constraint<T>(InnerMethod,new JProperty("AllowValues",JArray.FromObject(acceptableValues)));
+      return new Constraint<T>(InnerMethod,new JProperty(nameof(AllowValues),JArray.FromObject(acceptableValues)));
     }
-
-    /// <param name="pattern">Valid Regex pattern(s) used in the returned function.</param>
-    /// <returns>Function checking to ensure that the whole JToken matches at least one of the provided pattern strings.</returns>
+    /// <summary>
+    /// Ensures that the token value is an exact match to at least one of the passed <paramref name="patterns"/>.
+    /// </summary>
+    /// <param name="patterns">Valid Regex pattern(s) used in the returned function.</param>
+    /// <returns>Function checking to ensure that the string value isan exact match to at least one of the passed <paramref name="patterns"/>.</returns>
     public static Constraint<string> ConstrainStringWithRegexExact(params Regex[] patterns)
     {
       List<Error> InnerMethod(string inputString, string inputName)
       {
         List<Error> internalErrorList = new();
-        bool matchesAtLeastOne = false;
         foreach (Regex pattern in patterns)
         {
-          if (pattern.IsMatch(inputString))
+          if(pattern.Match(inputString).Length == inputString.Length)
           {
-            if (Regex.Replace(inputString, pattern.ToString(), "").Length == 0)
-            {
-              matchesAtLeastOne = true;
-            }
+            return internalErrorList;  // Return empty error list if a match is found.
           }
         }
-        if (!matchesAtLeastOne)
+        if (patterns.Length == 1)
         {
-          if (patterns.Length == 1)
-          {
-            internalErrorList.Add(new Error($"Token {inputName} with value {inputString} is not an exact match to pattern {patterns[0]}"));
-          }
-          else
-          {
-            internalErrorList.Add(new Error($"Token {inputName} with value {inputString} is not an exact match to any pattern: {string.Join<Regex>(" ", patterns)}"));
-          }
-          return internalErrorList;
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} is not an exact match to pattern {patterns[0]}"));
+        }
+        else
+        {
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} is not an exact match to any pattern: {string.Join<Regex>(" ", patterns)}"));
         }
         return internalErrorList;
       }
-      return new Constraint<string>(InnerMethod, new JProperty("ConstrainStringWithRegexExact",JArray.FromObject(patterns)));
+      return new Constraint<string>(InnerMethod, new JProperty(nameof(ConstrainStringWithRegexExact),JArray.FromObject(patterns)));
     }
 
     /// <summary>
-    /// Constrains length of string value.
+    /// Constrains length of a string value.
     /// </summary>
     /// <param name="lowerBound">Minimum length of passed string.</param>
-    /// <returns>Function that ensures the length of a string is at least lowerBound.</returns>
-    public static Constraint<string> ConstrainStringLength(int lowerBound)
+    /// <returns>Function that ensures the length of a string is at least <paramref name="lowerBound"/>.</returns>
+    public static Constraint<string> ConstrainStringLengthLowerBound(int lowerBound)
     {
       List<Error> InnerMethod(string inputString, string inputName)
       {
@@ -346,25 +345,24 @@ namespace SchemaForge.Crucible
         if (inputString.Length < lowerBound)
         {
           internalErrorList.Add(new Error($"Token {inputName} with value {inputString} must have a length of at least {lowerBound}. Actual length: {inputString.Length}"));
-          return internalErrorList;
         }
         return internalErrorList;
       }
-      return new Constraint<string>(InnerMethod,new JProperty("ConstrainStringLength", lowerBound));
+      return new Constraint<string>(InnerMethod,new JProperty(nameof(ConstrainStringLengthLowerBound), lowerBound));
     }
 
     /// <summary>
-    /// Constrains length of string value.
+    /// Constrains length of a string value.
     /// </summary>
     /// <param name="lowerBound">Minimum length of passed string.</param>
     /// <param name="upperBound">Maximum length of passed string.</param>
-    /// <exception cref="ArgumentException">Throws ArgumentException if lowerBound is greater than upperBound.</exception>
-    /// <returns>Function that ensures the length of a string is at least lowerBound and at most upperBound.</returns>
+    /// <exception cref="ArgumentException">Throws ArgumentException if <paramref name="lowerBound"/> is greater than <paramref name="upperBound"/>.</exception>
+    /// <returns>Function that ensures the length of a string is at least <paramref name="lowerBound"/> and at most <paramref name="upperBound"/>.</returns>
     public static Constraint<string> ConstrainStringLength(int lowerBound, int upperBound)
     {
       if (lowerBound > upperBound)
       {
-        throw new ArgumentException($"ConstrainStringLength lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
+        throw new ArgumentException($"{nameof(ConstrainStringLength)} lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
       List<Error> InnerMethod(string inputString, string inputName)
       {
@@ -372,34 +370,53 @@ namespace SchemaForge.Crucible
         if (inputString.Length < lowerBound || inputString.Length > upperBound)
         {
           internalErrorList.Add(new Error($"Token {inputName} with value {inputString} must have a length of at least {lowerBound} and at most {upperBound}. Actual length: {inputString.Length}"));
-          return internalErrorList;
         }
         return internalErrorList;
       }
-      return new Constraint<string>(InnerMethod, new JProperty("ConstrainStringLength", lowerBound + ", " + upperBound));
+      return new Constraint<string>(InnerMethod, new JProperty(nameof(ConstrainStringLength), lowerBound + ", " + upperBound));
     }
 
     /// <summary>
-    /// Forbids characters from a string.
+    /// Constrains length of a string value.
     /// </summary>
-    /// <param name="forbiddenSubstrings">Characters that cannot occur in the input string.</param>
-    /// <exception cref="ArgumentException">Throws ArgumentException if no chars are passed.</exception>
-    /// <returns>Function that ensures the input string does not contain any of the passed characters.</returns>
+    /// <param name="upperBound">Maximum length of passed string.</param>
+    /// <returns>Function that ensures the length of a string is less than or equal to <paramref name="upperBound"/>.</returns>
+    public static Constraint<string> ConstrainStringLengthUpperBound(int upperBound)
+    {
+      List<Error> InnerMethod(string inputString, string inputName)
+      {
+        List<Error> internalErrorList = new();
+        if (inputString.Length > upperBound)
+        {
+          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} must have a length no longer than {upperBound}. Actual length: {inputString.Length}"));
+        }
+        return internalErrorList;
+      }
+      return new Constraint<string>(InnerMethod, new JProperty(nameof(ConstrainStringLengthUpperBound), upperBound));
+    }
+
+    /// <summary>
+    /// Ensures that the token's value does not contain any of <paramref name="forbiddenSubstrings"/>.
+    /// </summary>
+    /// <param name="forbiddenSubstrings">Strings that cannot occur in the input string.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if no strings are passed.</exception>
+    /// <returns>Function that ensures the input string does not contain any of <paramref name="forbiddenSubstrings"/>.</returns>
     public static Constraint<string> ForbidSubstrings(params string[] forbiddenSubstrings)
     {
       if (forbiddenSubstrings.Length == 0)
       {
-        throw new ArgumentException("ForbidSubstrings must have at least one parameter.");
+        throw new ArgumentException($"{nameof(ForbidSubstrings)} must have at least one parameter.");
       }
       List<Error> InnerMethod(string inputString, string inputName)
       {
         List<Error> internalErrorList = new();
         bool containsForbidden = false;
-        foreach (string forbiddenCharacter in forbiddenSubstrings)
+        foreach (string forbiddenSubstring in forbiddenSubstrings)
         {
-          if (inputString.IndexOf(forbiddenCharacter) != -1)
+          if (inputString.IndexOf(forbiddenSubstring) != -1)
           {
             containsForbidden = true;
+            break;
           }
         }
         if (containsForbidden)
@@ -408,7 +425,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      return new Constraint<string>(InnerMethod, new JProperty("ForbidSubstrings",JArray.FromObject(forbiddenSubstrings.ToArray())));
+      return new Constraint<string>(InnerMethod, new JProperty(nameof(ForbidSubstrings),JArray.FromObject(forbiddenSubstrings.ToArray())));
     }
 
     #endregion
@@ -416,66 +433,87 @@ namespace SchemaForge.Crucible
     #region JArray Constraints
 
     /// <summary>
-    /// Constrains the number of items in an enumerable object with a lower bound.
+    /// Constrains the number of items in an <see cref="IEnumerable"/> object with a lower bound.
     /// </summary>
-    /// <param name="lowerBound">Minimum number of items in the target enumerable.</param>
-    /// <returns>Constraint ensuring an enumerable has at least lowerBound items.</returns>
-    public static Constraint<T> ConstrainCollectionCount<T>(int lowerBound) where T: IEnumerable
+    /// <param name="lowerBound">Minimum number of items in the target <see cref="IEnumerable"/>.</param>
+    /// <returns>Constraint ensuring an enumerable has at least <paramref name="lowerBound"/> items.</returns>
+    public static Constraint<T> ConstrainCollectionCountLowerBound<T>(int lowerBound) where T: IEnumerable
     {
       List<Error> InnerMethod(T inputArray, string inputName)
       {
         List<Error> internalErrorList = new();
-        if (inputArray.Count() < lowerBound)
+        int count = inputArray.Count();
+        if (count < lowerBound)
         {
-          internalErrorList.Add(new Error($"Collection {inputName} contains {inputArray.Count()} values, but must contain at least {lowerBound} values."));
-          return internalErrorList;
+          internalErrorList.Add(new Error($"Collection {inputName} contains {count} values, but must contain at least {lowerBound} values."));
         }
         return internalErrorList;
       }
-      return new Constraint<T>(InnerMethod, new JProperty("ConstrainCollectionCount", lowerBound));
+      return new Constraint<T>(InnerMethod, new JProperty(nameof(ConstrainCollectionCountLowerBound), lowerBound));
     }
 
     /// <summary>
-    /// Constrains the number of items in a JArray with a lower bound and upper bound.
+    /// Constrains the number of items in an <see cref="IEnumerable"/> with a lower bound and upper bound.
     /// </summary>
-    /// <param name="lowerBound">Minimum number of items in the target JArray.</param>
-    /// <param name="upperBound">Maximum number of items in the target JArray.</param>
-    /// <exception cref="ArgumentException">Throws ArgumentException if lowerBound is greater than upperBound.</exception>
-    /// <returns>Function ensuring a JArray has at least lowerBound and at most upperBound items.</returns>
+    /// <param name="lowerBound">Minimum number of items in the target <see cref="IEnumerable"/>.</param>
+    /// <param name="upperBound">Maximum number of items in the target <see cref="IEnumerable"/>.</param>
+    /// <exception cref="ArgumentException">Throws ArgumentException if <paramref name="lowerBound"/> is greater than <paramref name="upperBound"/>.</exception>
+    /// <returns>Function ensuring a JArray has at least <paramref name="lowerBound"/> and at most <paramref name="upperBound"/> items.</returns>
     public static Constraint<T> ConstrainCollectionCount<T>(int lowerBound, int upperBound) where T: IEnumerable
     {
       if (lowerBound > upperBound)
       {
-        throw new ArgumentException($"ConstrainArrayCount lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: " + upperBound);
+        throw new ArgumentException($"{nameof(ConstrainCollectionCount)} lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: " + upperBound);
       }
       List<Error> InnerMethod(T inputArray, string inputName)
       {
         List<Error> internalErrorList = new();
-        if (inputArray.Count() < lowerBound || inputArray.Count() > upperBound)
+        int count = inputArray.Count();
+        if (count < lowerBound || count > upperBound)
         {
-          internalErrorList.Add(new Error($"Collection {inputName} contains {inputArray.Count()} values, but must contain between {lowerBound} and {upperBound} values."));
-          return internalErrorList;
+          internalErrorList.Add(new Error($"Collection {inputName} contains {count} values, but must contain between {lowerBound} and {upperBound} values."));
         }
         return internalErrorList;
       }
-      return new Constraint<T>(InnerMethod, new JProperty("ConstrainCollectionCount", lowerBound + ", " + upperBound));
+      return new Constraint<T>(InnerMethod, new JProperty(nameof(ConstrainCollectionCount), lowerBound + ", " + upperBound));
     }
+
+    /// <summary>
+    /// Constrains the number of items in an <see cref="IEnumerable"/> object with an upper bound.
+    /// </summary>
+    /// <param name="upperBound">Minimum number of items in the target <see cref="IEnumerable"/>.</param>
+    /// <returns>Constraint ensuring an enumerable has at least <paramref name="upperBound"/> items.</returns>
+    public static Constraint<T> ConstrainCollectionCountUpperBound<T>(int upperBound) where T : IEnumerable
+    {
+      List<Error> InnerMethod(T inputArray, string inputName)
+      {
+        List<Error> internalErrorList = new();
+        int count = inputArray.Count();
+        if (count > upperBound)
+        {
+          internalErrorList.Add(new Error($"Collection {inputName} contains {count} values, but must contain fewer than {upperBound} values."));
+        }
+        return internalErrorList;
+      }
+      return new Constraint<T>(InnerMethod, new JProperty(nameof(ConstrainCollectionCountUpperBound), upperBound));
+    }
+
     /// <summary>
     /// Encapsulates the process of typechecking and applying all passed constraints.
     /// </summary>
-    /// <typeparam name="TValueType">Expected type that the JToken will be cast to.</typeparam>
-    /// <param name="inputToken">Input JToken.</param>
-    /// <param name="tokenName">Name of the input JToken.</param>
+    /// <typeparam name="TValueType">Expected type of the token value being evaluated.</typeparam>
+    /// <param name="inputToken">Input <see cref="JToken"/>.</param>
+    /// <param name="tokenName">Name of the input <see cref="JToken"/>.</param>
     /// <param name="constraints">Constraints to apply to the input token.</param>
-    /// <returns>List{error} generated by applying all of the constraints.</returns>
+    /// <returns>List{Error} generated by applying all of the constraints.</returns>
     private static List<Error> ApplyConstraintsHelper<TValueType>(JToken inputToken, string tokenName, Constraint<TValueType>[] constraints)
     {
       List<Error> internalErrorList = new();
       try
       {
-        TValueType castValue = inputToken.Value<TValueType>();
         if (constraints.Exists())
         {
+          TValueType castValue = inputToken.Value<TValueType>();
           foreach (Constraint<TValueType> constraint in constraints)
           {
             internalErrorList.AddRange(constraint.Function(castValue, tokenName));
@@ -490,11 +528,11 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Ensures all items in the target JArray are of type <typeparam name="TElementType"/> and pass all provided constraints.
+    /// Ensures all items in the target <see cref="JArray"/> are of type <typeparam name="TElementType"/> and pass all provided constraints.
     /// </summary>
-    /// <typeparam name="TElementType">Type of all items in the target JArray.</typeparam>
-    /// <param name="constraints">List of functions to run on all items in the JArray individually.</param>
-    /// <returns>Function ensuring that all items in the target JArray are of type T and pass all provided constraints.</returns>
+    /// <typeparam name="TElementType">Type of all items in the target <see cref="JArray"/>.</typeparam>
+    /// <param name="constraints">List of functions to run on all items in the <see cref="JArray"/> individually.</param>
+    /// <returns>Function ensuring that all items in the target <see cref="JArray"/> are of type <typeparamref name="TElementType"/> and pass all provided constraints.</returns>
     public static Constraint<JArray> ApplyConstraintsToJArray<TElementType>(params Constraint<TElementType>[] constraints)
     {
       List<Error> InnerMethod(JArray inputArray, string inputName)
@@ -509,26 +547,25 @@ namespace SchemaForge.Crucible
           catch
           {
             internalErrorList.Add(new Error($"Value {token} in array {inputName} is an incorrect type. Expected value type: {typeof(TElementType).Name}"));
-            return internalErrorList;
           }
         }
         return internalErrorList;
       }
       JArray constraintArray = new();
       constraintArray.Add(ConfigToken.GetConstraintObject(constraints));
-      return new Constraint<JArray>(InnerMethod, new JProperty("ApplyConstraintsToCollection", constraintArray));
+      return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
 
     /// <summary>
-    /// Ensures all items in the target JArray are of type
+    /// Ensures all items in the target <see cref="JArray"/> are of type
     /// <typeparam name="TElementType1"/> or <typeparam name="TElementType2"/>
     /// and applies all constraints on the type to which the element corresponds.
-    /// WARNING: Casts will be attempted IN ORDER. For example, <see cref="ApplyConstraintsToJArray{string, int}"/>
+    /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraintsToJArray{string, int}
     /// will NEVER treat the passed token as an int!
     /// </summary>
     /// <typeparam name="TElementType1">First type to check against the token value
     /// in the returned function.</typeparam>
-    /// <typeparam name="TElementType2">First type to check against the token value
+    /// <typeparam name="TElementType2">Second type to check against the token value
     /// in the returned function.</typeparam>
     /// <param name="constraintsIfTElementType1">Constraints to execute if cast to
     /// <typeparam name="TElementType1"/> is successful.</param>
@@ -556,7 +593,6 @@ namespace SchemaForge.Crucible
             catch
             {
               internalErrorList.Add(new Error($"Token {token} in collection {inputName} is an incorrect type. Expected one of: {typeof(TElementType1).Name}, {typeof(TElementType2).Name}"));
-              return internalErrorList;
             }
           }
         }
@@ -565,22 +601,22 @@ namespace SchemaForge.Crucible
       JArray constraintArray = new();
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfTElementType1));
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfTElementType2));
-      return new Constraint<JArray>(InnerMethod, new JProperty("ApplyConstraintsToCollection", constraintArray));
+      return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
 
     /// <summary>
-    /// Ensures all items in the target JArray are of type
+    /// Ensures all items in the target <see cref="JArray"/> are of type
     /// <typeparam name="TElementType1"/>, or <typeparam name="TElementType2"/>,
     /// or <typeparam name="TElementType3"/>
     /// and applies all constraints on the type to which the element corresponds.
-    /// WARNING: Casts will be attempted IN ORDER. For example, <see cref="ApplyConstraintsToJArray{string, int}"/>
+    /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraintsToJArray{string, int}
     /// will NEVER treat the passed token as an int!
     /// </summary>
     /// <typeparam name="TElementType1">First type to check against the token value
     /// in the returned function.</typeparam>
-    /// <typeparam name="TElementType2">First type to check against the token value
+    /// <typeparam name="TElementType2">Second type to check against the token value
     /// in the returned function.</typeparam>
-    /// <typeparam name="TElementType3">First type to check against the token value
+    /// <typeparam name="TElementType3">Third type to check against the token value
     /// in the returned function.</typeparam>
     /// <param name="constraintsIfTElementType1">Constraints to execute if cast to
     /// <typeparam name="TElementType1"/> is successful.</param>
@@ -616,7 +652,6 @@ namespace SchemaForge.Crucible
               catch
               {
                 internalErrorList.Add(new Error($"Token {token} in collection {inputName} is an incorrect type. Expected one of: {typeof(TElementType1).Name}, {typeof(TElementType2).Name}, {typeof(TElementType3).Name}"));
-                return internalErrorList;
               }
             }
           }
@@ -627,7 +662,7 @@ namespace SchemaForge.Crucible
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfT1));
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfT2));
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfT3));
-      return new Constraint<JArray>(InnerMethod, new JProperty("ApplyConstraintsToCollection", constraintArray));
+      return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
 
     #endregion
@@ -635,19 +670,19 @@ namespace SchemaForge.Crucible
     #region JObject Constraints
 
     /// <summary>
-    /// Allows nested Json property checking.
+    /// Applies a <see cref="Schema"/> to the value of this token with the <see cref="Schema.Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, string, bool)"/> method.
     /// </summary>
-    /// <param name="inputSchema">Schema object to apply to the Json.</param>
-    /// <returns>Function ensuring the passed JObject contains all tokens in requiredTokens and all validation functions are passed.</returns>
+    /// <param name="inputSchema">Schema object to apply to the designated object.</param>
+    /// <returns>Function that adds all the <see cref="List{Error}"/> generated by using the <see cref="Schema"/> to validate the passed <see cref="JObject"/></returns>
     public static Constraint<JObject> ApplySchema(Schema inputSchema)
     {
       List<Error> InnerMethod(JObject inputJson, string inputName)
       {
         List<Error> internalErrorList = new();
-        internalErrorList.AddRange(inputSchema.Validate(inputJson, new JObjectTranslator(), inputName, "inner json"));
+        internalErrorList.AddRange(inputSchema.Validate(inputJson, new JObjectTranslator(), $"inner object {inputName}"));
         return internalErrorList;
       }
-      return new Constraint<JObject>(InnerMethod, new JProperty("ApplySchema", inputSchema.ToString()));
+      return new Constraint<JObject>(InnerMethod, new JProperty(nameof(ApplySchema), inputSchema.ToString()));
     }
 
     #endregion
@@ -655,35 +690,28 @@ namespace SchemaForge.Crucible
     #region Datetime Constraints
 
     /// <summary>
-    /// Ensures a DateTime value follows at least one of the passed formats.
+    /// Ensures a <see cref="DateTime"/> value follows at least one of the passed Custom Format Specifier <see cref="formats"/>.
     /// </summary>
-    /// <param name="formats">Formats in the DateTime Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
-    /// <returns></returns>
+    /// <param name="formats">Formats in the <see cref="DateTime"/> Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
+    /// <returns>A function ensuring that the token value is in one of the providd Custom Format Specifier <see cref="formats"/>.</returns>
     public static Constraint<DateTime> ConstrainDateTimeFormat(params string[] formats)
     {
       List<Error> InnerMethod(string inputValue, string inputName)
       {
         List<Error> internalErrorList = new();
-
-        bool atLeastOneSuccess = false;
-
         foreach(string format in formats)
         {
           if(DateTime.TryParseExact(inputValue, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _))
           {
-            atLeastOneSuccess = true;
-            break;
+            return internalErrorList;
           }
         }
         
-        if(!atLeastOneSuccess)
-        {
-          internalErrorList.Add(new Error($"Input {inputName} with value {inputValue} is not in a valid DateTime format. Valid DateTime formats: {formats.Join(", ")}"));
-        }
+        internalErrorList.Add(new Error($"Input {inputName} with value {inputValue} is not in a valid DateTime format. Valid DateTime formats: {formats.Join(", ")}"));
 
         return internalErrorList;
       }
-      return new Constraint<DateTime>(InnerMethod, ConstraintType.Format, new JProperty("ConstrainDateTimeFormat", JArray.FromObject(formats)));
+      return new Constraint<DateTime>(InnerMethod, ConstraintType.Format, new JProperty(nameof(ConstrainDateTimeFormat), JArray.FromObject(formats)));
     }
 
     #endregion
@@ -709,7 +737,7 @@ namespace SchemaForge.Crucible
     {
       if(constraints.Length < 2)
       {
-        throw new ArgumentException("MatchAnyConstraint requires at least 2 constraint arguments.");
+        throw new ArgumentException($"{nameof(MatchAnyConstraint)} requires at least 2 constraint arguments.");
       }
       List<Error> InnerFunction(TValueType inputValue, string inputName)
       {
@@ -734,9 +762,9 @@ namespace SchemaForge.Crucible
           }
         }
         internalErrorList.Add(new Error($"{inputName} Any clause generated fatal errors. At least one set of errors must be avoided.", Severity.Info));
-        foreach (List<Error> errorList in constraintResults)
+        for(int i=constraintResults.Length;i-- > 0;)
         {
-          internalErrorList.AddRange(errorList);
+          internalErrorList.AddRange(constraintResults[i]);
         }
         internalErrorList.Add(new Error($"{inputName} Any clause output complete.", Severity.Info));
         return internalErrorList;
@@ -746,7 +774,7 @@ namespace SchemaForge.Crucible
       {
         constraintObject.Add(constraint.Property);
       }
-      return new Constraint<TValueType>(InnerFunction, new JProperty("Any", constraintObject));
+      return new Constraint<TValueType>(InnerFunction, new JProperty(nameof(MatchAnyConstraint), constraintObject));
     }
 
     #endregion

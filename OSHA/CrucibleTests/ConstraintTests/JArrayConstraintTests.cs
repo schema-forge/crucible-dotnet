@@ -23,41 +23,69 @@ namespace ConstraintTests
     }
 
     /// <summary>
-    /// Tests for ConstrainCollectionCount on JArray.
+    /// Tests for <see cref="ConstrainCollectionCountLowerBound{T}(int)"/> on JArray.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json containing the array that will be tested.</param>
+    /// <param name="constraints">Lower bound to pass to <see cref="ConstrainCollectionCountLowerBound{T}(int)"/>.</param>
+    [Theory]
+    [InlineData(true, "{'TestArray':[1,'fish']}", 2)] // Equal to lower.
+    [InlineData(false, "{'TestArray':['beat']}", 2)] // Too few.
+    public void ConstrainCollectionCountLowerBoundTests(bool expectedResult, string constrainedJson, int lowerBound)
+    {
+      ConfigToken testToken;
+      bool testResult;
+      testToken = new ConfigToken<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCountLowerBound<JArray>(lowerBound) });
+      testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
+
+    /// <summary>
+    /// Tests for <see cref="ConstrainCollectionCount{T}(int, int)"/> on JArray.
     /// </summary>
     /// <param name="expectedResult">Expected validation result.</param>
     /// <param name="constrainedJson">Json containing the array that will be tested.</param>
     /// <param name="constraints">Upper and lower bounds to pass to ConstrainCollectionCount.</param>
     [Theory]
-    [InlineData(true, "{'TestArray':[1,'fish']}", 2)] // Equal to lower.
-    [InlineData(false, "{'TestArray':['beat']}", 2)] // Too few.
     [InlineData(true, "{'TestArray':[2,'fish']}", 1, 2)] //Equal to upper.
     [InlineData(true, "{'TestArray':['red','fish']}", 2, 2)] // Exactly equal.
     [InlineData(false, "{'TestArray':['blue','fish']}", 3, 5)] // Too few.
     [InlineData(false, "{'TestArray':['arm1','arm2','leg1','leg2','theforbiddenone']}", 1, 3)] // Too many.
     [InlineData(false, "{'TestArray':['doomed']}", 4, 2)] // Exception test.
-    public void ConstrainCollectionCountTests(bool expectedResult, string constrainedJson, params int[] constraints)
+    public void ConstrainCollectionCountTests(bool expectedResult, string constrainedJson, int lowerBound, int upperBound)
     {
       ConfigToken testToken;
       bool testResult;
-      if (constraints.Length == 1)
+      if (lowerBound > upperBound)
       {
-        testToken = new ConfigToken<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(constraints[0]) });
-        testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+        Assert.Throws<ArgumentException>(() => new ConfigToken<JArray>("TestToken", "I don't want any more.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(lowerBound, upperBound) }));
+        return;
       }
       else
       {
-        if (constraints[0] > constraints[1])
-        {
-          Assert.Throws<ArgumentException>(() => new ConfigToken<JArray>("TestToken", "I don't want any more.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(constraints[0], constraints[1]) }));
-          return;
-        }
-        else
-        {
-          testToken = new ConfigToken<JArray>("TestArray", "Humans require ice cream.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(constraints[0], constraints[1]) });
-          testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
-        }
+        testToken = new ConfigToken<JArray>("TestArray", "Humans require ice cream.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(lowerBound, upperBound) });
+        testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       }
+      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
+
+    /// <summary>
+    /// Tests for <see cref="ConstrainCollectionCountUpperBound{T}(int)"/> on JArray.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json containing the array that will be tested.</param>
+    /// <param name="upperBound">Upper bound to pass to <see cref="ConstrainCollectionCountUpperBound{T}(int)"/></param>
+    [Theory]
+    [InlineData(true, "{'TestArray':[1,'fish']}", 2)] // Equal to upper.
+    [InlineData(false, "{'TestArray':['beat','up','my','grandmother']}", 2)] // Too many.s
+    public void ConstrainCollectionCountUpperBoundTests(bool expectedResult, string constrainedJson, int upperBound)
+    {
+      ConfigToken testToken;
+      bool testResult;
+      testToken = new ConfigToken<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCountUpperBound<JArray>(upperBound) });
+      testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine(string.Join('\n', testToken.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
@@ -118,7 +146,7 @@ namespace ConstraintTests
     {
       ConfigToken testToken;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "There is only ice cream.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainStringLength(15), ForbidSubstrings("/", "?", "!")) });
+      testToken = new ConfigToken<JArray>("TestArray", "There is only ice cream.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainStringLengthLowerBound(15), ForbidSubstrings("/", "?", "!")) });
       testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine($"Input array: {string.Join(",", JObject.Parse(constrainedJson)["TestArray"])}");
       output.WriteLine(string.Join('\n', testToken.ErrorList));

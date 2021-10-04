@@ -103,14 +103,14 @@ namespace SchemaForge.Crucible
     /// tokens present in the object being validated but not in the Schea) will raise
     /// a <see cref="Severity.Fatal"/> error. If true, unrecognized tokens will
     /// raise a <see cref="Severity.Info"/> error.</param>
-    public virtual List<Error> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, string type = null, bool allowUnrecognized = false)
+    public virtual List<Error> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, bool allowUnrecognized = false)
     {
       string message = " ";
       // This option is included in case a sub-configuration is being validated; this allows the ErrorList to indicate the exact configuration that has the issue.
       // Name is usually the token name of the sub-configuration.
-      if (!(string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(type)))
+      if (!string.IsNullOrWhiteSpace(name))
       {
-        message = $"Validation for {type} {name} failed.";
+        message = $"Validation for {name} failed.";
       }
       foreach (ConfigToken token in ConfigTokens)
       {
@@ -124,7 +124,7 @@ namespace SchemaForge.Crucible
             }
             else
             {
-              ErrorList.Add(new Error($"Input {type} {name} is missing required token {token.TokenName}\n{token.Description}"));
+              ErrorList.Add(new Error($"Input {name} is missing required token {token.TokenName}\n{token.Description}"));
             }
           }
           else if(token.DefaultValue.Exists())
@@ -161,11 +161,11 @@ namespace SchemaForge.Crucible
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add(new Error($"Input json file contains unrecognized token: {key}",allowUnrecognized?Severity.Info:Severity.Fatal));
+            ErrorList.Add(new Error($"Input object contains unrecognized token: {key}",allowUnrecognized?Severity.Info:Severity.Fatal));
           }
           else
           {
-            ErrorList.Add(new Error($"Input {type} {name} contains unrecognized token: {key}", allowUnrecognized?Severity.Info:Severity.Fatal));
+            ErrorList.Add(new Error($"Input {name} contains unrecognized token: {key}", allowUnrecognized?Severity.Info:Severity.Fatal));
           }
         }
       }

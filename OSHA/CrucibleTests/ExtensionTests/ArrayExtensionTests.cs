@@ -23,7 +23,7 @@ namespace Extensions
       int[] secondArray = firstArray.CloneArray();
 
       bool allMatch = true;
-      for (int i = secondArray.Length - 1; i-- > 0;)
+      for (int i = secondArray.Length; i-- > 0;)
       {
         if (firstArray[i] != secondArray[i])
         {
@@ -40,7 +40,7 @@ namespace Extensions
       string[] secondArray = firstArray.CloneArray();
 
       bool allMatch = true;
-      for (int i = secondArray.Length - 1; i-- > 0;)
+      for (int i = secondArray.Length; i-- > 0;)
       {
         if (firstArray[i] != secondArray[i])
         {

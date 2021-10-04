@@ -31,5 +31,6 @@ namespace OSHA.TestUtilities
     public bool CollectionContains(JToken collection, string valueName) => collection.Contains(valueName);
     public string CollectionValueToString(JToken collection, string valueName) => collection.ToString();
     public List<string> GetCollectionKeys(JToken collection) => throw new NotImplementedException("A JToken does not always have keys.");
+    public string GetEquivalentType(string cSharpType) => cSharpType;
   }
 }
