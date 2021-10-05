@@ -87,17 +87,14 @@ namespace SchemaForge.Crucible
     public int Count() => ConfigTokens.Count;
 
     /// <summary>
-    /// Checks config against the ConfigToken HashSet.
+    /// Checks <paramref name="collection"/> using the set of <see cref="ConfigTokens"/>.
     /// If name and type are provided, the message
-    /// "Validation for <paramref name="type"/> <paramref name="name"/> failed."
-    /// will be added to ErrorList on validation failure.
+    /// "Validation for <paramref name="name"/> failed."
+    /// will be added to <see cref="ErrorList"/> on validation failure.
     /// </summary>
-    /// <param name="config">Config object to check using the ConfigToken rules set in ConfigTokens.</param>
+    /// <param name="collection">Collection object to check using the <see cref="ConfigToken"/> rules set in <see cref="ConfigTokens"/>.</param>
     /// <param name="name">If name and type are provided, the message 
-    /// "Validation for <paramref name="type"/> <paramref name="name"/> failed."
-    /// will be added to ErrorList on validation failure.</param>
-    /// <param name="type">If name and type are provided, the message 
-    /// "Validation for <paramref name="type"/> <paramref name="name"/> failed."
+    /// "Validation for <paramref name="name"/> failed."
     /// will be added to ErrorList on validation failure.</param>
     /// <param name="allowUnrecognized">If false, unrecognized tokens (that is,
     /// tokens present in the object being validated but not in the Schea) will raise
@@ -188,7 +185,7 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// Returns the current schema as a stringified Json object.
     /// </summary>
-    /// <returns>String version of a JObject representation of the current schema controller.</returns>
+    /// <returns>String version of a <see cref="JObject"/> representation of the current schema controller.</returns>
     public override string ToString()
     {
       JObject schemaJson = new();
@@ -207,10 +204,10 @@ namespace SchemaForge.Crucible
     */
 
     /// <summary>
-    /// This method can be used to generate a new example request or configuration file with all the required and optional tokens along with their HelpStrings.
+    /// This method can be used to generate a new example request or configuration file with all the required and optional tokens along with their <see cref="ConfigToken.Description"/>.
     /// </summary>
-    /// <returns>A JObject file with all tokens from <see cref="ConfigTokens"/>, using the name of the token and the HelpString.
-    /// If the HelpStrings are well-written, the return value will serve as an excellent example for an end user to fill in.</returns>
+    /// <returns>A <see cref="JObject"/> with all tokens from <see cref="ConfigTokens"/>, using <see cref="ConfigToken.TokenName"/> as the name and <see cref="ConfigToken.Description"/> as the property value.
+    /// If the Descriptions are well-written, the return value will serve as an excellent example for an end user to fill in.</returns>
     public JObject GenerateEmptyJson()
     {
       JObject newConfig = new();
@@ -229,9 +226,9 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Returns a new Schema that is a clone of the current Schema.
+    /// Returns a new <see cref="Schema"/> that is a clone of the current <see cref="Schema"/>.
     /// </summary>
-    /// <returns>A new Schema that is a clone of this Schema.</returns>
+    /// <returns>A new <see cref="Schema"/> that is a clone of this <see cref="Schema"/>.</returns>
     public Schema Clone()
     {
       Schema newSchema = new();

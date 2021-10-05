@@ -281,18 +281,18 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
+    /// A <see cref="ConfigToken"/> represents a token that is expected to exist in the input collection to a <see cref="Schema"/> object.
     /// All passed types must be unique.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If inputName or inputDescription is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="inputName"/> or inputDescription is null, whitespace, or empty.</exception>
     /// <exception cref="ArgumentException">If all Type arguments are not unique.</exception>
-    /// <exception cref="ArgumentException">If inputDefaultValue can't be cast to any of the ConfigToken types.</exception>
-    /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
+    /// <exception cref="ArgumentException">If <paramref name="inputDefaultValue"/> can't be cast to any of the ConfigToken types.</exception>
+    /// <param name="inputName">Name of the token. This will be used to search the object that is being validated.</param>
     /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
-    /// <param name="inputDefaultValue">Object that will be inserted into the user config if an optional token is not provided.
+    /// <param name="inputDefaultValue">Object that will be inserted into the object that is being validated if an optional token is not provided.
     /// If provided, assumes this token is not required.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
@@ -411,18 +411,18 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
+    /// A <see cref="ConfigToken"/> represents a token that is expected to exist in the input collection to a <see cref="Schema"/> object.
     /// All passed types must be unique.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If inputName or inputDescription is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="inputName"/> or inputDescription is null, whitespace, or empty.</exception>
     /// <exception cref="ArgumentException">If all Type arguments are not unique.</exception>
-    /// <exception cref="ArgumentException">If inputDefaultValue can't be cast to any of the ConfigToken types.</exception>
-    /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
+    /// <exception cref="ArgumentException">If <paramref name="inputDefaultValue"/> can't be cast to any of the ConfigToken types.</exception>
+    /// <param name="inputName">Name of the token. This will be used to search the object that is being validated.</param>
     /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
-    /// <param name="inputDefaultValue">Object that will be inserted into the user config if an optional token is not provided.
+    /// <param name="inputDefaultValue">Object that will be inserted into the object that is being validated if an optional token is not provided.
     /// If provided, assumes this token is not required.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
@@ -558,18 +558,18 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// A ConfigToken represents a token that is expected to exist in the input collection to a Schema object.
+    /// A <see cref="ConfigToken"/> represents a token that is expected to exist in the input collection to a <see cref="Schema"/> object.
     /// All passed types must be unique.
     /// WARNING: Casts will be attempted IN ORDER. For example,
     /// ConfigToken{string, int} will NEVER treat the passed token as an int!
     /// Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If inputName or inputDescription is null, whitespace, or empty.</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="inputName"/> or inputDescription is null, whitespace, or empty.</exception>
     /// <exception cref="ArgumentException">If all Type arguments are not unique.</exception>
-    /// <exception cref="ArgumentException">If inputDefaultValue can't be cast to any of the ConfigToken types.</exception>
-    /// <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
+    /// <exception cref="ArgumentException">If <paramref name="inputDefaultValue"/> can't be cast to any of the ConfigToken types.</exception>
+    /// <param name="inputName">Name of the token. This will be used to search the object that is being validated.</param>
     /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
-    /// <param name="inputDefaultValue">Object that will be inserted into the user config if an optional token is not provided.
+    /// <param name="inputDefaultValue">Object that will be inserted into the object that is being validated if an optional token is not provided.
     /// If provided, assumes this token is not required.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
@@ -616,7 +616,7 @@ namespace SchemaForge.Crucible
     /// <returns>New <see cref="ConfigToken{Type1, Type2, Type3,TNewType}"/></returns>
     public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
     {
-      throw new NotImplementedException($"A {nameof(ConfigToken)} cannot have more than 3 types.");
+      throw new NotImplementedException($"{nameof(ConfigToken)} cannot have more than 3 types.");
     }
 
     /// <summary>

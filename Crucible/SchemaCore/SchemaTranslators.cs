@@ -89,7 +89,7 @@ namespace SchemaForge.Crucible
   /// </summary>
   public class JObjectTranslator : ISchemaTranslator<JObject>
   {
-    Dictionary<string, string> TypeMap = new()
+    readonly Dictionary<string, string> TypeMap = new()
     {
       { "Byte", "number" },
       { "SByte", "number" },
@@ -104,8 +104,8 @@ namespace SchemaForge.Crucible
       { "UInt64", "number" },
       { "JObject", "object" },
       { "Boolean", "boolean" },
-      { "DateTime", "string" },
       { "JArray", "array" },
+      { "DateTime", "string" },
       { "String", "string" },
       { "Char", "string" }
     };
