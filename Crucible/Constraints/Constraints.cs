@@ -697,8 +697,10 @@ namespace SchemaForge.Crucible
     /// parser in <see cref="Conversions"/>, allowing the parser to recognize
     /// <see cref="DateTime"/>s in the provided formats.
     /// </summary>
-    /// <param name="formats">Formats in the <see cref="DateTime"/> Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
-    /// <returns>A function ensuring that the token value is in one of the providd Custom Format Specifier <see cref="formats"/>.</returns>
+    /// <param name="formats">Formats in the <see cref="DateTime"/> Custom Format
+    /// Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
+    /// <returns>A function ensuring that the token value is in one of the provided
+    /// Custom Format Specifier <see cref="formats"/>.</returns>
     public static Constraint<DateTime> ConstrainDateTimeFormat(params string[] formats)
     {
       foreach(string format in formats)

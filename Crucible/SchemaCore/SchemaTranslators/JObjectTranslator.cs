@@ -39,7 +39,7 @@ namespace SchemaForge.Crucible
     };
     public bool TryCastToken<TCastType>(JObject collection, string valueName, out TCastType outputValue)
     {
-      if (typeof(TCastType).Name == "DateTime")
+      if (typeof(TCastType) == typeof(DateTime))
       {
         bool result = Conversions.TryConvertDateTime(collection[valueName].ToString(), out DateTime outDateTime);
         outputValue = (TCastType)(object)outDateTime; // This syntax is required because, even though we're in an

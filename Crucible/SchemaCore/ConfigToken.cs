@@ -230,7 +230,7 @@ namespace SchemaForge.Crucible
       Type defaultValueType = DefaultValue.GetType();
       foreach (Type currentType in typeArray)
       {
-        if(currentType.Name == "DateTime") // DateTime is a special case because of how many formats it can use.
+        if(currentType == typeof(DateTime)) // DateTime is a special case because of how many formats it can use.
         {
           return Conversions.TryConvertDateTime(DefaultValue.ToString(), out _);
         }
