@@ -50,12 +50,12 @@ namespace SchemaForge.Crucible.Extensions
       return indexes;
     }
     /// <summary>
-    /// Gets a list of all the indices of the given string or char.
+    /// Gets a list of all the indexes of the given string or char.
     /// </summary>
     /// <param name="str">String to search.</param>
     /// <param name="value">Char to search for.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if str is null, empty, or whitespace.</exception>
-    /// <returns>List of all indices of the search value within the target string.</returns>
+    /// <returns>List of all indexes of the search value within the target string.</returns>
     public static List<int> AllIndexesOf(this string str, char value)
     {
       if (str.IsNullOrEmpty())

@@ -10,7 +10,7 @@ namespace Extensions
   public class ArrayExtensionTests
   {
     [Fact]
-    public void CloneArrayEmptyTest()
+    public void CloneNullArrayTest()
     {
       int[] emptyArray = null;
       Assert.Throws<ArgumentNullException>(() => emptyArray.CloneArray());

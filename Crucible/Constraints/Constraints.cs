@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 using SchemaForge.Crucible.Extensions;
+using SchemaForge.Crucible.Utilities;
 
 namespace SchemaForge.Crucible
 {
@@ -690,12 +691,20 @@ namespace SchemaForge.Crucible
     #region Datetime Constraints
 
     /// <summary>
-    /// Ensures a <see cref="DateTime"/> value follows at least one of the passed Custom Format Specifier <see cref="formats"/>.
+    /// Ensures a <see cref="DateTime"/> value follows at least one of the passed
+    /// Custom Format Specifier <see cref="formats"/>.
+    /// Including this <see cref="Constraint"/> will update the <see cref="DateTime"/>
+    /// parser in <see cref="Conversions"/>, allowing the parser to recognize
+    /// <see cref="DateTime"/>s in the provided formats.
     /// </summary>
     /// <param name="formats">Formats in the <see cref="DateTime"/> Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
     /// <returns>A function ensuring that the token value is in one of the providd Custom Format Specifier <see cref="formats"/>.</returns>
     public static Constraint<DateTime> ConstrainDateTimeFormat(params string[] formats)
     {
+      foreach(string format in formats)
+      {
+        Conversions.RegisterDateTimeFormat(format);
+      }
       List<Error> InnerMethod(string inputValue, string inputName)
       {
         List<Error> internalErrorList = new();

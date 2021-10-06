@@ -15,7 +15,7 @@ namespace SchemaForge.Crucible
   /// interprets a <typeparamref name="TCollectionType"/>
   /// for a <see cref="Schema"/> so that it can be validated.
   /// </summary>
-  /// <typeparam name="TCollectionType"></typeparam>
+  /// <typeparam name="TCollectionType">The .NET object type that is being translated for a <see cref="Schema"/> to read.</typeparam>
   public interface ISchemaTranslator<TCollectionType>
   {
     /// <summary>
@@ -76,62 +76,11 @@ namespace SchemaForge.Crucible
     public List<string> GetCollectionKeys(TCollectionType collection);
 
     /// <summary>
-    /// Takes the name of a valid C# data type and translates it to the
+    /// Takes the name of a valid .NET data type and translates it to the
     /// equivalent data type in <see cref="TCollectionType"/>
     /// </summary>
-    /// <param name="cSharpType">Name of a valid C# data type.</param>
+    /// <param name="cSharpType">Name of a valid .NET data type.</param>
     /// <returns>Name of the corresponding type in <see cref="TCollectionType"/></returns>
     public string GetEquivalentType(string cSharpType);
-  }
-  /// <summary>
-  /// Interprets <see cref="JObject"/> objects for a <see cref="Schema"/> object to validate.
-  /// Requires no parameters.
-  /// </summary>
-  public class JObjectTranslator : ISchemaTranslator<JObject>
-  {
-    readonly Dictionary<string, string> TypeMap = new()
-    {
-      { "Byte", "number" },
-      { "SByte", "number" },
-      { "Single", "number" },
-      { "Double", "number" },
-      { "Decimal", "number" },
-      { "Int16", "number" },
-      { "UInt16", "number" },
-      { "Int32", "number" },
-      { "UInt32", "number" },
-      { "Int64", "number" },
-      { "UInt64", "number" },
-      { "JObject", "object" },
-      { "Boolean", "boolean" },
-      { "JArray", "array" },
-      { "DateTime", "string" },
-      { "String", "string" },
-      { "Char", "string" }
-    };
-    public bool TryCastToken<TCastType>(JObject collection, string valueName, out TCastType outputValue)
-    {
-      try
-      {
-        JToken token = collection[valueName];
-        outputValue = token.Value<TCastType>();
-        return true;
-      }
-      catch
-      {
-        outputValue = default;
-        return false;
-      }
-    }
-    public bool TokenIsNullOrEmpty(JObject collection, string valueName) => collection[valueName].IsNullOrEmpty();
-    public JObject InsertToken<TDefaultValueType>(JObject collection, string valueName, TDefaultValueType newValue)
-    {
-      collection.Add(valueName, new JValue(newValue));
-      return collection;
-    }
-    public bool CollectionContains(JObject collection, string valueName) => collection.ContainsKey(valueName);
-    public List<string> GetCollectionKeys(JObject collection) => collection.Properties().Select(x => x.Name).ToList();
-    public string CollectionValueToString(JObject collection, string valueName) => collection[valueName].ToString();
-    public string GetEquivalentType(string cSharpType) => $"Json " + (TypeMap.ContainsKey(cSharpType) ? TypeMap[cSharpType] : cSharpType.Contains("[]") ? "array" : "null");
   }
 }

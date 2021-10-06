@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SchemaForge.Crucible.Extensions;
+using SchemaForge.Crucible.Utilities;
 using Newtonsoft.Json.Linq;
 
 namespace SchemaForge.Crucible
@@ -137,7 +138,7 @@ namespace SchemaForge.Crucible
       JObject constraintObject = new();
       try
       {
-        if (typeof(TValueType).ToString().Contains("Nullable"))
+        if (Nullable.GetUnderlyingType(typeof(TValueType)) != null)
         {
           constraintObject.Add("Type", ShippingAndReceiving.TypeMap(typeof(TValueType).GenericTypeArguments[0].Name));
         }
@@ -164,7 +165,7 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Sets all the non-genericly typed values of a ConfigToken.
+    /// Sets all the non-generically typed values of a ConfigToken.
     /// </summary>
     /// <param name="inputName">Name to set.</param>
     /// <param name="inputHelpString">HelpString to set.</param>
@@ -226,15 +227,16 @@ namespace SchemaForge.Crucible
     protected bool CheckDefaultValue()
     {
       Type[] typeArray = GetType().GetGenericArguments();
-      foreach(Type currentType in typeArray)
+      Type defaultValueType = DefaultValue.GetType();
+      foreach (Type currentType in typeArray)
       {
-        try
+        if(currentType.Name == "DateTime") // DateTime is a special case because of how many formats it can use.
         {
-          Convert.ChangeType(DefaultValue, currentType);
-          return true;
+          return Conversions.TryConvertDateTime(DefaultValue.ToString(), out _);
         }
-        catch
+        else if (defaultValueType.IsAssignableFrom(currentType))
         {
+          return true;
         }
       }
       return false;
@@ -253,7 +255,18 @@ namespace SchemaForge.Crucible
   /// <typeparam name="Type1">The 1st possible value type of this token.</typeparam>
   public class ConfigToken<Type1> : ConfigToken
   {
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type1"/>, after the cast is applied.
+    /// </summary>
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type1"/>, with the value cast to string rather than
+    /// <typeparamref name="Type1"/>.
+    /// </summary>
     public List<Constraint<Type1>> FormatConstraintsIfType1 { get; protected set; } = new();
 
     #region Constructors
@@ -380,9 +393,31 @@ namespace SchemaForge.Crucible
   /// <typeparam name="Type2">The 2nd possible value type of this token.</typeparam>
   public class ConfigToken<Type1, Type2> : ConfigToken
   {
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type1"/>, after the cast is applied.
+    /// </summary>
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type1"/>, with the value cast to string rather than
+    /// <typeparamref name="Type1"/>.
+    /// </summary>
     public List<Constraint<Type1>> FormatConstraintsIfType1 { get; protected set; } = new();
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type2"/>, after the cast is applied.
+    /// </summary>
     public List<Constraint<Type2>> ConstraintsIfType2 { get; protected set; } = new();
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type2"/>, with the value cast to string rather than
+    /// <typeparamref name="Type2"/>.
+    /// </summary>
     public List<Constraint<Type2>> FormatConstraintsIfType2 { get; protected set; } = new();
 
     #region Constructors
@@ -524,11 +559,44 @@ namespace SchemaForge.Crucible
   /// <typeparam name="Type3">The 3rd possible value type of this token.</typeparam>
   public class ConfigToken<Type1, Type2, Type3> : ConfigToken
   {
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type1"/>, after the cast is applied.
+    /// </summary>
     public List<Constraint<Type1>> ConstraintsIfType1 { get; protected set; } = new();
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type1"/>, with the value cast to string rather than
+    /// <typeparamref name="Type1"/>.
+    /// </summary>
     public List<Constraint<Type1>> FormatConstraintsIfType1 { get; protected set; } = new();
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type2"/>, after the cast is applied.
+    /// </summary>
     public List<Constraint<Type2>> ConstraintsIfType2 { get; protected set; } = new();
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type2"/>, with the value cast to string rather than
+    /// <typeparamref name="Type2"/>.
+    /// </summary>
     public List<Constraint<Type2>> FormatConstraintsIfType2 { get; protected set; } = new();
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type3"/>, after the cast is applied.
+    /// </summary>
     public List<Constraint<Type3>> ConstraintsIfType3 { get; protected set; } = new();
+    /// <summary>
+    /// The constraints whose functions will be executed on the value of the token
+    /// corresponding to <see cref="ConfigToken.TokenName"/> if it can be cast to
+    /// <typeparamref name="Type3"/>, with the value cast to string rather than
+    /// <typeparamref name="Type3"/>.
+    /// </summary>
     public List<Constraint<Type3>> FormatConstraintsIfType3 { get; protected set; } = new();
 
     #region Constructors
@@ -615,9 +683,7 @@ namespace SchemaForge.Crucible
     /// <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
     /// <returns>New <see cref="ConfigToken{Type1, Type2, Type3,TNewType}"/></returns>
     public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
-    {
-      throw new NotImplementedException($"{nameof(ConfigToken)} cannot have more than 3 types.");
-    }
+    => throw new NotImplementedException("Cannot have more than 3 types on 1 ConfigToken.");
 
     /// <summary>
     /// Extracts a token named <see cref="ConfigToken.TokenName"/> from

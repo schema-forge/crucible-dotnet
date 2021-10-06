@@ -87,24 +87,25 @@ namespace SchemaForge.Crucible.Extensions
       Therefore, if the attempted conversion fails, the value should not be part of the final list to search, which is why TryConvert returns a tuple, the first item of which indicates if the conversion was a success.
 
       */
-      static (bool, T) TryConvert(JToken input)
+      static bool TryConvert(JToken input, out T output)
       {
         try
         {
-          return (true, input.ToObject<T>());
+          output = input.ToObject<T>();
+          return true;
         }
         catch
         {
-          return (false, default(T));
+          output = default;
+          return false;
         }
       }
       List<T> newList = new();
       foreach (JToken i in input)
       {
-        (bool, T) result = TryConvert(i);
-        if (result.Item1)
+        if (TryConvert(i, out T output))
         {
-          newList.Add(result.Item2);
+          newList.Add(output);
         }
       }
 

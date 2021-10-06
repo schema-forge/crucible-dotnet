@@ -8,20 +8,30 @@ using Newtonsoft.Json.Linq;
 using SchemaForge.Crucible.Extensions;
 using static SchemaForge.Crucible.Constraints;
 
+/*
+
+TODO:
+
+Expose iteration over config tokens and more fine tuning functions, for the grim darkness of the future when Schemas are passed from program to program.
+ 
+*/
+
 namespace SchemaForge.Crucible
 {
   /// <summary>
-  /// Schema objects contain a set of ConfigTokens that define each value that should be contained in an object passed to its Validate method.
+  /// Schema objects contain a set of ConfigTokens that define each value that should be
+  /// contained in an object passed to its Validate method.
   /// </summary>
   public class Schema
   {
     /// <summary>
-    /// Set of token rules to use when a Json is passed to Validate().
+    /// Set of token rules to use when a collection is passed to
+    /// <see cref="Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, bool)"/>.
     /// </summary>
-    private readonly HashSet<ConfigToken> ConfigTokens = new();
+    private readonly Dictionary<string, ConfigToken> ConfigTokens = new();
     /// <summary>
-    /// Contains all errors generated during validation and the associated HelpStrings of each token that was marked invalid.
-    /// Should be printed to console or returned as part of an HTTP 400 response.
+    /// Contains all errors generated during validation and the associated
+    /// <see cref="ConfigToken.Description"/> of each token that was marked invalid.
     /// </summary>
     public List<Error> ErrorList { get; } = new();
 
@@ -58,10 +68,11 @@ namespace SchemaForge.Crucible
     /// <param name="token">Token to add. The name must be different from all <see cref="ConfigToken"/> objects currently in the Schema.</param>
     public void AddToken(ConfigToken token)
     {
-      if (!ConfigTokens.Add(token))
+      if (ConfigTokens.ContainsKey(token.TokenName))
       {
         throw new ArgumentException($"ConfigToken set already contains a ConfigToken named {token.TokenName}");
       }
+      ConfigTokens.Add(token.TokenName, token);
     }
 
     /// <summary>
@@ -73,10 +84,28 @@ namespace SchemaForge.Crucible
     {
       foreach (ConfigToken token in tokens)
       {
-        if (!ConfigTokens.Add(token))
+        if (ConfigTokens.ContainsKey(token.TokenName))
         {
           throw new ArgumentException($"ConfigToken set already contains a ConfigToken named {token.TokenName}");
         }
+        ConfigTokens.Add(token.TokenName, token);
+      }
+    }
+
+    /// <summary>
+    /// Removes one token from the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects.
+    /// </summary>
+    /// <exception cref="ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
+    /// <param name="tokenName">Name of the token to remove; corresponds to <see cref="ConfigToken.TokenName"/>.</param>
+    public void RemoveToken(string tokenName)
+    {
+      if(ConfigTokens.ContainsKey(tokenName))
+      {
+        ConfigTokens.Remove(tokenName);
+      }
+      else
+      {
+        throw new ArgumentException($"Attempted to remove token {tokenName} from Schema, but Schema did not contain {tokenName}");
       }
     }
 
@@ -103,13 +132,13 @@ namespace SchemaForge.Crucible
     public virtual List<Error> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, bool allowUnrecognized = false)
     {
       string message = " ";
-      // This option is included in case a sub-configuration is being validated; this allows the ErrorList to indicate the exact configuration that has the issue.
-      // Name is usually the token name of the sub-configuration.
+      // This option is included in case a sub-collection is being validated; this
+      //   allows the ErrorList to indicate the exact collection that has the issue.
       if (!string.IsNullOrWhiteSpace(name))
       {
         message = $"Validation for {name} failed.";
       }
-      foreach (ConfigToken token in ConfigTokens)
+      foreach (ConfigToken token in ConfigTokens.Values)
       {
         if (!translator.CollectionContains(collection, token.TokenName))
         {
@@ -141,20 +170,23 @@ namespace SchemaForge.Crucible
       }
       /*
 
-      The decision to invalidate the config due to unrecognized tokens stems from the possibility that an end user might misspell an optional token 
-          when forming their configuration file or request.
+      The decision to invalidate the config due to unrecognized tokens stems
+        from the possibility that an end user might misspell an optional token
+        when forming their configuration file or request.
 
-      If the user includes an optional token with a typo in the token name, it will not be flagged as a missing required token,
-          but it will also not have the effect the user intended from including the optional token.
+      If the user includes an optional token with a typo in the token name, it
+        will not be flagged as a missing required token, but it will also not
+        have the effect the user intended from including the optional token.
 
       Such a problem would be very frustrating and possibly difficult to debug;
-          therefore, we invalidate the config file if there are any tokens that are not accounted for in ConfigTokens by default.
+        therefore, we invalidate the collection if there are any tokens that
+        are not accounted for in ConfigTokens by default.
 
       */
       List<string> collectionKeys = translator.GetCollectionKeys(collection);
       foreach (string key in collectionKeys)
       {
-        if (!ConfigTokens.Select(x => x.TokenName).Contains(key))
+        if (!ConfigTokens.Select(x => x.Value.TokenName).Contains(key))
         {
           if (message.IsNullOrEmpty())
           {
@@ -189,7 +221,7 @@ namespace SchemaForge.Crucible
     public override string ToString()
     {
       JObject schemaJson = new();
-      foreach(ConfigToken token in ConfigTokens)
+      foreach(ConfigToken token in ConfigTokens.Values)
       {
         schemaJson.Add(token.TokenName, token.JsonConstraint);
       }
@@ -211,7 +243,7 @@ namespace SchemaForge.Crucible
     public JObject GenerateEmptyJson()
     {
       JObject newConfig = new();
-      foreach (ConfigToken token in ConfigTokens)
+      foreach (ConfigToken token in ConfigTokens.Values)
       {
         if(token.Required)
         {
@@ -232,7 +264,7 @@ namespace SchemaForge.Crucible
     public Schema Clone()
     {
       Schema newSchema = new();
-      foreach(ConfigToken token in ConfigTokens)
+      foreach(ConfigToken token in ConfigTokens.Values)
       {
         newSchema.AddToken(token);
       }

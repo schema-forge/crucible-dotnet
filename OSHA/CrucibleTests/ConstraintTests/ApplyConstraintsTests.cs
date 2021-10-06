@@ -53,7 +53,7 @@ namespace ConstraintTests
     }
 
     /// <summary>
-    /// Executes two constraints on a string that will pass both constarints.
+    /// Executes two constraints on a string that will pass both constraints.
     /// </summary>
     [Fact]
     public void ApplyConstraintsValid() => Assert.True(new ConfigToken<string>("TestToken", "I'm sorry. I'm so sorry.", new Constraint<string>[] { ConstrainStringLengthLowerBound(5), ForbidSubstrings(",", "\n") }).Validate(new JValue("Valid string!"), new JTokenTranslator()));
@@ -85,7 +85,9 @@ namespace ConstraintTests
     /// Tests applying different constraints to different types.
     /// </summary>
     /// <param name="expectedResult">Expected validation result.</param>
-    /// <param name="inputValue">Value to validate using the constraints. If int, it must be between 3 and 15. If string, must be one of Tennant, Smith, and Eccleston.</param>
+    /// <param name="inputValue">Value to validate using the constraints.
+    /// If int, it must be between 3 and 15. If string, must be one of
+    /// Tennant, Smith, and Eccleston.</param>
     [Theory]
     [InlineData(true, "Tennant")]
     [InlineData(true, 12)]

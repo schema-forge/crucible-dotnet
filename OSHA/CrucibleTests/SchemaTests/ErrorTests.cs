@@ -19,7 +19,6 @@ namespace SchemaTests
       Error error = new("You dun goofed!");
       Assert.Equal("You dun goofed!", error.ErrorMessage);
       Assert.Equal(Severity.Fatal, error.ErrorSeverity);
-      Assert.Equal("You dun goofed!", error.ErrorMessage);
     }
 
     /// <summary>
