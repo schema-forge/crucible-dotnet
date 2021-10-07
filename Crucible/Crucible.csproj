@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -6,6 +6,7 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <Version>0.0.2</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Company>SchemaForge</Company>
     <RepositoryUrl>https://github.com/schema-forge/crucible-dotnet</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
@@ -25,8 +26,8 @@ The goal is to centralize all validation for incoming web requests or configurat
 Alpha 0.0.1- initial release. Includes Schema objects, JObjectTranslator for applying Schema objects to Json, ConfigToken objects to define tokens, Constraint objects to define rules that the values of tokens must follow, and Error objects to contain information about issues found during Schema validation.</PackageReleaseNotes>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>C:\Users\Syme\source\repos\schema-forge\crucible\Crucible\Crucible.xml</DocumentationFile>
+  <PropertyGroup>
+      <DocumentationFile>Crucible.xml</DocumentationFile>
   </PropertyGroup>
     
   <ItemGroup>
