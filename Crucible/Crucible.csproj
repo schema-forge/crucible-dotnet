@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>SchemaForge.Crucible</RootNamespace>
     <AnalysisLevel>latest</AnalysisLevel>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>SchemaForge</Company>
     <RepositoryUrl>https://github.com/schema-forge/crucible-dotnet</RepositoryUrl>
@@ -13,14 +13,16 @@
     <PackageId>SchemaForge.Crucible</PackageId>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageTags>api, request validation, schema creation</PackageTags>
-    <Description>Crucible is the primary consumable library of the SchemaForge eco system. It exposes Schema creation and validation.
+    <Description>Crucible is the primary consumable library of the SchemaForge ecosystem. It exposes Schema creation and validation.
 
 Schemas are objects used to define the structure and rules of a collection file. They hold lists of tokens, each of which defines the type of data the token must contain and all of the rules a token must follow in order to be considered valid.
 
 The goal is to centralize all validation for incoming web requests or configuration files, providing an easy-to-use interface that generates helpful and specific error messages that can be passed along to end users interacting with a service that incorporates Crucible.</Description>
     <Authors>SchemaForge</Authors>
     <Copyright>2021, SchemaForge</Copyright>
-    <PackageReleaseNotes>Alpha 0.0.1- initial release. Includes Schema objects, JObjectTranslator for applying Schema objects to Json, ConfigToken objects to define tokens, Constraint objects to define rules that the values of tokens must follow, and Error objects to contain information about issues found during Schema validation.</PackageReleaseNotes>
+    <PackageReleaseNotes>Alpha 0.0.2- Fixed various XML documentation issues.
+
+Alpha 0.0.1- initial release. Includes Schema objects, JObjectTranslator for applying Schema objects to Json, ConfigToken objects to define tokens, Constraint objects to define rules that the values of tokens must follow, and Error objects to contain information about issues found during Schema validation.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
