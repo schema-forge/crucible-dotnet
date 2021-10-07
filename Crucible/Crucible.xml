@@ -1,0 +1,1310 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Crucible</name>
+    </assembly>
+    <members>
+        <member name="T:SchemaForge.Crucible.ConstraintType">
+            <summary>
+            Indicates the type of the constraint; Standard constraints apply to values
+            that have been cast to the corresponding TValueType of Constraint whereas
+            Format constraints are applied to those values cast to strings instead.
+            </summary>
+        </member>
+        <member name="F:SchemaForge.Crucible.ConstraintType.Standard">
+            <summary>
+            Indicates that this constraint applies to casted values.
+            </summary>
+        </member>
+        <member name="F:SchemaForge.Crucible.ConstraintType.Format">
+            <summary>
+            Indicates that this constraint applies to the string version of the token value.
+            </summary>
+        </member>
+        <member name="T:SchemaForge.Crucible.Constraint">
+            <summary>
+            An object that represents a rule that a token value must follow. When
+            passed to a <see cref="T:SchemaForge.Crucible.ConfigToken"/>, the passed Function
+            will be executed on the value corresponding with the <see cref="T:SchemaForge.Crucible.ConfigToken"/>.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.Constraint.Property">
+            <summary>
+            JProperty representation of this constraint. Will be used when saving a <see cref="T:SchemaForge.Crucible.Schema"/> to Json.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraint.GetFunction">
+            <summary>
+            Used solely to retrieve the function as an object when deserializing.
+            </summary>
+            <returns>Function boxed in an object.</returns>
+        </member>
+        <member name="P:SchemaForge.Crucible.Constraint.Errors">
+            <summary>
+            List of errors generated during creation of the constraint.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.Constraint.ConstraintType">
+            <summary>
+            Gives the type of the constraint; <see cref="F:SchemaForge.Crucible.ConstraintType.Format"/> constraints are applied to the original token
+            value cast to string while <see cref="F:SchemaForge.Crucible.ConstraintType.Standard"/> constraints are applied after casting to the required type.
+            </summary>
+        </member>
+        <member name="T:SchemaForge.Crucible.Constraint`1">
+            <summary>
+            An object that represents a rule that a token value must follow. When
+            passed to a <see cref="T:SchemaForge.Crucible.ConfigToken"/>, the <see cref="P:SchemaForge.Crucible.Constraint`1.Function"/>
+            will be executed on the value corresponding with the ConfigToken.
+            </summary>
+            <typeparam name="TValueType">Type of the constraint; must match up with the <see cref="T:SchemaForge.Crucible.ConfigToken"/> to which the Constraint is being passed.</typeparam>
+        </member>
+        <member name="P:SchemaForge.Crucible.Constraint`1.Function">
+            <summary>
+            Function that will be applied by the constraint if this is a <see cref="F:SchemaForge.Crucible.ConstraintType.Standard"/> constraint.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.Constraint`1.FormatFunction">
+            <summary>
+            Function that will be applied by the constraint if this is a <see cref="F:SchemaForge.Crucible.ConstraintType.Format"/> constraint.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraint`1.#ctor(System.Func{`0,System.String,System.Collections.Generic.List{SchemaForge.Crucible.Error}},Newtonsoft.Json.Linq.JProperty,System.Collections.Generic.List{SchemaForge.Crucible.Error})">
+            <summary>
+            Constraint objects represent a rule that is applied to a token; <paramref name="inputFunction"/> is the validation function that will be executed on the token's value while the <paramref name="inputProperty"/> is the representation of the constraint as a <see cref="T:Newtonsoft.Json.Linq.JProperty"/>.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">Throws <see cref="T:System.ArgumentNullException"/> if <paramref name="inputProperty"/> name or value is null or empty.</exception>
+            <param name="inputFunction">Function to execute from this <see cref="T:SchemaForge.Crucible.Constraint"/>. The TValueType in the function is the value being tested; the string is the name of the token in the object being tested.</param>
+            <param name="inputProperty">JProperty representation of this <see cref="T:SchemaForge.Crucible.Constraint"/>. Neither name nor value can be null or whitespace.</param>
+            <param name="constraintErrors">Errors generated while creating this <see cref="T:SchemaForge.Crucible.Constraint"/>.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraint`1.#ctor(System.Func{System.String,System.String,System.Collections.Generic.List{SchemaForge.Crucible.Error}},SchemaForge.Crucible.ConstraintType,Newtonsoft.Json.Linq.JProperty,System.Collections.Generic.List{SchemaForge.Crucible.Error})">
+            <summary>
+            Use this overload only if you intend to create a non-Standard constraint type.
+            Format constraints are applied to the input data before it is cast to another
+            format; this is especially useful for potentially destructive casts such as
+            DateTime.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">Throws <see cref="T:System.ArgumentNullException"/> if <paramref name="inputProperty"/>
+            name or value is null or empty or if attempting to pass <see cref="F:SchemaForge.Crucible.ConstraintType.Standard"/> to this overload.</exception>
+            <param name="inputFunction">Function to execute from this constraint. The first string argument is the input data value cast to string; the second string argument is the name of the token in the object being tested.</param>
+            <param name="constraintType">Type of this constraint. Currently, only <see cref="F:SchemaForge.Crucible.ConstraintType.Format"/> is supported here.</param>
+            <param name="inputProperty">JProperty representation of this constraint. Neither name nor value can be null or whitespace.</param>
+            <param name="constraintErrors">Errors generated while creating this constraint.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraint`1.GetFunction">
+            <summary>
+            Returns the <see cref="P:SchemaForge.Crucible.Constraint`1.Function"/> of this <see cref="T:SchemaForge.Crucible.Constraint"/> as an object.
+            </summary>
+            <returns>The <see cref="P:SchemaForge.Crucible.Constraint`1.Function"/> boxed in an object.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.Constraints">
+            <summary>
+            Contains the definitions of all prepackaged Constraint-generating functions.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainValueLowerBound``1(``0)">
+            <summary>
+            Constrains comparable values with only a lower bound.
+            </summary>
+            <typeparam name="TValueType"><see cref="T:System.IComparable`1"/> and <see cref="T:System.IFormattable"/> type to check.</typeparam>
+            <param name="lowerBound"><typeparamref name="TValueType"/> used as the lower bound in the returned function, inclusive.</param>
+            <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is greater than the provided lower bound.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainValueUpperBound``1(``0)">
+            <summary>
+            Constrains comparable values with only an upper bound.
+            </summary>
+            <typeparam name="TValueType"><see cref="T:System.IComparable`1"/> and <see cref="T:System.IFormattable"/> type to check.</typeparam>
+            <param name="upperBound"><typeparamref name="TValueType"/> used as the lower bound in the returned function, inclusive.</param>
+            <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is greater than the provided lower bound.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainValue``1(``0,``0)">
+            <summary>
+            Constrains comparable values with a lower bound and an upper bound.
+            </summary>
+            <typeparam name="TValueType"><see cref="T:System.IComparable`1"/> and <see cref="T:System.IFormattable"/> type to check.</typeparam>
+            <param name="lowerBound"><typeparamref name="TValueType"/> used as the lower bound in the returned function, inclusive.</param>
+            <param name="upperBound"><typeparamref name="TValueType"/> used as the upper bound in the returned function, inclusive.</param>
+            <exception cref="T:System.ArgumentException">Throws <see cref="T:System.ArgumentException"/> if upperBound is greater than lowerBound.</exception>
+            <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is greater than the provided lower bound.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainValue``1(System.ValueTuple{``0,``0}[])">
+            <summary>
+            Constrains comparable values using any number of provided domains as tuples in format (lowerBound, upperBound)
+            </summary>
+            <typeparam name="TValueType"><see cref="T:System.IComparable`1"/> and <see cref="T:System.IFormattable"/> type to check.</typeparam>
+            <param name="domains">(<typeparamref name="TValueType"/>, <typeparamref name="TValueType"/>) tuples in format (lowerBound, upperBound) used as possible domains in the returned function, inclusive.</param>
+            <exception cref="T:System.ArgumentException">Throws <see cref="T:System.ArgumentException"/> if the first item of any passed tuple is greater than the second item.</exception>
+            <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is within at least one of the provided domains.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainDigits``1(System.Int32)">
+            <summary>
+            Constrains the number of digits a number has after the decimal.
+            </summary>
+            <param name="upperBound">Maximum number of digits after the decimal.</param>
+            <returns>A new <see cref="T:SchemaForge.Crucible.Constraint"/> containing a method to constrain decimal digits.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.AllowValues``1(``0[])">
+            <summary>
+            Ensure that the passed <typeparamref name="T"/> matches at least one of the values provided in <paramref name="acceptableValues"/>.
+            </summary>
+            <param name="acceptableValues">List of values used to build the returned function.</param>
+            <returns>Function checking to ensure that the value of the passed item is one of acceptableValues.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainStringWithRegexExact(System.Text.RegularExpressions.Regex[])">
+            <summary>
+            Ensures that the token value is an exact match to at least one of the passed <paramref name="patterns"/>.
+            </summary>
+            <param name="patterns">Valid Regex pattern(s) used in the returned function.</param>
+            <returns>Function checking to ensure that the string value isan exact match to at least one of the passed <paramref name="patterns"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainStringLengthLowerBound(System.Int32)">
+            <summary>
+            Constrains length of a string value.
+            </summary>
+            <param name="lowerBound">Minimum length of passed string.</param>
+            <returns>Function that ensures the length of a string is at least <paramref name="lowerBound"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainStringLength(System.Int32,System.Int32)">
+            <summary>
+            Constrains length of a string value.
+            </summary>
+            <param name="lowerBound">Minimum length of passed string.</param>
+            <param name="upperBound">Maximum length of passed string.</param>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if <paramref name="lowerBound"/> is greater than <paramref name="upperBound"/>.</exception>
+            <returns>Function that ensures the length of a string is at least <paramref name="lowerBound"/> and at most <paramref name="upperBound"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainStringLengthUpperBound(System.Int32)">
+            <summary>
+            Constrains length of a string value.
+            </summary>
+            <param name="upperBound">Maximum length of passed string.</param>
+            <returns>Function that ensures the length of a string is less than or equal to <paramref name="upperBound"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ForbidSubstrings(System.String[])">
+            <summary>
+            Ensures that the token's value does not contain any of <paramref name="forbiddenSubstrings"/>.
+            </summary>
+            <param name="forbiddenSubstrings">Strings that cannot occur in the input string.</param>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if no strings are passed.</exception>
+            <returns>Function that ensures the input string does not contain any of <paramref name="forbiddenSubstrings"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainCollectionCountLowerBound``1(System.Int32)">
+            <summary>
+            Constrains the number of items in an <see cref="T:System.Collections.IEnumerable"/> object with a lower bound.
+            </summary>
+            <param name="lowerBound">Minimum number of items in the target <see cref="T:System.Collections.IEnumerable"/>.</param>
+            <returns>Constraint ensuring an enumerable has at least <paramref name="lowerBound"/> items.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainCollectionCount``1(System.Int32,System.Int32)">
+            <summary>
+            Constrains the number of items in an <see cref="T:System.Collections.IEnumerable"/> with a lower bound and upper bound.
+            </summary>
+            <param name="lowerBound">Minimum number of items in the target <see cref="T:System.Collections.IEnumerable"/>.</param>
+            <param name="upperBound">Maximum number of items in the target <see cref="T:System.Collections.IEnumerable"/>.</param>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if <paramref name="lowerBound"/> is greater than <paramref name="upperBound"/>.</exception>
+            <returns>Function ensuring a JArray has at least <paramref name="lowerBound"/> and at most <paramref name="upperBound"/> items.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainCollectionCountUpperBound``1(System.Int32)">
+            <summary>
+            Constrains the number of items in an <see cref="T:System.Collections.IEnumerable"/> object with an upper bound.
+            </summary>
+            <param name="upperBound">Minimum number of items in the target <see cref="T:System.Collections.IEnumerable"/>.</param>
+            <returns>Constraint ensuring an enumerable has at least <paramref name="upperBound"/> items.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ApplyConstraintsHelper``1(Newtonsoft.Json.Linq.JToken,System.String,SchemaForge.Crucible.Constraint{``0}[])">
+            <summary>
+            Encapsulates the process of typechecking and applying all passed constraints.
+            </summary>
+            <typeparam name="TValueType">Expected type of the token value being evaluated.</typeparam>
+            <param name="inputToken">Input <see cref="T:Newtonsoft.Json.Linq.JToken"/>.</param>
+            <param name="tokenName">Name of the input <see cref="T:Newtonsoft.Json.Linq.JToken"/>.</param>
+            <param name="constraints">Constraints to apply to the input token.</param>
+            <returns>List{Error} generated by applying all of the constraints.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ApplyConstraintsToJArray``1(SchemaForge.Crucible.Constraint{``0}[])">
+            <summary>
+            Ensures all items in the target <see cref="T:Newtonsoft.Json.Linq.JArray"/> are of type <typeparamref name="TElementType"/> and pass all provided constraints.
+            </summary>
+            <typeparam name="TElementType">Type of all items in the target <see cref="T:Newtonsoft.Json.Linq.JArray"/>.</typeparam>
+            <param name="constraints">List of functions to run on all items in the <see cref="T:Newtonsoft.Json.Linq.JArray"/> individually.</param>
+            <returns>Function ensuring that all items in the target <see cref="T:Newtonsoft.Json.Linq.JArray"/> are of type <typeparamref name="TElementType"/> and pass all provided constraints.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ApplyConstraintsToJArray``2(SchemaForge.Crucible.Constraint{``0}[],SchemaForge.Crucible.Constraint{``1}[])">
+            <summary>
+            Ensures all items in the target <see cref="T:Newtonsoft.Json.Linq.JArray"/> are of type
+            <typeparamref name="TElementType1"/> or <typeparamref name="TElementType2"/>
+            and applies all constraints on the type to which the element corresponds.
+            WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraintsToJArray{string, int}
+            will NEVER treat the passed token as an int!
+            </summary>
+            <typeparam name="TElementType1">First type to check against the token value
+            in the returned function.</typeparam>
+            <typeparam name="TElementType2">Second type to check against the token value
+            in the returned function.</typeparam>
+            <param name="constraintsIfTElementType1">Constraints to execute if cast to
+            <typeparamref name="TElementType1"/> is successful.</param>
+            <param name="constraintsIfTElementType2">Constraints to execute if cast to
+            <typeparamref name="TElementType2"/> is successful.</param>
+            <returns>Composite function of the type cast and all passed constraints.
+            Can be used in the constructor of a ConfigToken.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ApplyConstraintsToJArray``3(SchemaForge.Crucible.Constraint{``0}[],SchemaForge.Crucible.Constraint{``1}[],SchemaForge.Crucible.Constraint{``2}[])">
+            <summary>
+            Ensures all items in the target <see cref="T:Newtonsoft.Json.Linq.JArray"/> are of type
+            <typeparamref name="TElementType1"/>, or <typeparamref name="TElementType2"/>,
+            or <typeparamref name="TElementType3"/>
+            and applies all constraints on the type to which the element corresponds.
+            WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraintsToJArray{string, int}
+            will NEVER treat the passed token as an int!
+            </summary>
+            <typeparam name="TElementType1">First type to check against the token value
+            in the returned function.</typeparam>
+            <typeparam name="TElementType2">Second type to check against the token value
+            in the returned function.</typeparam>
+            <typeparam name="TElementType3">Third type to check against the token value
+            in the returned function.</typeparam>
+            <param name="constraintsIfT1">Constraints to execute if cast to
+            <typeparamref name="TElementType1"/> is successful.</param>
+            <param name="constraintsIfT2">Constraints to execute if cast to
+            <typeparamref name="TElementType2"/> is successful.</param>
+            <param name="constraintsIfT3">Constraints to execute if cast to
+            <typeparamref name="TElementType3"/> is successful.</param>
+            <returns>Composite function of the type cast and all passed constraints.
+            Can be used in the constructor of a ConfigToken.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ApplySchema(SchemaForge.Crucible.Schema)">
+            <summary>
+            Applies a <see cref="T:SchemaForge.Crucible.Schema"/> to the value of this token with the <see cref="M:SchemaForge.Crucible.Schema.Validate``1(``0,SchemaForge.Crucible.ISchemaTranslator{``0},System.String,System.Boolean)"/> method.
+            </summary>
+            <param name="inputSchema">Schema object to apply to the designated object.</param>
+            <returns>Function that adds all the <see cref="T:System.Collections.Generic.List`1"/> generated by using the <see cref="T:SchemaForge.Crucible.Schema"/> to validate the passed <see cref="T:Newtonsoft.Json.Linq.JObject"/></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainDateTimeFormat(System.String[])">
+            <summary>
+            Ensures a <see cref="T:System.DateTime"/> value follows at least one of the passed
+            Custom Format Specifier <paramref name="formats"/>.
+            Including this <see cref="T:SchemaForge.Crucible.Constraint"/> will update the <see cref="T:System.DateTime"/>
+            parser in <see cref="T:SchemaForge.Crucible.Utilities.Conversions"/>, allowing the parser to recognize
+            <see cref="T:System.DateTime"/>s in the provided formats.
+            </summary>
+            <param name="formats">Formats in the <see cref="T:System.DateTime"/> Custom Format
+            Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
+            <returns>A function ensuring that the token value is in one of the provided
+            Custom Format Specifier <paramref name="formats"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.MatchAnyConstraint``1(SchemaForge.Crucible.Constraint{``0}[])">
+            <summary>
+            A logic constraint that will check the passed value against all
+            <paramref name="constraints"/> and return the <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.Error"/>
+            of the first constraint that does not generate fatal errors, or the
+            <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.Error"/> of all constraints combined if none pass.
+            </summary>
+            <typeparam name="TValueType">Value type that will be checked with
+            constraints applying to said value type.</typeparam>
+            <param name="constraints">Constraints to check; if at least one passes,
+            the value will be considered valid.</param>
+            <exception cref="T:System.ArgumentException">Throws <see cref="T:System.ArgumentException"/>
+            if fewer than two constraints are passed.</exception>
+            <returns>A function that returns the <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.Error"/> resulting
+            from checking whether or not the passed <typeparamref name="TValueType"/> passes
+            at least one of <paramref name="constraints"/></returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.Severity">
+            <summary>
+            Indicates the severity of an error found while validating.
+            </summary>
+        </member>
+        <member name="F:SchemaForge.Crucible.Severity.Info">
+            <summary>
+            Indicates something that is not an error, but should be provided for the end user's edification.
+            </summary>
+        </member>
+        <member name="F:SchemaForge.Crucible.Severity.Warning">
+            <summary>
+            Indicates an error that is not severe enough to mark the object invalid.
+            </summary>
+        </member>
+        <member name="F:SchemaForge.Crucible.Severity.Fatal">
+            <summary>
+            Indicates an error that should invalidate the object being evaluated by the Schema.
+            </summary>
+        </member>
+        <member name="F:SchemaForge.Crucible.Severity.Trace">
+            <summary>
+            Indicates that this is debugging info.
+            </summary>
+        </member>
+        <member name="T:SchemaForge.Crucible.Error">
+            <summary>
+            In SchemaForge, an Error is an object generated when using a Schema to validate another object.
+            When converted to a string, Errors show their severity and error message.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.Error.ErrorMessage">
+            <summary>
+            Message detailing the error.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.Error.ErrorSeverity">
+            <summary>
+            <see cref="T:SchemaForge.Crucible.Severity"/> of the error.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Error.#ctor(System.String,SchemaForge.Crucible.Severity)">
+            <summary>
+            Builds an <see cref="T:SchemaForge.Crucible.Error"/> with the <see cref="P:SchemaForge.Crucible.Error.ErrorMessage"/>
+            set to <paramref name="inputMessage"/> and the <see cref="T:SchemaForge.Crucible.Severity"/>
+            set to <paramref name="inputSeverity"/> if provided.
+            </summary>
+            <param name="inputMessage">The message to be displayed when this error is converted to string. Will display as "[<paramref name="inputSeverity"/>] <paramref name="inputMessage"/>"</param>
+            <param name="inputSeverity">Severity of this error. Defaults to Fatal.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Error.ToString">
+            <summary>
+            Converts the error's severity and message to string format.
+            </summary>
+            <returns>String in the format "[<see cref="P:SchemaForge.Crucible.Error.ErrorSeverity"/>] <see cref="P:SchemaForge.Crucible.Error.ErrorMessage"/>"</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.Extensions.ArrayExtensions">
+            <summary>
+            Contains extensions to the <see cref="T:System.Array"/> class for ease-of-use in SchemaForge.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.ArrayExtensions.CloneArray``1(``0[])">
+            <summary>
+            Shallow copies the <paramref name="source"/> array.
+            </summary>
+            <typeparam name="T">Type of the data contained in the array.</typeparam>
+            <param name="source">Source array to be shallow copied.</param>
+            <returns>Copy of the <paramref name="source"/> array.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.ArrayExtensions.Reverse``1(``0[])">
+            <summary>
+            Performs an in-place reversal on the <paramref name="source"/>
+            and returns it.
+            </summary>
+            <typeparam name="T">Type of the data contained in the array.</typeparam>
+            <param name="source">Source array, modified in place.</param>
+            <exception cref="T:System.ArgumentNullException">
+            If the <paramref name="source"/> array is null.
+            </exception>
+            <returns>The <paramref name="source"/> array.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.Extensions.IEnumerableExtensions">
+            <summary>
+            Contains extensions to the <see cref="T:System.Collections.IEnumerable"/> class for ease-of-use in SchemaForge.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.IEnumerableExtensions.Join``1(System.Collections.Generic.IEnumerable{``0},System.Char)">
+            <summary>
+            Performs a <see cref="M:System.String.Join``1(System.Char,System.Collections.Generic.IEnumerable{``0})"/> operation
+            on enumerable using the given <see cref="T:System.Char"/> seperator.
+            <see cref="M:System.Object.ToString"/> is called on each item.
+            </summary>
+            <typeparam name="T">Underlying type in <paramref name="enumerable"/></typeparam>
+            <param name="enumerable">Enumerable object to be joined.</param>
+            <param name="separator">Separator to be used to delimit items.</param>
+            <returns><paramref name="separator"/>-delimited <see cref="T:System.String"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.IEnumerableExtensions.Join``1(System.Collections.Generic.IEnumerable{``0},System.String)">
+            <summary>
+            Performs a <see cref="M:System.String.Join``1(System.String,System.Collections.Generic.IEnumerable{``0})"/>
+            operation on enumerable using the given <see cref="T:System.String"/>
+            seperator. <see cref="M:System.Object.ToString"/> is called on each item.
+            </summary>
+            <typeparam name="T">Underlying type in <paramref name="enumerable"/></typeparam>
+            <param name="enumerable">Enumerable object to be joined.</param>
+            <param name="separator">Separator to be used to delimit items.</param>
+            <returns><paramref name="separator"/>-delimited <see cref="T:System.String"/></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.IEnumerableExtensions.AnyFatal(System.Collections.Generic.IEnumerable{SchemaForge.Crucible.Error})">
+            <summary>
+            Checks to see if any error in the calling error collection has severity Fatal.
+            </summary>
+            <param name="errorCollection">Error collection to search.</param>
+            <returns>Bool indicating if the error collection contains a fatal error.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.IEnumerableExtensions.Count(System.Collections.IEnumerable)">
+            <summary>
+            If the source is ICollection, returns Count property. Otherwise instantiates an enumerator and retrieves the count through iteration.
+            </summary>
+            <param name="source">IEnumerable to count.</param>
+            <returns>Number of elements in the IEnumerable.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.Extensions.JTokenExtensions">
+            <summary>
+            Contains extensions to the <see cref="T:Newtonsoft.Json.Linq.JToken"/> class for ease-of-use in SchemaForge.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.JTokenExtensions.IsNullOrEmpty(Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Checks if the given <see cref="T:Newtonsoft.Json.Linq.JToken"/> is an empty string, contains no array values, has no properties,
+            is null or undefined, or has a <see cref="T:Newtonsoft.Json.Linq.JProperty"/> value matching these conditions, depending on type.
+            </summary>
+            <param name="token"><see cref="T:Newtonsoft.Json.Linq.JToken"/> to check. If it is a <see cref="T:Newtonsoft.Json.Linq.JProperty"/>, the method will be executed on the name and the value of the <see cref="T:Newtonsoft.Json.Linq.JProperty"/>.</param>
+            <returns></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.JTokenExtensions.Contains``1(Newtonsoft.Json.Linq.JToken,``0)">
+            <summary>
+            Checks if the <see cref="T:Newtonsoft.Json.Linq.JToken"/> contains the given item. If the token
+            is a <see cref="T:Newtonsoft.Json.Linq.JArray"/>, it checks if one of the <see cref="T:Newtonsoft.Json.Linq.JArray"/>
+            items is the passed item. If the token is a string, it will search the
+            string for the string version of the item. If the <see cref="T:Newtonsoft.Json.Linq.JToken"/>
+            is a <see cref="T:Newtonsoft.Json.Linq.JObject"/>, it will search for a <see cref="T:Newtonsoft.Json.Linq.JProperty"/> named
+            after the item. If the token is a <see cref="T:Newtonsoft.Json.Linq.JProperty"/>, it will run recursively on the Value of the <see cref="T:Newtonsoft.Json.Linq.JProperty"/>.
+            </summary>
+            <param name="token"><see cref="T:Newtonsoft.Json.Linq.JToken"/> that will be searched.</param>
+            <param name="item">Item to search for.</param>
+            <returns>True if the <see cref="T:Newtonsoft.Json.Linq.JToken"/> contains the item; false if the <see cref="T:Newtonsoft.Json.Linq.JToken"/> is not a searchable type or it does not contain <paramref name="item"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.JTokenExtensions.Contains``1(Newtonsoft.Json.Linq.JArray,``0)">
+            <summary>
+            This method is a typed Contains method for <see cref="T:Newtonsoft.Json.Linq.JArray"/>s, to search for objects of specific types.
+            </summary>
+            <typeparam name="T">Type of item to search for.</typeparam>
+            <param name="input">JArray to search.</param>
+            <param name="item">Item to search for.</param>
+            <returns>Bool indicating if the item with the correct type is contained in the array.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.JTokenExtensions.Add``1(Newtonsoft.Json.Linq.JToken,``0)">
+            <summary>
+            Attempts to add passed item to the given <see cref="T:Newtonsoft.Json.Linq.JToken"/>. If the <see cref="T:Newtonsoft.Json.Linq.JToken"/> is not an array, throws an exception.
+            </summary>
+            <exception cref="T:System.ArgumentException">Throws <see cref="T:System.ArgumentException"/> if type of token is not <see cref="F:Newtonsoft.Json.Linq.JTokenType.Array"/></exception>
+            <param name="token"><see cref="T:Newtonsoft.Json.Linq.JToken"/> to add to if it is a <see cref="T:Newtonsoft.Json.Linq.JArray"/>.</param>
+            <param name="item">Item to add to the array.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.JTokenExtensions.Add(Newtonsoft.Json.Linq.JToken,System.String,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Attempts to add passed item to the given <see cref="T:Newtonsoft.Json.Linq.JToken"/>. If the <see cref="T:Newtonsoft.Json.Linq.JToken"/> is not an object, throws an exception.
+            </summary>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if type of token is not <see cref="F:Newtonsoft.Json.Linq.JTokenType.Object"/> or if name is null, empty, or whitespace.</exception>
+            <param name="token"><see cref="T:Newtonsoft.Json.Linq.JToken"/> to add to if it is an array.</param>
+            <param name="name">Name of the new property to add to the <see cref="T:Newtonsoft.Json.Linq.JObject"/>.</param>
+            <param name="value">Value of the new property to add to the <see cref="T:Newtonsoft.Json.Linq.JObject"/>.</param>
+        </member>
+        <member name="T:SchemaForge.Crucible.Extensions.ObjectExtensions">
+            <summary>
+            Contains extensions to the <see cref="T:System.Object"/> class for ease-of-use in SchemaForge.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.ObjectExtensions.Exists(System.Object)">
+            <summary>
+            Syntactic sugar to check for null.
+            </summary>
+            <param name="obj">Object to check its null status.</param>
+            <returns>True if not null.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.ObjectExtensions.Exists``1(System.Nullable{``0})">
+            <summary>
+            Syntactic sugar to check for null.
+            </summary>
+            <typeparam name="T">Underlying value type.</typeparam>
+            <param name="strct">Object to check.</param>
+            <returns>True if not null, or false if it is.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.Extensions.StringExtensions">
+            <summary>
+            Contains extensions to the <see cref="T:System.String"/> class for ease-of-use in SchemaForge.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.StringExtensions.IsNullOrEmpty(System.String)">
+            <summary>
+            Executes string.IsNullOrEmpty() and string.IsNullOrWhiteSpace().
+            </summary>
+            <param name="str">String to check for emptiness.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.StringExtensions.AllIndexesOf(System.String,System.String)">
+            <summary>
+            Gets a list of all the indices of the given string or char.
+            </summary>
+            <param name="str">String to search.</param>
+            <param name="value">String to search for.</param>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if str or value is null, empty, or whitespace.</exception>
+            <returns>List of all indices of the search value within the target string.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.StringExtensions.AllIndexesOf(System.String,System.Char)">
+            <summary>
+            Gets a list of all the indexes of the given string or char.
+            </summary>
+            <param name="str">String to search.</param>
+            <param name="value">Char to search for.</param>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if str is null, empty, or whitespace.</exception>
+            <returns>List of all indexes of the search value within the target string.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Extensions.StringExtensions.CountOfChar(System.String,System.Char)">
+            <summary>
+            Counts the instances of a character in a string.
+            </summary>
+            <param name="input">Input string to search.</param>
+            <param name="target">Char to search for.</param>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if input is null, empty, or whitespace.</exception>
+            <returns>Number of times char occurs in input.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.IEnumerableExtensionsPublic">
+            <summary>
+            Contains AnyFatal, an extension method that indicates whether or not a collection of Errors contains any of Severity.Fatal.
+            An important method for consumers of the library.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.IEnumerableExtensionsPublic.AnyFatal(System.Collections.Generic.IList{SchemaForge.Crucible.Error})">
+            <summary>
+            Checks to see if any error in the calling error collection has severity Fatal.
+            </summary>
+            <param name="errorCollection">Error collection to search.</param>
+            <returns>Bool indicating if the error collection contains a fatal error.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.ConfigToken">
+            <summary>
+            A ConfigToken represents a value that is expected to exist in a collection processed by a Schema object.
+            ConfigTokens can have up to 3 types passed as type parameters, each a possible type of the corresponding value in the
+            object to be analyzed by the Schema.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken.TokenName">
+            <summary>
+            Name of the token; corresponds to a token present in the JObject that will be validated.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken.Description">
+            <summary>
+            String that will be added to the ErrorList of a Schema object as ErrorSeverity.Info when a validation error occurs for this token.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken.ErrorList">
+            <summary>
+            Contains all the errors generated by validation functions.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken.AllowNull">
+            <summary>
+            If false, null or empty token values are fatal errors. If true, they are warnings instead.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken.JsonConstraint">
+            <summary>
+            Represents the constraints on the token as a set of Json objects, one per possible type.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken.Required">
+            <summary>
+            Indicates whether or not this token is required.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken.DefaultValue">
+            <summary>
+            If DefaultValue is set and the token is optional, then if the user does not include this token in their configuration file, the default value will be inserted with TokenName as the property name.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.ToJProperty">
+            <summary>
+            Converts a ConfigToken into a JProperty of format "<see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/>":{ "Constraints":<see cref="P:SchemaForge.Crucible.ConfigToken.JsonConstraint"/>, "Description":"<see cref="P:SchemaForge.Crucible.ConfigToken.Description"/>" }
+            </summary>
+            <returns>JProperty of format "<see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/>":{ "Constraints":<see cref="P:SchemaForge.Crucible.ConfigToken.JsonConstraint"/>, "Description":"<see cref="P:SchemaForge.Crucible.ConfigToken.Description"/>"</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.AddNewType``1(SchemaForge.Crucible.Constraint{``0}[])">
+            <summary>
+            Returns a new <see cref="T:SchemaForge.Crucible.ConfigToken"/> with an additional type and new constraints added. Used primarily during deserialization.
+            </summary>
+            <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
+            <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
+            <returns>New <see cref="T:SchemaForge.Crucible.ConfigToken"/> with all pre-existing types, plus <typeparamref name="TNewType"/></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.Validate``1(``0,SchemaForge.Crucible.ISchemaTranslator{``0})">
+            <summary>
+            Extracts a token from the given <paramref name="collection"/> using the 
+            <see cref="M:SchemaForge.Crucible.ISchemaTranslator`1.TryCastToken``1(`0,System.String,``0@)"/>
+            method, with <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> as the passed string. All non-abstract
+            ConfigTokens have a set of type parameters. The method above will attempt casts
+            in the order those type parameters are provided; the first successful cast will
+            result in the corresponding ConstraintsIfTypeN array being applied to the token value.
+            </summary>
+            <typeparam name="TCollectionType">Collection from which the token will be
+            extracted.</typeparam>
+            <param name="collection">Collection to extract a value from.</param>
+            <param name="translator">Translator object to use when interacting with
+            the specified collection.</param>
+            <returns>Bool indicating whether or not any fatal errors were
+            raised by the constraint functions.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.InsertDefaultValue``1(``0,SchemaForge.Crucible.ISchemaTranslator{``0})">
+            <summary>
+            Inserts this token's DefaultValue into <paramref name="collection"/> using the relevant method from <paramref name="translator"/>.
+            </summary>
+            <typeparam name="TCollectionType">Type of collection to perform the operation on.</typeparam>
+            <param name="collection">Collection to insert the value into.</param>
+            <param name="translator">Translator used to interpret <typeparamref name="TCollectionType"/></param>
+            <returns>A new <typeparamref name="TCollectionType"/> <paramref name="collection"/> with the value added.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.ToString">
+            <summary>
+            Represents a <see cref="T:SchemaForge.Crucible.ConfigToken"/> as a string, returning <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/>.
+            </summary>
+            <returns><see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> of this <see cref="T:SchemaForge.Crucible.ConfigToken"/></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.Equals(System.Object)">
+            <summary>
+            All equality operators compare the TokenName of two ConfigTokens to determine equality.
+            </summary>
+            <param name="obj">The other object to compare.</param>
+            <returns>Bool indicating if two ConfigTokens have the same name.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.Equals(SchemaForge.Crucible.ConfigToken)">
+            <summary>
+            All equality operators compare the TokenName of two ConfigTokens to determine equality.
+            </summary>
+            <param name="other">The other token to compare.</param>
+            <returns>Bool indicating if two ConfigTokens have the same name.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.GetHashCode">
+            <summary>
+            Sets the HashCode of a ConfigToken to the HashCode of its TokenName.
+            </summary>
+            <returns>HashCode of TokenName string.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.GetConstraintObject``1(SchemaForge.Crucible.Constraint{``0}[])">
+            <summary>
+            Gets JObject representation of the type and all other constraints.
+            </summary>
+            <typeparam name="TValueType">Type of all constraints.</typeparam>
+            <param name="constraints">Array of constraints passed to the constructor.</param>
+            <returns>JObject representation of the constraints applied to the token.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.BuildConfigTokenCore(System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Sets all the non-generically typed values of a ConfigToken.
+            </summary>
+            <param name="inputName">Name to set.</param>
+            <param name="inputHelpString">HelpString to set.</param>
+            <param name="required">Indicates if the token is required.</param>
+            <param name="allowNull">Indicates if Null should be permitted for the token's value.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.InternalValidate``1(``0,System.Collections.Generic.List{SchemaForge.Crucible.Constraint{``0}})">
+            <summary>
+            Takes the castResult from a call to an ISchemaTranslator's
+            TryCastValue function, then applies constraints if the cast
+            succeeded or returns false if it did not.
+            </summary>
+            <typeparam name="TValueType">Type that the collection member was cast to.</typeparam>
+            <param name="castResult">Token value cast to TValueType from TryCastToken.</param>
+            <param name="constraints">Constraints to apply.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.InternalValidateFormat``1(System.String,System.Collections.Generic.List{SchemaForge.Crucible.Constraint{``0}})">
+            <summary>
+            Takes the castResult from a call to an ISchemaTranslator's
+            TryCastValue function to string, then applies format constraints.
+            </summary>
+            <typeparam name="TValueType">Type that the collection member was originally cast to.</typeparam>
+            <param name="castResult">Tuple that indicates whether the cast succeeded and contains the cast result.</param>
+            <param name="constraints">Constraints to apply if cast succeeded.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken.CheckDefaultValue">
+            <summary>
+            Ensures that the DefaultValue can be cast to one of the types provided for the ConfigToken.
+            </summary>
+            <returns>Bool indicating if DefaultValue is valid.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.ConfigToken`1">
+            <summary>
+            A <see cref="T:SchemaForge.Crucible.ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="T:SchemaForge.Crucible.Schema"/> object.
+            All passed types must be unique.
+            WARNING: Casts will be attempted IN ORDER. For example,
+            ConfigToken{string, int} will NEVER treat the passed token as an int!
+            Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
+            </summary>
+            <typeparam name="Type1">The 1st possible value type of this token.</typeparam>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`1.ConstraintsIfType1">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type1"/>, after the cast is applied.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`1.FormatConstraintsIfType1">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type1"/>, with the value cast to string rather than
+            <typeparamref name="Type1"/>.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`1.#ctor(System.String,System.String,SchemaForge.Crucible.Constraint{`0}[],System.Boolean,System.Boolean)">
+            <summary>
+            A <see cref="T:SchemaForge.Crucible.ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="T:SchemaForge.Crucible.Schema"/> object.
+            All passed types must be unique.
+            WARNING: Casts will be attempted IN ORDER. For example,
+            ConfigToken{string, int} will NEVER treat the passed token as an int!
+            Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">If inputName is null, whitespace, or empty.</exception>
+            <exception cref="T:System.ArgumentException">If all Type arguments are not unique.</exception>
+            <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
+            <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
+            <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+            <param name="required">If true, not detecting this token when applying a Schema is a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/>
+            If false, not detecting this token when applying a schema raises no error.</param>
+            <param name="allowNull">If false, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/>
+            If true, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Warning"/></param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`1.#ctor(System.String,System.String,System.Object,SchemaForge.Crucible.Constraint{`0}[],System.Boolean)">
+            <summary>
+            A <see cref="T:SchemaForge.Crucible.ConfigToken"/> represents a token that is expected to exist in the input collection to a <see cref="T:SchemaForge.Crucible.Schema"/> object.
+            All passed types must be unique.
+            WARNING: Casts will be attempted IN ORDER. For example,
+            ConfigToken{string, int} will NEVER treat the passed token as an int!
+            Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">If <paramref name="inputName"/> or inputDescription is null, whitespace, or empty.</exception>
+            <exception cref="T:System.ArgumentException">If all Type arguments are not unique.</exception>
+            <exception cref="T:System.ArgumentException">If <paramref name="inputDefaultValue"/> can't be cast to any of the ConfigToken types.</exception>
+            <param name="inputName">Name of the token. This will be used to search the object that is being validated.</param>
+            <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
+            <param name="inputDefaultValue">Object that will be inserted into the object that is being validated if an optional token is not provided.
+            If provided, assumes this token is not required.</param>
+            <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+            <param name="allowNull">If false, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/>
+            If true, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Warning"/></param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`1.BuildConstraints(SchemaForge.Crucible.Constraint{`0}[])">
+            <summary>
+            Internal constraint constructor. Ensures that all types are unique and assigns the constraint arrays to the appropriate fields.
+            </summary>
+            <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`1.AddNewType``1(SchemaForge.Crucible.Constraint{``0}[])">
+            <summary>
+            Returns a new <see cref="T:SchemaForge.Crucible.ConfigToken"/> with an additional type and new constraints added. Used primarily during deserialization.
+            </summary>
+            <exception cref="T:System.ArgumentException">If this <see cref="T:SchemaForge.Crucible.ConfigToken"/> already has <typeparamref name="TNewType"/></exception>
+            <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
+            <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
+            <returns>New <see cref="T:SchemaForge.Crucible.ConfigToken`2"/></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`1.Validate``1(``0,SchemaForge.Crucible.ISchemaTranslator{``0})">
+            <summary>
+            Extracts a token named <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> from
+            <paramref name="collection"/> using <see cref="M:SchemaForge.Crucible.ISchemaTranslator`1.TryCastToken``1(`0,System.String,``0@)"/>.
+            If at least one cast is successful, this function executes the
+            <see cref="P:SchemaForge.Crucible.Constraint`1.Function"/> of each
+            <see cref="T:SchemaForge.Crucible.Constraint`1"/> of the successful cast type on the
+            cast value.
+            </summary>
+            <param name="collection">Collection from which a token will be extracted.</param>
+            <param name="translator"><see cref="T:SchemaForge.Crucible.ISchemaTranslator`1"/> corresponding to the type of <paramref name="collection"/>.</param>
+            <returns>Bool indicating whether any fatal errors were found during validation.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.ConfigToken`2">
+            <summary>
+            A <see cref="T:SchemaForge.Crucible.ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="T:SchemaForge.Crucible.Schema"/> object.
+            All passed types must be unique.
+            WARNING: Casts will be attempted IN ORDER. For example,
+            ConfigToken{string, int} will NEVER treat the passed token as an int!
+            Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
+            </summary>
+            <typeparam name="Type1">The 1st possible value type of this token.</typeparam>
+            <typeparam name="Type2">The 2nd possible value type of this token.</typeparam>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`2.ConstraintsIfType1">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type1"/>, after the cast is applied.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`2.FormatConstraintsIfType1">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type1"/>, with the value cast to string rather than
+            <typeparamref name="Type1"/>.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`2.ConstraintsIfType2">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type2"/>, after the cast is applied.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`2.FormatConstraintsIfType2">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type2"/>, with the value cast to string rather than
+            <typeparamref name="Type2"/>.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`2.#ctor(System.String,System.String,SchemaForge.Crucible.Constraint{`0}[],SchemaForge.Crucible.Constraint{`1}[],System.Boolean,System.Boolean)">
+            <summary>
+            A <see cref="T:SchemaForge.Crucible.ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="T:SchemaForge.Crucible.Schema"/> object.
+            All passed types must be unique.
+            WARNING: Casts will be attempted IN ORDER. For example,
+            ConfigToken{string, int} will NEVER treat the passed token as an int!
+            Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">If inputName is null, whitespace, or empty.</exception>
+            <exception cref="T:System.ArgumentException">If all Type arguments are not unique.</exception>
+            <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
+            <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
+            <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+            <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
+            <param name="required">If true, not detecting this token when applying a Schema is a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/>
+            If false, not detecting this token when applying a schema raises no error.</param>
+            <param name="allowNull">If false, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/>
+            If true, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Warning"/></param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`2.#ctor(System.String,System.String,System.Object,SchemaForge.Crucible.Constraint{`0}[],SchemaForge.Crucible.Constraint{`1}[],System.Boolean)">
+            <summary>
+            A <see cref="T:SchemaForge.Crucible.ConfigToken"/> represents a token that is expected to exist in the input collection to a <see cref="T:SchemaForge.Crucible.Schema"/> object.
+            All passed types must be unique.
+            WARNING: Casts will be attempted IN ORDER. For example,
+            ConfigToken{string, int} will NEVER treat the passed token as an int!
+            Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">If <paramref name="inputName"/> or inputDescription is null, whitespace, or empty.</exception>
+            <exception cref="T:System.ArgumentException">If all Type arguments are not unique.</exception>
+            <exception cref="T:System.ArgumentException">If <paramref name="inputDefaultValue"/> can't be cast to any of the ConfigToken types.</exception>
+            <param name="inputName">Name of the token. This will be used to search the object that is being validated.</param>
+            <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
+            <param name="inputDefaultValue">Object that will be inserted into the object that is being validated if an optional token is not provided.
+            If provided, assumes this token is not required.</param>
+            <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+            <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
+            <param name="allowNull">If false, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/>
+            If true, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Warning"/></param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`2.BuildConstraints(SchemaForge.Crucible.Constraint{`0}[],SchemaForge.Crucible.Constraint{`1}[])">
+            <summary>
+            Internal constraint constructor. Ensures that all types are unique and assigns the constraint arrays to the appropriate fields.
+            </summary>
+            <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+            <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`2.AddNewType``1(SchemaForge.Crucible.Constraint{``0}[])">
+            <summary>
+            Returns a new <see cref="T:SchemaForge.Crucible.ConfigToken"/> with an additional type and new constraints added. Used primarily during deserialization.
+            </summary>
+            <exception cref="T:System.ArgumentException">If this <see cref="T:SchemaForge.Crucible.ConfigToken"/> already has <typeparamref name="TNewType"/></exception>
+            <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
+            <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
+            <returns>New <see cref="T:SchemaForge.Crucible.ConfigToken`3"/></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`2.Validate``1(``0,SchemaForge.Crucible.ISchemaTranslator{``0})">
+            <summary>
+            Extracts a token named <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> from
+            <paramref name="collection"/> using <see cref="M:SchemaForge.Crucible.ISchemaTranslator`1.TryCastToken``1(`0,System.String,``0@)"/>.
+            If at least one cast is successful, this function executes the
+            <see cref="P:SchemaForge.Crucible.Constraint`1.Function"/> of each
+            <see cref="T:SchemaForge.Crucible.Constraint`1"/> of the successful cast type on the
+            cast value.
+            </summary>
+            <param name="collection">Collection from which a token will be extracted.</param>
+            <param name="translator"><see cref="T:SchemaForge.Crucible.ISchemaTranslator`1"/> corresponding to the type of <paramref name="collection"/>.</param>
+            <returns>Bool indicating whether any fatal errors were found during validation.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.ConfigToken`3">
+            <summary>
+            A <see cref="T:SchemaForge.Crucible.ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="T:SchemaForge.Crucible.Schema"/> object.
+            All passed types must be unique.
+            WARNING: Casts will be attempted IN ORDER. For example,
+            ConfigToken{string, int} will NEVER treat the passed token as an int!
+            Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
+            </summary>
+            <typeparam name="Type1">The 1st possible value type of this token.</typeparam>
+            <typeparam name="Type2">The 2nd possible value type of this token.</typeparam>
+            <typeparam name="Type3">The 3rd possible value type of this token.</typeparam>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`3.ConstraintsIfType1">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type1"/>, after the cast is applied.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`3.FormatConstraintsIfType1">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type1"/>, with the value cast to string rather than
+            <typeparamref name="Type1"/>.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`3.ConstraintsIfType2">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type2"/>, after the cast is applied.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`3.FormatConstraintsIfType2">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type2"/>, with the value cast to string rather than
+            <typeparamref name="Type2"/>.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`3.ConstraintsIfType3">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type3"/>, after the cast is applied.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.ConfigToken`3.FormatConstraintsIfType3">
+            <summary>
+            The constraints whose functions will be executed on the value of the token
+            corresponding to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> if it can be cast to
+            <typeparamref name="Type3"/>, with the value cast to string rather than
+            <typeparamref name="Type3"/>.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`3.#ctor(System.String,System.String,SchemaForge.Crucible.Constraint{`0}[],SchemaForge.Crucible.Constraint{`1}[],SchemaForge.Crucible.Constraint{`2}[],System.Boolean,System.Boolean)">
+            <summary>
+            A <see cref="T:SchemaForge.Crucible.ConfigToken"/> represents a value that is expected to exist in a collection processed by a <see cref="T:SchemaForge.Crucible.Schema"/> object.
+            All passed types must be unique.
+            WARNING: Casts will be attempted IN ORDER. For example,
+            ConfigToken{string, int} will NEVER treat the passed token as an int!
+            Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">If inputName is null, whitespace, or empty.</exception>
+            <exception cref="T:System.ArgumentException">If all Type arguments are not unique.</exception>
+            <param name="inputName">Name of the token. This will be used to search the user config when validating.</param>
+            <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
+            <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+            <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
+            <param name="constraintsIfType3">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type3"/>.</param>
+            <param name="required">If true, not detecting this token when applying a Schema is a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/>
+            If false, not detecting this token when applying a schema raises no error.</param>
+            <param name="allowNull">If false, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/>
+            If true, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Warning"/></param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`3.#ctor(System.String,System.String,System.Object,SchemaForge.Crucible.Constraint{`0}[],SchemaForge.Crucible.Constraint{`1}[],SchemaForge.Crucible.Constraint{`2}[],System.Boolean)">
+            <summary>
+            A <see cref="T:SchemaForge.Crucible.ConfigToken"/> represents a token that is expected to exist in the input collection to a <see cref="T:SchemaForge.Crucible.Schema"/> object.
+            All passed types must be unique.
+            WARNING: Casts will be attempted IN ORDER. For example,
+            ConfigToken{string, int} will NEVER treat the passed token as an int!
+            Casts will stop at the first valid attempt and apply the relevant constraints as defined in the constructor.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">If <paramref name="inputName"/> or inputDescription is null, whitespace, or empty.</exception>
+            <exception cref="T:System.ArgumentException">If all Type arguments are not unique.</exception>
+            <exception cref="T:System.ArgumentException">If <paramref name="inputDefaultValue"/> can't be cast to any of the ConfigToken types.</exception>
+            <param name="inputName">Name of the token. This will be used to search the object that is being validated.</param>
+            <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
+            <param name="inputDefaultValue">Object that will be inserted into the object that is being validated if an optional token is not provided.
+            If provided, assumes this token is not required.</param>
+            <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+            <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
+            <param name="constraintsIfType3">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type3"/>.</param>
+            <param name="allowNull">If false, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/>
+            If true, detecting a null or empty value is a <see cref="F:SchemaForge.Crucible.Severity.Warning"/></param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`3.BuildConstraints(SchemaForge.Crucible.Constraint{`0}[],SchemaForge.Crucible.Constraint{`1}[],SchemaForge.Crucible.Constraint{`2}[])">
+            <summary>
+            Internal constraint constructor. Ensures that all types are unique and assigns the constraint arrays to the appropriate fields.
+            </summary>
+            <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+            <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
+            <param name="constraintsIfType3">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type3"/>.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`3.AddNewType``1(SchemaForge.Crucible.Constraint{``0}[])">
+            <summary>
+            Returns a new <see cref="T:SchemaForge.Crucible.ConfigToken"/> with an additional type and new constraints added. Used primarily during deserialization.
+            </summary>
+            <exception cref="T:System.ArgumentException">If this <see cref="T:SchemaForge.Crucible.ConfigToken"/> already has <typeparamref name="TNewType"/></exception>
+            <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
+            <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.ConfigToken`3.Validate``1(``0,SchemaForge.Crucible.ISchemaTranslator{``0})">
+            <summary>
+            Extracts a token named <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> from
+            <paramref name="collection"/> using <see cref="M:SchemaForge.Crucible.ISchemaTranslator`1.TryCastToken``1(`0,System.String,``0@)"/>.
+            If at least one cast is successful, this function executes the
+            <see cref="P:SchemaForge.Crucible.Constraint`1.Function"/> of each
+            <see cref="T:SchemaForge.Crucible.Constraint`1"/> of the successful cast type on the
+            cast value.
+            </summary>
+            <param name="collection">Collection from which a token will be extracted.</param>
+            <param name="translator"><see cref="T:SchemaForge.Crucible.ISchemaTranslator`1"/> corresponding to the type of <paramref name="collection"/>.</param>
+            <returns>Bool indicating whether any fatal errors were found during validation.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.Schema">
+            <summary>
+            Schema objects contain a set of ConfigTokens that define each value that should be
+            contained in an object passed to its Validate method.
+            </summary>
+        </member>
+        <member name="F:SchemaForge.Crucible.Schema.ConfigTokens">
+            <summary>
+            Set of token rules to use when a collection is passed to
+            <see cref="M:SchemaForge.Crucible.Schema.Validate``1(``0,SchemaForge.Crucible.ISchemaTranslator{``0},System.String,System.Boolean)"/>.
+            </summary>
+        </member>
+        <member name="P:SchemaForge.Crucible.Schema.ErrorList">
+            <summary>
+            Contains all errors generated during validation and the associated
+            <see cref="P:SchemaForge.Crucible.ConfigToken.Description"/> of each token that was marked invalid.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.#ctor">
+            <summary>
+            Constructs an empty <see cref="T:SchemaForge.Crucible.Schema"/> with no <see cref="T:SchemaForge.Crucible.ConfigToken"/> objects.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.#ctor(SchemaForge.Crucible.ConfigToken[])">
+            <summary>
+            Instantiates a <see cref="T:SchemaForge.Crucible.Schema"/> object with a set of <see cref="T:SchemaForge.Crucible.ConfigToken"/> objects to use.
+            </summary>
+            <param name="tokens">Tokens to add to the token set.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.#ctor(System.Collections.Generic.IEnumerable{SchemaForge.Crucible.ConfigToken})">
+            <summary>
+            Instantiates a <see cref="T:SchemaForge.Crucible.Schema"/> object with a set of <see cref="T:SchemaForge.Crucible.ConfigToken"/> objects to use.
+            </summary>
+            <param name="tokens">Tokens to add to the token set.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.AddToken(SchemaForge.Crucible.ConfigToken)">
+            <summary>
+            Adds a token to the <see cref="T:SchemaForge.Crucible.Schema"/> object's set of <see cref="T:SchemaForge.Crucible.ConfigToken"/> objects.
+            </summary>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if the Schema already contains a <see cref="T:SchemaForge.Crucible.ConfigToken"/> with the same name.</exception>
+            <param name="token">Token to add. The name must be different from all <see cref="T:SchemaForge.Crucible.ConfigToken"/> objects currently in the Schema.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.AddTokens(System.Collections.Generic.IEnumerable{SchemaForge.Crucible.ConfigToken})">
+            <summary>
+            Adds a set of tokens to the <see cref="T:SchemaForge.Crucible.Schema"/> object's set of <see cref="T:SchemaForge.Crucible.ConfigToken"/> objects.
+            </summary>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if the Schema already contains a token with the same name as one or more of the tokens in <paramref name="tokens"/>.</exception>
+            <param name="tokens">Collection of tokens to add. There must be no tokens in the set that have a name identical to something already in the Schema's token set.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.RemoveToken(System.String)">
+            <summary>
+            Removes one token from the <see cref="T:SchemaForge.Crucible.Schema"/> object's set of <see cref="T:SchemaForge.Crucible.ConfigToken"/> objects.
+            </summary>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
+            <param name="tokenName">Name of the token to remove; corresponds to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/>.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.Count">
+            <summary>
+            Returns the number of tokens contained in the <see cref="T:SchemaForge.Crucible.Schema"/>.
+            </summary>
+            <returns>The number of tokens contained in the <see cref="T:SchemaForge.Crucible.Schema"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.Validate``1(``0,SchemaForge.Crucible.ISchemaTranslator{``0},System.String,System.Boolean)">
+            <summary>
+            Checks <paramref name="collection"/> using the set of <see cref="F:SchemaForge.Crucible.Schema.ConfigTokens"/>.
+            If name and type are provided, the message
+            "Validation for <paramref name="name"/> failed."
+            will be added to <see cref="P:SchemaForge.Crucible.Schema.ErrorList"/> on validation failure.
+            </summary>
+            <param name="collection">Collection object to check using the <see cref="T:SchemaForge.Crucible.ConfigToken"/>
+            rules set in <see cref="F:SchemaForge.Crucible.Schema.ConfigTokens"/>.</param>
+            <param name="translator"><see cref="T:SchemaForge.Crucible.ISchemaTranslator`1"/>
+            used to interpret the collection for the <see cref="T:SchemaForge.Crucible.Schema"/> and extract values.</param>
+            <param name="name">If name and type are provided, the message 
+            "Validation for <paramref name="name"/> failed."
+            will be added to ErrorList on validation failure.</param>
+            <param name="allowUnrecognized">If false, unrecognized tokens (that is,
+            tokens present in the object being validated but not in the Schea) will raise
+            a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/> error. If true, unrecognized tokens will
+            raise a <see cref="F:SchemaForge.Crucible.Severity.Info"/> error.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.ToString">
+            <summary>
+            Returns the current schema as a stringified Json object.
+            </summary>
+            <returns>String version of a <see cref="T:Newtonsoft.Json.Linq.JObject"/> representation of the current schema controller.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.GenerateEmptyJson">
+            <summary>
+            This method can be used to generate a new example request or configuration file with all the required and optional tokens along with their <see cref="P:SchemaForge.Crucible.ConfigToken.Description"/>.
+            </summary>
+            <returns>A <see cref="T:Newtonsoft.Json.Linq.JObject"/> with all tokens from <see cref="F:SchemaForge.Crucible.Schema.ConfigTokens"/>, using <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> as the name and <see cref="P:SchemaForge.Crucible.ConfigToken.Description"/> as the property value.
+            If the Descriptions are well-written, the return value will serve as an excellent example for an end user to fill in.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.Clone">
+            <summary>
+            Returns a new <see cref="T:SchemaForge.Crucible.Schema"/> that is a clone of the current <see cref="T:SchemaForge.Crucible.Schema"/>.
+            </summary>
+            <returns>A new <see cref="T:SchemaForge.Crucible.Schema"/> that is a clone of this <see cref="T:SchemaForge.Crucible.Schema"/>.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.ISchemaTranslator`1">
+            <summary>
+            An <see cref="T:SchemaForge.Crucible.ISchemaTranslator`1"/>
+            interprets a <typeparamref name="TCollectionType"/>
+            for a <see cref="T:SchemaForge.Crucible.Schema"/> so that it can be validated.
+            </summary>
+            <typeparam name="TCollectionType">The .NET object type that is being translated for a <see cref="T:SchemaForge.Crucible.Schema"/> to read.</typeparam>
+        </member>
+        <member name="M:SchemaForge.Crucible.ISchemaTranslator`1.TryCastToken``1(`0,System.String,``0@)">
+            <summary>
+            Extracts a value from <paramref name="collection"/> with the designation
+            <paramref name="valueName"/> and attempts to cast that value to <typeparamref name="TCastType"/>
+            </summary>
+            <typeparam name="TCastType">The extracted value will be cast to this type.</typeparam>
+            <param name="collection">The collection from which to extract the value.</param>
+            <param name="valueName">The string designator for the value to be extracted.</param>
+            <param name="outputValue">The value after casting, if casting is successful; otherwise default of <typeparamref name="TCastType"/></param>
+            <returns>(bool, <typeparamref name="TCastType"/>) where bool indicates
+            success of the cast and <typeparamref name="TCastType"/> is the cast
+            value if successful, default otherwise.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ISchemaTranslator`1.TokenIsNullOrEmpty(`0,System.String)">
+            <summary>
+            Extracts a value from <paramref name="collection"/> with the designation
+            <paramref name="valueName"/> and determines whether this value is null or empty.
+            </summary>
+            <param name="collection">The collection from which to extract the value.</param>
+            <param name="valueName">The string designator for the value to be extracted.</param>
+            <returns>bool indicating if the value is null or empty.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ISchemaTranslator`1.InsertToken``1(`0,System.String,``0)">
+            <summary>
+            Inserts <paramref name="newValue"/> into <paramref name="collection"/>
+            with string designation <paramref name="valueName"/> and returns a
+            new <typeparamref name="TCollectionType"/> with the value inserted.
+            </summary>
+            <typeparam name="TDefaultValueType">Type of the value to be inserted.</typeparam>
+            <param name="collection">The collection from which to extract the value.</param>
+            <param name="valueName">The string designator for the value to be extracted.</param>
+            <param name="newValue">The new value to be inserted.</param>
+            <returns>New <typeparamref name="TCollectionType"/> with value inserted.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ISchemaTranslator`1.CollectionContains(`0,System.String)">
+            <summary>
+            Searches <paramref name="collection"/> for a value with string designation <paramref name="valueName"/>
+            </summary>
+            <param name="collection">The collection from which to extract the value.</param>
+            <param name="valueName">The string designator for the value to be extracted.</param>
+            <returns>bool indicating whether or not <paramref name="collection"/> contains a value with string designation <paramref name="valueName"/></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ISchemaTranslator`1.CollectionValueToString(`0,System.String)">
+            <summary>
+            Extracts a value from <paramref name="collection"/> with the designation
+            <paramref name="valueName"/> and returns its string representation.
+            </summary>
+            <param name="collection">The collection from which to extract the value.</param>
+            <param name="valueName">The string designator for the value to be extracted.</param>
+            <returns>string representation of <paramref name="valueName"/> extracted from <paramref name="collection"/></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ISchemaTranslator`1.GetCollectionKeys(`0)">
+            <summary>
+            Extracts a list of all string representations of tokens inside <paramref name="collection"/>.
+            </summary>
+            <param name="collection">The collection from which to extract all keys.</param>
+            <returns>List{string} containing all collection keys.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ISchemaTranslator`1.GetEquivalentType(System.String)">
+            <summary>
+            Takes the name of a valid .NET data type and translates it to the
+            equivalent data type in <typeparamref name="TCollectionType"/>
+            </summary>
+            <param name="cSharpType">Name of a valid .NET data type.</param>
+            <returns>Name of the corresponding type in <typeparamref name="TCollectionType"/></returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.JObjectTranslator">
+            <summary>
+            Interprets <see cref="T:Newtonsoft.Json.Linq.JObject"/> objects for a <see cref="T:SchemaForge.Crucible.Schema"/> object to validate.
+            Requires no constructor parameters.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.JObjectTranslator.TryCastToken``1(Newtonsoft.Json.Linq.JObject,System.String,``0@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.JObjectTranslator.TokenIsNullOrEmpty(Newtonsoft.Json.Linq.JObject,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.JObjectTranslator.InsertToken``1(Newtonsoft.Json.Linq.JObject,System.String,``0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.JObjectTranslator.CollectionContains(Newtonsoft.Json.Linq.JObject,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.JObjectTranslator.GetCollectionKeys(Newtonsoft.Json.Linq.JObject)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.JObjectTranslator.CollectionValueToString(Newtonsoft.Json.Linq.JObject,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.JObjectTranslator.GetEquivalentType(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="T:SchemaForge.Crucible.ShippingAndReceiving">
+            <summary>
+            Currently in progress.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.ShippingAndReceiving.TypeMap(System.String)">
+            <summary>
+            Will be used to convert .NET types to their equivalent SchemaForge types in future iterations.
+            </summary>
+            <param name="typeString">Type to convert.</param>
+            <returns>Converted type string.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ShippingAndReceiving.GetSupportedTypes">
+            <summary>
+            Returns the list of supported .NET types.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ShippingAndReceiving.GetConstraintsForType``1(SchemaForge.Crucible.Constraint[])">
+            <summary>
+            Used as part of the type deserializer. When adding a new supported type,
+            only use the method name and type argument. Do not attempt to pass constraints.
+            </summary>
+            <typeparam name="T">Type to align with a string key.</typeparam>
+            <param name="constraints">Irrelevant. Populated only when deserializing a Json file to a Schema.</param>
+            <returns>ConstraintContainer containing constraints of that particular type.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ShippingAndReceiving.EndsInZeroHelper(System.String)">
+            <summary>
+            Returns true if the string representation of a number is something like "3.0" or "3." and false otherwise.
+            </summary>
+            <param name="inputString">String to check.</param>
+            <returns>Bool indicating if the decimal places are all zero.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.Utilities.Conversions">
+            <summary>
+            Holds classes and utility methods for special conversions.
+            </summary>
+        </member>
+        <member name="F:SchemaForge.Crucible.Utilities.Conversions.DateTimeFormats">
+            <summary>
+            Holds the <see cref="T:System.DateTime"/> formats in <see cref="T:System.DateTime"/> Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Utilities.Conversions.CheckDateTimeConversion(System.String)">
+            <summary>
+            Checks whether or not <see cref="M:SchemaForge.Crucible.Utilities.Conversions.TryConvertDateTime(System.String,System.DateTime@)"/> recognizes the passed format.
+            </summary>
+            <param name="format">Format to search for in the current list of known formats.</param>
+            <returns>Bool indicating if the parser recognizes the passed format.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Utilities.Conversions.RegisterDateTimeFormat(System.String)">
+            <summary>
+            Adds a new <see cref="T:System.DateTime"/> format for <see cref="M:SchemaForge.Crucible.Utilities.Conversions.TryConvertDateTime(System.String,System.DateTime@)"/> to use.
+            </summary>
+            <param name="format">A format in <see cref="T:System.DateTime"/> Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Utilities.Conversions.DeregisterDateTimeFormat(System.String)">
+            <summary>
+            Removes a <see cref="T:System.DateTime"/> format from the list of known formats.
+            </summary>
+            <param name="format">Format to search for in the current list and remove.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Utilities.Conversions.TryConvertDateTime(System.String,System.DateTime@)">
+            <summary>
+            Attempts to convert the input string to <see cref="T:System.DateTime"/>; first, it
+            attempts to use <see cref="M:System.DateTime.TryParse(System.String,System.DateTime@)"/>.
+            If this fails, it will try each <see cref="F:SchemaForge.Crucible.Utilities.Conversions.DateTimeFormats"/>.
+            To add a new format, use <see cref="M:SchemaForge.Crucible.Utilities.Conversions.RegisterDateTimeFormat(System.String)"/>
+            </summary>
+            <param name="inputString">String to parse into <see cref="T:System.DateTime"/></param>
+            <param name="outputDateTime">Parsed <see cref="T:System.DateTime"/></param>
+            <returns>Bool indicating whether or not the conversion was successful.</returns>
+        </member>
+    </members>
+</doc>

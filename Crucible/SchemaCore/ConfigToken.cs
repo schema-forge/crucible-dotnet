@@ -66,7 +66,7 @@ namespace SchemaForge.Crucible
 
     /// <summary>
     /// Extracts a token from the given <paramref name="collection"/> using the 
-    /// <see cref="ISchemaTranslator{TCollectionType, TValueType}.TryCastToken{TCastType}(TCollectionType, string)"/>
+    /// <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>
     /// method, with <see cref="TokenName"/> as the passed string. All non-abstract
     /// ConfigTokens have a set of type parameters. The method above will attempt casts
     /// in the order those type parameters are provided; the first successful cast will
@@ -74,8 +74,6 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <typeparam name="TCollectionType">Collection from which the token will be
     /// extracted.</typeparam>
-    /// <typeparam name="TValueType">The type of elements in the collection.
-    /// For example, for a Newtonsoft <see cref="JObject"/>, this would be <see cref="JToken"/>.</typeparam>
     /// <param name="collection">Collection to extract a value from.</param>
     /// <param name="translator">Translator object to use when interacting with
     /// the specified collection.</param>
@@ -101,6 +99,10 @@ namespace SchemaForge.Crucible
 
     #region Overrides
 
+    /// <summary>
+    /// Represents a <see cref="ConfigToken"/> as a string, returning <see cref="TokenName"/>.
+    /// </summary>
+    /// <returns><see cref="TokenName"/> of this <see cref="ConfigToken"/></returns>
     public override string ToString() => TokenName;
 
     /// <summary>
@@ -131,7 +133,7 @@ namespace SchemaForge.Crucible
     /// Gets JObject representation of the type and all other constraints.
     /// </summary>
     /// <typeparam name="TValueType">Type of all constraints.</typeparam>
-    /// <param name="constraints">Array of constraints that have been applied by <see cref="ApplyConstraints{TValueType}"/>.</param>
+    /// <param name="constraints">Array of constraints passed to the constructor.</param>
     /// <returns>JObject representation of the constraints applied to the token.</returns>
     public static JObject GetConstraintObject<TValueType>(Constraint<TValueType>[] constraints)
     {
@@ -321,6 +323,10 @@ namespace SchemaForge.Crucible
       BuildConstraints(constraintsIfType1);
     }
 
+    /// <summary>
+    /// Internal constraint constructor. Ensures that all types are unique and assigns the constraint arrays to the appropriate fields.
+    /// </summary>
+    /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
     protected void BuildConstraints(Constraint<Type1>[] constraintsIfType1 = null)
     {
       Type[] typeArray = GetType().GetGenericArguments();
@@ -353,14 +359,14 @@ namespace SchemaForge.Crucible
 
     /// <summary>
     /// Extracts a token named <see cref="ConfigToken.TokenName"/> from
-    /// <see cref="collection"/> using <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>.
+    /// <paramref name="collection"/> using <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>.
     /// If at least one cast is successful, this function executes the
     /// <see cref="Constraint{TValueType}.Function"/> of each
     /// <see cref="Constraint{TValueType}"/> of the successful cast type on the
     /// cast value.
     /// </summary>
     /// <param name="collection">Collection from which a token will be extracted.</param>
-    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/> corresponding to the type of <see cref="collection"/>.</param>
+    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/> corresponding to the type of <paramref name="collection"/>.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
     public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
@@ -474,6 +480,11 @@ namespace SchemaForge.Crucible
       BuildConstraints(constraintsIfType1, constraintsIfType2);
     }
 
+    /// <summary>
+    /// Internal constraint constructor. Ensures that all types are unique and assigns the constraint arrays to the appropriate fields.
+    /// </summary>
+    /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+    /// <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
     protected void BuildConstraints(Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null)
     {
       Type[] typeArray = GetType().GetGenericArguments();
@@ -509,14 +520,14 @@ namespace SchemaForge.Crucible
 
     /// <summary>
     /// Extracts a token named <see cref="ConfigToken.TokenName"/> from
-    /// <see cref="collection"/> using <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>.
+    /// <paramref name="collection"/> using <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>.
     /// If at least one cast is successful, this function executes the
     /// <see cref="Constraint{TValueType}.Function"/> of each
     /// <see cref="Constraint{TValueType}"/> of the successful cast type on the
     /// cast value.
     /// </summary>
     /// <param name="collection">Collection from which a token will be extracted.</param>
-    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/> corresponding to the type of <see cref="collection"/>.</param>
+    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/> corresponding to the type of <paramref name="collection"/>.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
     public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
@@ -655,6 +666,13 @@ namespace SchemaForge.Crucible
       BuildConstraints(constraintsIfType1, constraintsIfType2, constraintsIfType3);
     }
 
+
+    /// <summary>
+    /// Internal constraint constructor. Ensures that all types are unique and assigns the constraint arrays to the appropriate fields.
+    /// </summary>
+    /// <param name="constraintsIfType1">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type1"/>.</param>
+    /// <param name="constraintsIfType2">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type2"/>.</param>
+    /// <param name="constraintsIfType3">Constraints that will be applied to the token's value if it can be cast to <typeparamref name="Type3"/>.</param>
     protected void BuildConstraints(Constraint<Type1>[] constraintsIfType1 = null, Constraint<Type2>[] constraintsIfType2 = null, Constraint<Type3>[] constraintsIfType3 = null)
     {
       Type[] typeArray = GetType().GetGenericArguments();
@@ -681,20 +699,19 @@ namespace SchemaForge.Crucible
     /// <exception cref="ArgumentException">If this <see cref="ConfigToken"/> already has <typeparamref name="TNewType"/></exception>
     /// <typeparam name="TNewType">New possible type to add to the ConfigToken.</typeparam>
     /// <param name="newConstraints">Constraints to apply if cast to the new type is successful.</param>
-    /// <returns>New <see cref="ConfigToken{Type1, Type2, Type3,TNewType}"/></returns>
     public override ConfigToken AddNewType<TNewType>(Constraint<TNewType>[] newConstraints = null)
     => throw new NotImplementedException("Cannot have more than 3 types on 1 ConfigToken.");
 
     /// <summary>
     /// Extracts a token named <see cref="ConfigToken.TokenName"/> from
-    /// <see cref="collection"/> using <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>.
+    /// <paramref name="collection"/> using <see cref="ISchemaTranslator{TCollectionType}.TryCastToken{TCastType}(TCollectionType, string, out TCastType)"/>.
     /// If at least one cast is successful, this function executes the
     /// <see cref="Constraint{TValueType}.Function"/> of each
     /// <see cref="Constraint{TValueType}"/> of the successful cast type on the
     /// cast value.
     /// </summary>
     /// <param name="collection">Collection from which a token will be extracted.</param>
-    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/> corresponding to the type of <see cref="collection"/>.</param>
+    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/> corresponding to the type of <paramref name="collection"/>.</param>
     /// <returns>Bool indicating whether any fatal errors were found during validation.</returns>
     public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {

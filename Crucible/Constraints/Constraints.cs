@@ -140,6 +140,10 @@ namespace SchemaForge.Crucible
       }
     }
 
+    /// <summary>
+    /// Returns the <see cref="Function"/> of this <see cref="Constraint"/> as an object.
+    /// </summary>
+    /// <returns>The <see cref="Function"/> boxed in an object.</returns>
     public override object GetFunction() => Function;
   }
 
@@ -255,7 +259,7 @@ namespace SchemaForge.Crucible
     /// Constrains the number of digits a number has after the decimal.
     /// </summary>
     /// <param name="upperBound">Maximum number of digits after the decimal.</param>
-    /// <returns>A new <see cref="Constraint{double}"/> containing a method to constrain decimal digits.</returns>
+    /// <returns>A new <see cref="Constraint"/> containing a method to constrain decimal digits.</returns>
     public static Constraint<TValueType> ConstrainDigits<TValueType>(int upperBound) where TValueType : struct,
           IComparable,
           IComparable<TValueType>,
@@ -529,7 +533,7 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Ensures all items in the target <see cref="JArray"/> are of type <typeparam name="TElementType"/> and pass all provided constraints.
+    /// Ensures all items in the target <see cref="JArray"/> are of type <typeparamref name="TElementType"/> and pass all provided constraints.
     /// </summary>
     /// <typeparam name="TElementType">Type of all items in the target <see cref="JArray"/>.</typeparam>
     /// <param name="constraints">List of functions to run on all items in the <see cref="JArray"/> individually.</param>
@@ -559,7 +563,7 @@ namespace SchemaForge.Crucible
 
     /// <summary>
     /// Ensures all items in the target <see cref="JArray"/> are of type
-    /// <typeparam name="TElementType1"/> or <typeparam name="TElementType2"/>
+    /// <typeparamref name="TElementType1"/> or <typeparamref name="TElementType2"/>
     /// and applies all constraints on the type to which the element corresponds.
     /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraintsToJArray{string, int}
     /// will NEVER treat the passed token as an int!
@@ -569,9 +573,9 @@ namespace SchemaForge.Crucible
     /// <typeparam name="TElementType2">Second type to check against the token value
     /// in the returned function.</typeparam>
     /// <param name="constraintsIfTElementType1">Constraints to execute if cast to
-    /// <typeparam name="TElementType1"/> is successful.</param>
+    /// <typeparamref name="TElementType1"/> is successful.</param>
     /// <param name="constraintsIfTElementType2">Constraints to execute if cast to
-    /// <typeparam name="TElementType2"/> is successful.</param>
+    /// <typeparamref name="TElementType2"/> is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints.
     /// Can be used in the constructor of a ConfigToken.</returns>
     public static Constraint<JArray> ApplyConstraintsToJArray<TElementType1,TElementType2>(Constraint<TElementType1>[] constraintsIfTElementType1 = null, Constraint<TElementType2>[] constraintsIfTElementType2 = null)
@@ -607,8 +611,8 @@ namespace SchemaForge.Crucible
 
     /// <summary>
     /// Ensures all items in the target <see cref="JArray"/> are of type
-    /// <typeparam name="TElementType1"/>, or <typeparam name="TElementType2"/>,
-    /// or <typeparam name="TElementType3"/>
+    /// <typeparamref name="TElementType1"/>, or <typeparamref name="TElementType2"/>,
+    /// or <typeparamref name="TElementType3"/>
     /// and applies all constraints on the type to which the element corresponds.
     /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraintsToJArray{string, int}
     /// will NEVER treat the passed token as an int!
@@ -619,12 +623,12 @@ namespace SchemaForge.Crucible
     /// in the returned function.</typeparam>
     /// <typeparam name="TElementType3">Third type to check against the token value
     /// in the returned function.</typeparam>
-    /// <param name="constraintsIfTElementType1">Constraints to execute if cast to
-    /// <typeparam name="TElementType1"/> is successful.</param>
-    /// <param name="constraintsIfTElementType2">Constraints to execute if cast to
-    /// <typeparam name="TElementType2"/> is successful.</param>
-    /// <param name="constraintsIfTElementType3">Constraints to execute if cast to
-    /// <typeparam name="TElementType3"/> is successful.</param>
+    /// <param name="constraintsIfT1">Constraints to execute if cast to
+    /// <typeparamref name="TElementType1"/> is successful.</param>
+    /// <param name="constraintsIfT2">Constraints to execute if cast to
+    /// <typeparamref name="TElementType2"/> is successful.</param>
+    /// <param name="constraintsIfT3">Constraints to execute if cast to
+    /// <typeparamref name="TElementType3"/> is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints.
     /// Can be used in the constructor of a ConfigToken.</returns>
     public static Constraint<JArray> ApplyConstraintsToJArray<TElementType1, TElementType2, TElementType3>(Constraint<TElementType1>[] constraintsIfT1 = null, Constraint<TElementType2>[] constraintsIfT2 = null, Constraint<TElementType3>[] constraintsIfT3 = null)
@@ -671,7 +675,7 @@ namespace SchemaForge.Crucible
     #region JObject Constraints
 
     /// <summary>
-    /// Applies a <see cref="Schema"/> to the value of this token with the <see cref="Schema.Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, string, bool)"/> method.
+    /// Applies a <see cref="Schema"/> to the value of this token with the <see cref="Schema.Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, bool)"/> method.
     /// </summary>
     /// <param name="inputSchema">Schema object to apply to the designated object.</param>
     /// <returns>Function that adds all the <see cref="List{Error}"/> generated by using the <see cref="Schema"/> to validate the passed <see cref="JObject"/></returns>
@@ -692,7 +696,7 @@ namespace SchemaForge.Crucible
 
     /// <summary>
     /// Ensures a <see cref="DateTime"/> value follows at least one of the passed
-    /// Custom Format Specifier <see cref="formats"/>.
+    /// Custom Format Specifier <paramref name="formats"/>.
     /// Including this <see cref="Constraint"/> will update the <see cref="DateTime"/>
     /// parser in <see cref="Conversions"/>, allowing the parser to recognize
     /// <see cref="DateTime"/>s in the provided formats.
@@ -700,7 +704,7 @@ namespace SchemaForge.Crucible
     /// <param name="formats">Formats in the <see cref="DateTime"/> Custom Format
     /// Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
     /// <returns>A function ensuring that the token value is in one of the provided
-    /// Custom Format Specifier <see cref="formats"/>.</returns>
+    /// Custom Format Specifier <paramref name="formats"/>.</returns>
     public static Constraint<DateTime> ConstrainDateTimeFormat(params string[] formats)
     {
       foreach(string format in formats)

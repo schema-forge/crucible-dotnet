@@ -121,7 +121,10 @@ namespace SchemaForge.Crucible
     /// "Validation for <paramref name="name"/> failed."
     /// will be added to <see cref="ErrorList"/> on validation failure.
     /// </summary>
-    /// <param name="collection">Collection object to check using the <see cref="ConfigToken"/> rules set in <see cref="ConfigTokens"/>.</param>
+    /// <param name="collection">Collection object to check using the <see cref="ConfigToken"/>
+    /// rules set in <see cref="ConfigTokens"/>.</param>
+    /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/>
+    /// used to interpret the collection for the <see cref="Schema"/> and extract values.</param>
     /// <param name="name">If name and type are provided, the message 
     /// "Validation for <paramref name="name"/> failed."
     /// will be added to ErrorList on validation failure.</param>
