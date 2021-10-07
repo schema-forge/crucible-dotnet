@@ -12,6 +12,9 @@ using static SchemaForge.Crucible.Constraints;
 
 namespace SchemaForge.Crucible
 {
+  /// <summary>
+  /// Currently in progress.
+  /// </summary>
   public class ShippingAndReceiving
   {
     /*
@@ -143,29 +146,19 @@ namespace SchemaForge.Crucible
     //  { "JObject", GetConstraintsForType<JObject> }
     //};
 
-    /// <summary>
-    /// Converts a type and array of constraints to a ConstraintContainer with
-    /// constraints of the specified type.
-    /// </summary>
-    /// <param name="typeString">One of the supported types as strings, which
-    /// can be retrieved with <see cref="ShippingAndReceiving.GetSupportedTypes()"/></param>
-    /// <param name="constraints">Constraints to pass along after the type check.</param>
-    /// <returns>GetConstraintsForType with a type</returns>
     //public static ConfigToken DeserializeType(string typeString, Constraint[] constraints) => InternalDeserializeType[typeString](constraints);
 
     /// <summary>
-    /// Converts a type from the C# type to the SchemaForge equivalent. See
-    /// <see cref="ShippingAndReceiving.GetSupportedTypes()"/> for the list of types.
+    /// Will be used to convert .NET types to their equivalent SchemaForge types in future iterations.
     /// </summary>
-    /// <param name="typeString">C# type to convert, without the namespace designation.</param>
-    /// <returns></returns>
+    /// <param name="typeString">Type to convert.</param>
+    /// <returns>Converted type string.</returns>
     public static string TypeMap(string typeString) => InternalTypeMap[typeString];
 
     /// <summary>
-    /// Returns all convertible C# types as a list of string.
+    /// Returns the list of supported .NET types.
     /// </summary>
-    /// <returns>List of keys in InternalTypeMap. To add to this list, use
-    /// <see cref="ShippingAndReceiving.AddSupportedType"/></returns>
+    /// <returns></returns>
     public static List<string> GetSupportedTypes() => InternalTypeMap.Keys.ToList();
 
     /// <summary>
@@ -185,39 +178,14 @@ namespace SchemaForge.Crucible
       return constraintList.ToArray();
     }
 
-    /// <summary>
-    /// Adds a new supported type for serializing and deserializing.
-    /// For typeDeserializer, pass <see cref="ShippingAndReceiving.GetConstraintsForType{T}"/>
-    /// with only the type parameter provided. It should line up with the provided
-    /// csTypeName.
-    /// </summary>
-    /// <param name="csTypeName">C# type name without namespace, such as UInt64 or String</param>
-    /// <param name="schemaForgeTypeName">Equivalent name to serialize the C# type name to.</param>
-    /// <param name="typeDeserializer"><see cref="ShippingAndReceiving.GetConstraintsForType{T}"/>
-    /// with a type parameter equivalent to the C# type name being provided.</param>
     //public static void AddSupportedType(string csTypeName, string schemaForgeTypeName, Func<Constraint[], ConstraintContainer> typeDeserializer)
     //{
     //  InternalTypeMap.Add(csTypeName, schemaForgeTypeName);
     //  InternalDeserializeType.Add(schemaForgeTypeName, typeDeserializer);
     //}
 
-    /// <summary>
-    /// Accepts a JProperty. The Name of the JProperty will be used to look up
-    /// a value in <see cref="StringToConstraint"/> and the Value of the
-    /// JProperty will be passed as the argument to the corresponding
-    /// function. To retrieve a list of supported constraint names,
-    /// use <see cref="ShippingAndReceiving.GetSupportedConstraints()"/>
-    /// </summary>
-    /// <typeparam name="T">Type of the returned constraint.</typeparam>
-    /// <param name="inputProperty">JProperty to deserialize into a Constraint.</param>
-    /// <returns>Constraint of the specified type using the name and arguments provided in the JProperty.</returns>
     //public static Constraint<T> JPropertyToConstraint<T>(JProperty inputProperty) => (Constraint<T>)StringToConstraint[inputProperty.Name](inputProperty.Value);
 
-    /// <summary>
-    /// Gets a list of strings that can be converted to constraints when passed
-    /// as the name of a JProperty to <see cref="ShippingAndReceiving.JPropertyToConstraint{T}(JProperty)"/>
-    /// </summary>
-    /// <returns>List of all valid constraint names that can be deserialized.</returns>
     //public static List<string> GetSupportedConstraints() => StringToConstraint.Keys.Select(x => x.ToString()).ToList();
 
     /// <summary>

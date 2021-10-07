@@ -11,7 +11,7 @@ using static SchemaForge.Crucible.Constraints;
 namespace SchemaForge.Crucible
 {
   /// <summary>
-  /// An <see cref="ISchemaTranslator{TCollectionType, TValueType}"/>
+  /// An <see cref="ISchemaTranslator{TCollectionType}"/>
   /// interprets a <typeparamref name="TCollectionType"/>
   /// for a <see cref="Schema"/> so that it can be validated.
   /// </summary>
@@ -25,6 +25,7 @@ namespace SchemaForge.Crucible
     /// <typeparam name="TCastType">The extracted value will be cast to this type.</typeparam>
     /// <param name="collection">The collection from which to extract the value.</param>
     /// <param name="valueName">The string designator for the value to be extracted.</param>
+    /// <param name="outputValue">The value after casting, if casting is successful; otherwise default of <typeparamref name="TCastType"/></param>
     /// <returns>(bool, <typeparamref name="TCastType"/>) where bool indicates
     /// success of the cast and <typeparamref name="TCastType"/> is the cast
     /// value if successful, default otherwise.</returns>
@@ -77,10 +78,10 @@ namespace SchemaForge.Crucible
 
     /// <summary>
     /// Takes the name of a valid .NET data type and translates it to the
-    /// equivalent data type in <see cref="TCollectionType"/>
+    /// equivalent data type in <typeparamref name="TCollectionType"/>
     /// </summary>
     /// <param name="cSharpType">Name of a valid .NET data type.</param>
-    /// <returns>Name of the corresponding type in <see cref="TCollectionType"/></returns>
+    /// <returns>Name of the corresponding type in <typeparamref name="TCollectionType"/></returns>
     public string GetEquivalentType(string cSharpType);
   }
 }

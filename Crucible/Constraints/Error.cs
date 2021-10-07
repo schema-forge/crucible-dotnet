@@ -62,6 +62,10 @@ namespace SchemaForge.Crucible
       ErrorSeverity = inputSeverity;
     }
 
+    /// <summary>
+    /// Converts the error's severity and message to string format.
+    /// </summary>
+    /// <returns>String in the format "[<see cref="ErrorSeverity"/>] <see cref="ErrorMessage"/>"</returns>
     public override string ToString() => $"[{ErrorSeverity}] {ErrorMessage}";
   }
 }

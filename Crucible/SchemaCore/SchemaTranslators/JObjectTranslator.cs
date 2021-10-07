@@ -37,6 +37,7 @@ namespace SchemaForge.Crucible
       { "String", "String" },
       { "Char", "String" }
     };
+    /// <inheritdoc/>
     public bool TryCastToken<TCastType>(JObject collection, string valueName, out TCastType outputValue)
     {
       if (typeof(TCastType) == typeof(DateTime))
@@ -61,15 +62,21 @@ namespace SchemaForge.Crucible
         }
       }
     }
+    /// <inheritdoc/>
     public bool TokenIsNullOrEmpty(JObject collection, string valueName) => collection[valueName].IsNullOrEmpty();
+    /// <inheritdoc/>
     public JObject InsertToken<TDefaultValueType>(JObject collection, string valueName, TDefaultValueType newValue)
     {
       collection.Add(valueName, new JValue(newValue));
       return collection;
     }
+    /// <inheritdoc/>
     public bool CollectionContains(JObject collection, string valueName) => collection.ContainsKey(valueName);
+    /// <inheritdoc/>
     public List<string> GetCollectionKeys(JObject collection) => collection.Properties().Select(x => x.Name).ToList();
+    /// <inheritdoc/>
     public string CollectionValueToString(JObject collection, string valueName) => collection[valueName].ToString();
+    /// <inheritdoc/>
     public string GetEquivalentType(string cSharpType) => $"Json " + (TypeMap.ContainsKey(cSharpType) ? TypeMap[cSharpType] : cSharpType.Contains("[]") ? "array" : "null");
   }
 }
