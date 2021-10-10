@@ -110,6 +110,48 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
+    /// Removes all tokens from the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects
+    /// where <see cref="ConfigToken.TokenName"/> is found in <paramref name="tokenNames"/>.
+    /// </summary>
+    /// <exception cref="ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
+    /// <param name="tokenNames">List of token names to remove; corresponds to <see cref="ConfigToken.TokenName"/>.</param>
+    public void RemoveTokens(IEnumerable<string> tokenNames)
+    {
+      foreach (string tokenName in tokenNames)
+      {
+        if (ConfigTokens.ContainsKey(tokenName))
+        {
+          ConfigTokens.Remove(tokenName);
+        }
+        else
+        {
+          throw new ArgumentException($"Attempted to remove token {tokenName} from Schema, but Schema did not contain {tokenName}");
+        }
+      }
+    }
+
+    /// <summary>
+    /// Removes all tokens from the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects
+    /// where <see cref="ConfigToken.TokenName"/> is found in <paramref name="tokenNames"/>.
+    /// </summary>
+    /// <exception cref="ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
+    /// <param name="tokenNames">List of token names to remove; corresponds to <see cref="ConfigToken.TokenName"/>.</param>
+    public void RemoveTokens(params string[] tokenNames)
+    {
+      foreach (string tokenName in tokenNames)
+      {
+        if (ConfigTokens.ContainsKey(tokenName))
+        {
+          ConfigTokens.Remove(tokenName);
+        }
+        else
+        {
+          throw new ArgumentException($"Attempted to remove token {tokenName} from Schema, but Schema did not contain {tokenName}");
+        }
+      }
+    }
+
+    /// <summary>
     /// Returns the number of tokens contained in the <see cref="Schema"/>.
     /// </summary>
     /// <returns>The number of tokens contained in the <see cref="Schema"/>.</returns>

@@ -17,26 +17,6 @@ namespace SchemaForge.Crucible
   /// </summary>
   public class JObjectTranslator : ISchemaTranslator<JObject>
   {
-    readonly Dictionary<string, string> TypeMap = new()
-    {
-      { "Byte", "Number" },
-      { "SByte", "Number" },
-      { "Single", "Number" },
-      { "Double", "Number" },
-      { "Decimal", "Number" },
-      { "Int16", "Number" },
-      { "UInt16", "Number" },
-      { "Int32", "Number" },
-      { "UInt32", "Number" },
-      { "Int64", "Number" },
-      { "UInt64", "Number" },
-      { "JObject", "Object" },
-      { "Boolean", "Boolean" },
-      { "JArray", "Array" },
-      { "DateTime", "String" },
-      { "String", "String" },
-      { "Char", "String" }
-    };
     /// <inheritdoc/>
     public bool TryCastToken<TCastType>(JObject collection, string valueName, out TCastType outputValue)
     {
@@ -77,6 +57,6 @@ namespace SchemaForge.Crucible
     /// <inheritdoc/>
     public string CollectionValueToString(JObject collection, string valueName) => collection[valueName].ToString();
     /// <inheritdoc/>
-    public string GetEquivalentType(string cSharpType) => $"Json " + (TypeMap.ContainsKey(cSharpType) ? TypeMap[cSharpType] : cSharpType.Contains("[]") ? "array" : "null");
+    public string GetEquivalentType(string cSharpType) => $"Json " + (Conversions.JsonTypeMap.ContainsKey(cSharpType) ? Conversions.JsonTypeMap[cSharpType] : cSharpType.Contains("[]") ? "array" : "null");
   }
 }

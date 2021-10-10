@@ -18,6 +18,28 @@ namespace SchemaForge.Crucible.Utilities
   /// </summary>
   public static class Conversions
   {
+
+    internal static readonly Dictionary<string, string> JsonTypeMap = new()
+    {
+      { "Byte", "Number" },
+      { "SByte", "Number" },
+      { "Single", "Number" },
+      { "Double", "Number" },
+      { "Decimal", "Number" },
+      { "Int16", "Number" },
+      { "UInt16", "Number" },
+      { "Int32", "Number" },
+      { "UInt32", "Number" },
+      { "Int64", "Number" },
+      { "UInt64", "Number" },
+      { "JObject", "Object" },
+      { "Boolean", "Boolean" },
+      { "JArray", "Array" },
+      { "DateTime", "String" },
+      { "String", "String" },
+      { "Char", "String" }
+    };
+
     /// <summary>
     /// Holds the <see cref="DateTime"/> formats in <see cref="DateTime"/> Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"
     /// </summary>

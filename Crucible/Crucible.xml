@@ -1087,6 +1087,22 @@
             <exception cref="T:System.ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
             <param name="tokenName">Name of the token to remove; corresponds to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/>.</param>
         </member>
+        <member name="M:SchemaForge.Crucible.Schema.RemoveTokens(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Removes all tokens from the <see cref="T:SchemaForge.Crucible.Schema"/> object's set of <see cref="T:SchemaForge.Crucible.ConfigToken"/> objects
+            where <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> is found in <paramref name="tokenNames"/>.
+            </summary>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
+            <param name="tokenNames">List of token names to remove; corresponds to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/>.</param>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.RemoveTokens(System.String[])">
+            <summary>
+            Removes all tokens from the <see cref="T:SchemaForge.Crucible.Schema"/> object's set of <see cref="T:SchemaForge.Crucible.ConfigToken"/> objects
+            where <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/> is found in <paramref name="tokenNames"/>.
+            </summary>
+            <exception cref="T:System.ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
+            <param name="tokenNames">List of token names to remove; corresponds to <see cref="P:SchemaForge.Crucible.ConfigToken.TokenName"/>.</param>
+        </member>
         <member name="M:SchemaForge.Crucible.Schema.Count">
             <summary>
             Returns the number of tokens contained in the <see cref="T:SchemaForge.Crucible.Schema"/>.
@@ -1130,6 +1146,33 @@
             Returns a new <see cref="T:SchemaForge.Crucible.Schema"/> that is a clone of the current <see cref="T:SchemaForge.Crucible.Schema"/>.
             </summary>
             <returns>A new <see cref="T:SchemaForge.Crucible.Schema"/> that is a clone of this <see cref="T:SchemaForge.Crucible.Schema"/>.</returns>
+        </member>
+        <member name="T:SchemaForge.Crucible.DictionaryTranslator">
+            <summary>
+            Interprets (string, object) <see cref="T:System.Collections.Generic.Dictionary`2"/> objects for a <see cref="T:SchemaForge.Crucible.Schema"/>
+            object to validate.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.DictionaryTranslator.CollectionContains(System.Collections.Generic.Dictionary{System.String,System.Object},System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.DictionaryTranslator.CollectionValueToString(System.Collections.Generic.Dictionary{System.String,System.Object},System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.DictionaryTranslator.GetCollectionKeys(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.DictionaryTranslator.GetEquivalentType(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.DictionaryTranslator.InsertToken``1(System.Collections.Generic.Dictionary{System.String,System.Object},System.String,``0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.DictionaryTranslator.TokenIsNullOrEmpty(System.Collections.Generic.Dictionary{System.String,System.Object},System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.DictionaryTranslator.TryCastToken``1(System.Collections.Generic.Dictionary{System.String,System.Object},System.String,``0@)">
+            <inheritdoc/>
         </member>
         <member name="T:SchemaForge.Crucible.ISchemaTranslator`1">
             <summary>
