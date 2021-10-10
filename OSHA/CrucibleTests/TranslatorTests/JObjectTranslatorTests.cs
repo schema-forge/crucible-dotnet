@@ -116,11 +116,24 @@ namespace TranslatorTests
       Assert.Equal("38",testTranslator.CollectionValueToString(testObject,"TestToken"));
     }
 
+    /// <summary>
+    /// Tests the <see cref="JObjectTranslator.GetEquivalentType(string)"/>
+    /// method.
+    /// </summary>
     [Fact]
     public void GetEquivalentTypeTest()
     {
       JObjectTranslator testTranslator = new();
       Assert.Equal("Json Number", testTranslator.GetEquivalentType("Int32"));
+    }
+
+    [Fact]
+    public void ApplyTestConfig()
+    {
+      Schema testSchema = TestUtilities.GetTestSchema();
+      testSchema.Validate(JObject.Parse(TestUtilities.GetTestJson()), new JObjectTranslator());
+      output.WriteLine(testSchema.ErrorList.Join("\n"));
+      Assert.True(!testSchema.ErrorList.AnyFatal());
     }
   }
 }
