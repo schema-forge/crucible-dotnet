@@ -371,7 +371,6 @@ namespace SchemaForge.Crucible
     public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
       base.Validate(collection, translator);
-      Console.WriteLine(typeof(Type1).FullName);
       if (translator.TryCastToken(collection, TokenName, out Type1 newValue1))
       {
         InternalValidate(newValue1, ConstraintsIfType1);
