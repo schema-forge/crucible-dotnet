@@ -16,7 +16,7 @@ namespace SchemaForge.Crucible.Utilities
   /// <summary>
   /// Holds classes and utility methods for special conversions.
   /// </summary>
-  public static class Conversions
+  public class Conversions
   {
 
     internal static readonly Dictionary<string, string> JsonTypeMap = new()
@@ -39,6 +39,8 @@ namespace SchemaForge.Crucible.Utilities
       { "String", "String" },
       { "Char", "String" }
     };
+
+    internal static string GetEquivalentJsonType(string cSharpType) => $"Json " + (JsonTypeMap.ContainsKey(cSharpType) ? JsonTypeMap[cSharpType] : cSharpType.Contains("[]") ? "array" : "null");
 
     /// <summary>
     /// Holds the <see cref="DateTime"/> formats in <see cref="DateTime"/> Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"

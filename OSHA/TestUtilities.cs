@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SchemaForge.Crucible;
 using SchemaForge.Crucible.Extensions;
@@ -42,14 +43,14 @@ namespace OSHA.TestUtilities
     public static Schema GetTestSchema()
     {
       Schema SubSchema = new(
-        new ConfigToken<string>("Season 1", "The first season."),
-        new ConfigToken<string>("Season 2", "Second season."),
-        new ConfigToken<string>("Season 3", "Third season.")
+        new ConfigToken<string>("Season1", "The first season."),
+        new ConfigToken<string>("Season2", "Second season."),
+        new ConfigToken<string>("Season3", "Third season.")
       );
       return new(new HashSet<ConfigToken>()
       {
           new ConfigToken<string>("RequiredToken","String: A Very Important Token[tm]"),
-          new ConfigToken<string>("Unrequired Token","String: Too lazy to show up.", required: false),
+          new ConfigToken<string>("UnrequiredToken","String: Too lazy to show up.", required: false),
           new ConfigToken<string>("ATokenThatIsNotRequiredButNonethelessHasAValueIfNotIncluded","Indeed.","Default Value"),
           new ConfigToken<string>("AllowValues","String: Constrained string.",new Constraint<string>[] { AllowValues("This Is The End","(if you want it)") }),
           new ConfigToken<string>("ConstrainStringWithRegexExactPatterns","String: Constrained by Regex patterns [A-z] or [1-3].",new Constraint<string>[] { ConstrainStringWithRegexExact(new Regex("[A-z]*"), new Regex("[1-3]*")) }),
@@ -88,9 +89,9 @@ namespace OSHA.TestUtilities
       'ConstrainValueDomains':37,
       'ConstrainValueUpperBound':37,
       'ConstrainDigits':37.55,
-      'ConstrainCollectionCountLowerBound':{'One item':'.', 'Two items':'..', 'Three items':'...'},
-      'ConstrainCollectionCount':{'One item':'.', 'Two items':'..', 'Three items':'...'},
-      'ApplySchema':{'Season 1':'Phantom Blood','Season 2':'Stardust Crusaders','Season 3':'Diamond Is Unbreakable'},
+      'ConstrainCollectionCountLowerBound':{'OneItem':'.', 'TweItems':'..', 'ThreeItems':'...'},
+      'ConstrainCollectionCount':{'OneItem':'.', 'TweItems':'..', 'ThreeItems':'...'},
+      'ApplySchema':{'Season1':'Phantom Blood','Season2':'Stardust Crusaders','Season3':'Diamond Is Unbreakable'},
       'ConstrainArrayCountLowerBound':[1, 2, 3],
       'ConstrainArrayCount':[4, 5, 6],
       'ApplyConstraintsToArrayElements':['under the smelters', 'in the tunnels beneath', 'help us'],

@@ -57,6 +57,6 @@ namespace SchemaForge.Crucible
     /// <inheritdoc/>
     public string CollectionValueToString(JObject collection, string valueName) => collection[valueName].ToString();
     /// <inheritdoc/>
-    public string GetEquivalentType(string cSharpType) => $"Json " + (Conversions.JsonTypeMap.ContainsKey(cSharpType) ? Conversions.JsonTypeMap[cSharpType] : cSharpType.Contains("[]") ? "array" : "null");
+    public string GetEquivalentType(string cSharpType) => Conversions.GetEquivalentJsonType(cSharpType);
   }
 }

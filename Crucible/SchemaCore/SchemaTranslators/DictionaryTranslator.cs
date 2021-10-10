@@ -16,7 +16,6 @@ namespace SchemaForge.Crucible
   /// </summary>
   public class DictionaryTranslator : ISchemaTranslator<Dictionary<string, object>>
   {
-
     /// <inheritdoc/>
     public bool CollectionContains(Dictionary<string, object> collection, string valueName) => collection.ContainsKey(valueName);
     /// <inheritdoc/>
@@ -24,7 +23,7 @@ namespace SchemaForge.Crucible
     /// <inheritdoc/>
     public List<string> GetCollectionKeys(Dictionary<string, object> collection) => collection.Keys.ToList();
     /// <inheritdoc/>
-    public string GetEquivalentType(string cSharpType) => $"Json " + (Conversions.JsonTypeMap.ContainsKey(cSharpType) ? Conversions.JsonTypeMap[cSharpType] : cSharpType.Contains("[]") ? "array" : "null");
+    public string GetEquivalentType(string cSharpType) => Conversions.GetEquivalentJsonType(cSharpType);
     /// <inheritdoc/>
     public Dictionary<string, object> InsertToken<TDefaultValueType>(Dictionary<string, object> collection, string valueName, TDefaultValueType newValue)
     {

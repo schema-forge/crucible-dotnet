@@ -35,7 +35,7 @@ namespace TranslatorTests
     [InlineData(false,"System.Int32","I am still a string!")]
     [InlineData(true,"System.Int32","57")]
     [InlineData(true,"System.DateTime","2021-10-09")]
-    [InlineData(false,"System.DateTime","20211009")] //This is not a format that DateTime.Parse can recognize.
+    [InlineData(false,"System.DateTime","20211021")] //This is not a format that DateTime.Parse can recognize.
     [InlineData(true,"System.DateTime","10202109")] //This format is normally not recognized by DateTime.Parse, but is added in the test by RegisterDateTimeFormat.
     public void ConversionTests(bool expectedResult, string type, string valueToConvert)
     {
@@ -148,7 +148,6 @@ namespace TranslatorTests
       Schema testSchema = TestUtilities.GetTestSchema();
       Dictionary<string, object> testDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(TestUtilities.GetTestJson());
       testSchema.Validate(testDictionary, new DictionaryTranslator());
-      output.WriteLine(testDictionary["ConstrainArrayCount"].GetType().Name);
       output.WriteLine(testSchema.ErrorList.Join("\n"));
       Assert.True(!testSchema.ErrorList.AnyFatal());
     }

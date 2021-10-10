@@ -151,7 +151,7 @@ namespace SchemaForge.Crucible
       }
       catch
       {
-        throw new ArgumentException($"Attempted to pass unsupported type {typeof(TValueType).Name}\nSupported types: {ShippingAndReceiving.GetSupportedTypes().Join(", ")}\nIf needed, use AddSupportedType to add a new type to the recognized types. This will enable SchemaForge to recognize this token type for your project.");
+        //throw new ArgumentException($"Attempted to pass unsupported type {typeof(TValueType).Name}\nSupported types: {ShippingAndReceiving.GetSupportedTypes().Join(", ")}\nIf needed, use AddSupportedType to add a new type to the recognized types. This will enable SchemaForge to recognize this token type for your project.");
       }
       if (constraints.Exists())
       {
@@ -371,6 +371,7 @@ namespace SchemaForge.Crucible
     public override bool Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator)
     {
       base.Validate(collection, translator);
+      Console.WriteLine(typeof(Type1).FullName);
       if (translator.TryCastToken(collection, TokenName, out Type1 newValue1))
       {
         InternalValidate(newValue1, ConstraintsIfType1);

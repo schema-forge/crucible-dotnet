@@ -229,9 +229,10 @@ namespace SchemaForge.Crucible
 
       */
       List<string> collectionKeys = translator.GetCollectionKeys(collection);
+      HashSet<string> configTokenNames = ConfigTokens.Select(x => x.Value.TokenName).ToHashSet();
       foreach (string key in collectionKeys)
       {
-        if (!ConfigTokens.Select(x => x.Value.TokenName).Contains(key))
+        if (!configTokenNames.Contains(key))
         {
           if (message.IsNullOrEmpty())
           {

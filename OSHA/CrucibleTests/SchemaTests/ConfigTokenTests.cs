@@ -157,11 +157,11 @@ namespace SchemaTests
     }
 
     [Theory]
-    [InlineData(true,"20210512")]
-    [InlineData(false,"20211312")]
+    [InlineData(true,"20211205")]
+    [InlineData(false,"20211213")]
     public void ConfigTokenValidateDateTimeTest(bool expectedResult, string input)
     {
-      ConfigToken<DateTime> token = new("Test Token", "From the moment I understood the weakness of my flesh, it disgusted me.",new Constraint<DateTime>[] { ConstrainDateTimeFormat("yyyyMMdd") });
+      ConfigToken<DateTime> token = new("Test Token", "From the moment I understood the weakness of my flesh, it disgusted me.",new Constraint<DateTime>[] { ConstrainDateTimeFormat("yyyyddMM") });
       JObject testConfig = new() { { "Test Token", input } };
       Schema testSchema = new(token);
       testSchema.Validate(testConfig, new JObjectTranslator());

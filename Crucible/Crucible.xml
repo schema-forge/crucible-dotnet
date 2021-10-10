@@ -1147,6 +1147,49 @@
             </summary>
             <returns>A new <see cref="T:SchemaForge.Crucible.Schema"/> that is a clone of this <see cref="T:SchemaForge.Crucible.Schema"/>.</returns>
         </member>
+        <member name="T:SchemaForge.Crucible.ClassTranslator">
+            <summary>
+            Interprets any .NET object for a <see cref="T:SchemaForge.Crucible.Schema"/>
+            object to validate; the object must have a property for all
+            <see cref="T:SchemaForge.Crucible.ConfigToken"/>s contained in <see cref="F:SchemaForge.Crucible.Schema.ConfigTokens"/>. 
+            Aligning property types with the types of each <see cref="T:SchemaForge.Crucible.ConfigToken"/>
+            is recommended, though not required.
+            </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.ClassTranslator.CollectionContains(System.Object,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.ClassTranslator.CollectionValueToString(System.Object,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.ClassTranslator.GetCollectionKeys(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.ClassTranslator.GetEquivalentType(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.ClassTranslator.InsertToken``1(System.Object,System.String,``0)">
+            <summary>
+            Inserts <paramref name="newValue"/> into <paramref name="collection"/>
+            with string designation <paramref name="valueName"/> and returns a
+            new instance of the class object with the value inserted.
+            </summary>
+            <exception cref="T:System.ArgumentException">If <paramref name="collection"/>'s
+            base type does not contain a property named <paramref name="valueName"/>
+            or if it does contain a property of that name, but the type is not
+            compatible with <typeparamref name="TDefaultValueType"/></exception>
+            <typeparam name="TDefaultValueType">Type of the value to be inserted.</typeparam>
+            <param name="collection">The collection from which to extract the value.</param>
+            <param name="valueName">The string designator for the value to be extracted.</param>
+            <param name="newValue">The new value to be inserted.</param>
+            <returns>New object with value inserted.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.ClassTranslator.TokenIsNullOrEmpty(System.Object,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:SchemaForge.Crucible.ClassTranslator.TryCastToken``1(System.Object,System.String,``0@)">
+            <inheritdoc/>
+        </member>
         <member name="T:SchemaForge.Crucible.DictionaryTranslator">
             <summary>
             Interprets (string, object) <see cref="T:System.Collections.Generic.Dictionary`2"/> objects for a <see cref="T:SchemaForge.Crucible.Schema"/>
