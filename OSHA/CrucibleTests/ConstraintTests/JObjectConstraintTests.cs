@@ -105,7 +105,21 @@ namespace ConstraintTests
         }
       }
       output.WriteLine(string.Join('\n', testToken.ErrorList));
-      Assert.Equal(testResult, expectedResult);
+      Assert.Equal(expectedResult, testResult);
+    }
+
+    [Theory]
+    [InlineData(true,"{'SubObject':{'Type':'Fruit','Fruit':'Watermelon'}}")]
+    [InlineData(true, "{'SubObject':{'Type':'Luxury','Luxury Good':'Silk Napkins'}}")]
+    [InlineData(false, "{'SubObject':{'Type':'Fruit','Luxury Good':'Those Fake Sparkly Apples People Sometimes Put In Decorative Bowls'}}")]
+    [InlineData(false, "{'SubObject':{'Type':'Vegetable','Luxury Good':'Cabbage'}}")]
+    public void ApplySchemaByTypeTest(bool expectedResult, string testJson)
+    {
+      Schema fruitSchema = new(new ConfigToken<string>("Type","The type of this object."), new ConfigToken<string>("Fruit","A fruit name."));
+      Schema luxurySchema = new(new ConfigToken<string>("Type", "The type of this object."), new ConfigToken<string>("Luxury Good", "A fruit name."));
+      Dictionary<string, Schema> typeMap = new() { { "Fruit", fruitSchema }, { "Luxury", luxurySchema } };
+      Schema metaSchema = new(new ConfigToken<JObject>("SubObject", "Either a fruit or a luxury good. Choose wisely.",new Constraint<JObject>[] { ApplySchema("Type", typeMap) }));
+      Assert.Equal(expectedResult, !metaSchema.Validate(JObject.Parse(testJson), new JObjectTranslator()).AnyFatal());
     }
   }
 }
