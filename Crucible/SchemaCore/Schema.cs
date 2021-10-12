@@ -33,7 +33,7 @@ namespace SchemaForge.Crucible
     /// Contains all errors generated during validation and the associated
     /// <see cref="Field.Description"/> of each <see cref="Field"/> value that was marked invalid.
     /// </summary>
-    public List<Error> ErrorList { get; } = new List<Error>();
+    public List<SchemaError> ErrorList { get; } = new List<SchemaError>();
 
     /// <summary>
     /// Constructs an empty <see cref="Schema"/> with no <see cref="Field"/> objects.
@@ -174,7 +174,7 @@ namespace SchemaForge.Crucible
     /// <see cref="Field"/>s present in the object being validated but not in the Schema) will raise
     /// a <see cref="Severity.Fatal"/> error. If true, unrecognized <see cref="Field"/>s will
     /// raise a <see cref="Severity.Info"/> error.</param>
-    public virtual List<Error> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, bool allowUnrecognized = false)
+    public virtual List<SchemaError> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, bool allowUnrecognized = false)
     {
       string message = " ";
       // This option is included in case a sub-collection is being validated; this
@@ -191,11 +191,11 @@ namespace SchemaForge.Crucible
           {
             if (message.IsNullOrEmpty())
             {
-              ErrorList.Add(new Error($"Input collection is missing required field {field.FieldName}\n{field.Description}"));
+              ErrorList.Add(new SchemaError($"Input collection is missing required field {field.FieldName}\n{field.Description}"));
             }
             else
             {
-              ErrorList.Add(new Error($"Input {name} is missing required field {field.FieldName}\n{field.Description}"));
+              ErrorList.Add(new SchemaError($"Input {name} is missing required field {field.FieldName}\n{field.Description}"));
             }
           }
           else if(field.DefaultValue.Exists())
@@ -204,13 +204,13 @@ namespace SchemaForge.Crucible
           }
           else
           {
-            ErrorList.Add(new Error($"Input collection is missing optional field {field.FieldName}",Severity.Info));
+            ErrorList.Add(new SchemaError($"Input collection is missing optional field {field.FieldName}",Severity.Info));
           }
         }
         else if (!field.Validate(collection,translator))
         {
           ErrorList.AddRange(field.ErrorList);
-          ErrorList.Add(new Error(field.Description,Severity.Info));
+          ErrorList.Add(new SchemaError(field.Description,Severity.Info));
         }
       }
       /*
@@ -236,17 +236,17 @@ namespace SchemaForge.Crucible
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add(new Error($"Input object contains unrecognized field: {key}",allowUnrecognized?Severity.Info:Severity.Fatal));
+            ErrorList.Add(new SchemaError($"Input object contains unrecognized field: {key}",allowUnrecognized?Severity.Info:Severity.Fatal));
           }
           else
           {
-            ErrorList.Add(new Error($"Input {name} contains unrecognized field: {key}", allowUnrecognized?Severity.Info:Severity.Fatal));
+            ErrorList.Add(new SchemaError($"Input {name} contains unrecognized field: {key}", allowUnrecognized?Severity.Info:Severity.Fatal));
           }
         }
       }
       if (ErrorList.AnyFatal() && !string.IsNullOrWhiteSpace(message))
       {
-        ErrorList.Add(new Error(message,Severity.Info));
+        ErrorList.Add(new SchemaError(message,Severity.Info));
       }
       return ErrorList;
     }

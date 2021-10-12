@@ -31,10 +31,10 @@ namespace SchemaForge.Crucible
     Trace
   }
   /// <summary>
-  /// In SchemaForge, an Error is an object generated when using a Schema to validate another object.
-  /// When converted to a string, Errors show their severity and error message.
+  /// In SchemaForge, a <see cref="SchemaError"/> is an object generated when using a <see cref="Schema"/> to validate another object.
+  /// When converted to a string, <see cref="SchemaError"/>s show their severity and error message.
   /// </summary>
-  public class Error
+  public class SchemaError
   {
     /// <summary>
     /// Message detailing the error.
@@ -46,13 +46,13 @@ namespace SchemaForge.Crucible
     public Severity ErrorSeverity { get; }
 
     /// <summary>
-    /// Builds an <see cref="Error"/> with the <see cref="ErrorMessage"/>
+    /// Builds an <see cref="SchemaError"/> with the <see cref="ErrorMessage"/>
     /// set to <paramref name="inputMessage"/> and the <see cref="Severity"/>
     /// set to <paramref name="inputSeverity"/> if provided.
     /// </summary>
     /// <param name="inputMessage">The message to be displayed when this error is converted to string. Will display as "[<paramref name="inputSeverity"/>] <paramref name="inputMessage"/>"</param>
     /// <param name="inputSeverity">Severity of this error. Defaults to Fatal.</param>
-    public Error(string inputMessage, Severity inputSeverity = Severity.Fatal)
+    public SchemaError(string inputMessage, Severity inputSeverity = Severity.Fatal)
     {
       if(inputMessage.IsNullOrEmpty())
       {

@@ -74,7 +74,7 @@ namespace ConstraintTests
     public void ConstrainUpperBoundTests(bool expectedResult, int constrainedValue, int constraint)
     {
       Constraint<int> newConstraint = ConstrainValueUpperBound(constraint);
-      List<Error> testResult = newConstraint.Function(constrainedValue, "Test Value");
+      List<SchemaError> testResult = newConstraint.Function(constrainedValue, "Test Value");
       output.WriteLine(string.Join("\n", testResult));
       Assert.Equal(expectedResult, !testResult.AnyFatal());
     }

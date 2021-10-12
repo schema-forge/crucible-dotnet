@@ -37,7 +37,7 @@ namespace ConstraintTests
     {
       // Conditions of constraint: Value must be less than or equal to 15, greater than or equal to 100, or 10, 35, 45, or 55.
       Constraint<int> newConstraint = MatchAnyConstraint(ConstrainValueUpperBound(15), ConstrainValueLowerBound(100), AllowValues(10, 35, 45, 55));
-      List<Error> testResult = newConstraint.Function(constrainedValue, "Test Value");
+      List<SchemaError> testResult = newConstraint.Function(constrainedValue, "Test Value");
       output.WriteLine($"Test value: {constrainedValue}");
       output.WriteLine(string.Join("\n", testResult));
       Assert.Equal(expectedResult, !testResult.AnyFatal());

@@ -173,7 +173,7 @@ namespace SchemaForge.Crucible
       List<Constraint<T>> constraintList = new List<Constraint<T>>();
       foreach (Constraint constraint in constraints)
       {
-        constraintList.Add(new Constraint<T>((Func<T, string, List<Error>>)constraint.GetFunction(), constraint.Property));
+        constraintList.Add(new Constraint<T>((Func<T, string, List<SchemaError>>)constraint.GetFunction(), constraint.Property));
       }
       return constraintList.ToArray();
     }

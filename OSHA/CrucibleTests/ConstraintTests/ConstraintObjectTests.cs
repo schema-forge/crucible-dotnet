@@ -17,7 +17,7 @@ namespace ConstraintTests
     /// <summary>
     /// Empty (but valid) function to make testing easy.
     /// </summary>
-    readonly Func<JToken, string, List<Error>> TestFunction = (JToken input, string inputName) => new List<Error>();
+    readonly Func<JToken, string, List<SchemaError>> TestFunction = (JToken input, string inputName) => new List<SchemaError>();
 
     /// <summary>
     /// Ensures that the constructor populates Function and Property.

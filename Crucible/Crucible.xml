@@ -68,7 +68,7 @@
             Function that will be applied by the constraint if this is a <see cref="F:SchemaForge.Crucible.ConstraintType.Format"/> constraint.
             </summary>
         </member>
-        <member name="M:SchemaForge.Crucible.Constraint`1.#ctor(System.Func{`0,System.String,System.Collections.Generic.List{SchemaForge.Crucible.Error}},Newtonsoft.Json.Linq.JProperty,System.Collections.Generic.List{SchemaForge.Crucible.Error})">
+        <member name="M:SchemaForge.Crucible.Constraint`1.#ctor(System.Func{`0,System.String,System.Collections.Generic.List{SchemaForge.Crucible.SchemaError}},Newtonsoft.Json.Linq.JProperty,System.Collections.Generic.List{SchemaForge.Crucible.SchemaError})">
             <summary>
             Constraint objects represent a rule that is applied to a <see cref="T:SchemaForge.Crucible.Field"/>; <paramref name="inputFunction"/> is the validation function that will be executed on the <see cref="T:SchemaForge.Crucible.Field"/>'s value while the <paramref name="inputProperty"/> is the representation of the constraint as a <see cref="T:Newtonsoft.Json.Linq.JProperty"/>.
             </summary>
@@ -77,7 +77,7 @@
             <param name="inputProperty">JProperty representation of this <see cref="T:SchemaForge.Crucible.Constraint"/>. Neither name nor value can be null or whitespace.</param>
             <param name="constraintErrors">Errors generated while creating this <see cref="T:SchemaForge.Crucible.Constraint"/>.</param>
         </member>
-        <member name="M:SchemaForge.Crucible.Constraint`1.#ctor(System.Func{System.String,System.String,System.Collections.Generic.List{SchemaForge.Crucible.Error}},SchemaForge.Crucible.ConstraintType,Newtonsoft.Json.Linq.JProperty,System.Collections.Generic.List{SchemaForge.Crucible.Error})">
+        <member name="M:SchemaForge.Crucible.Constraint`1.#ctor(System.Func{System.String,System.String,System.Collections.Generic.List{SchemaForge.Crucible.SchemaError}},SchemaForge.Crucible.ConstraintType,Newtonsoft.Json.Linq.JProperty,System.Collections.Generic.List{SchemaForge.Crucible.SchemaError})">
             <summary>
             Use this overload only if you intend to create a non-Standard constraint type.
             Format constraints are applied to the input data before it is cast to another
@@ -310,9 +310,9 @@
         <member name="M:SchemaForge.Crucible.Constraints.MatchAnyConstraint``1(SchemaForge.Crucible.Constraint{``0}[])">
             <summary>
             A logic constraint that will check the passed value against all
-            <paramref name="constraints"/> and return the <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.Error"/>
+            <paramref name="constraints"/> and return the <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.SchemaError"/>
             of the first constraint that does not generate fatal errors, or the
-            <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.Error"/> of all constraints combined if none pass.
+            <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.SchemaError"/> of all constraints combined if none pass.
             </summary>
             <typeparam name="TValueType">Value type that will be checked with
             constraints applying to said value type.</typeparam>
@@ -320,7 +320,7 @@
             the value will be considered valid.</param>
             <exception cref="T:System.ArgumentException">Throws <see cref="T:System.ArgumentException"/>
             if fewer than two constraints are passed.</exception>
-            <returns>A function that returns the <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.Error"/> resulting
+            <returns>A function that returns the <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.SchemaError"/> resulting
             from checking whether or not the passed <typeparamref name="TValueType"/> passes
             at least one of <paramref name="constraints"/></returns>
         </member>
@@ -349,36 +349,36 @@
             Indicates that this is debugging info.
             </summary>
         </member>
-        <member name="T:SchemaForge.Crucible.Error">
+        <member name="T:SchemaForge.Crucible.SchemaError">
             <summary>
             In SchemaForge, an Error is an object generated when using a Schema to validate another object.
             When converted to a string, Errors show their severity and error message.
             </summary>
         </member>
-        <member name="P:SchemaForge.Crucible.Error.ErrorMessage">
+        <member name="P:SchemaForge.Crucible.SchemaError.ErrorMessage">
             <summary>
             Message detailing the error.
             </summary>
         </member>
-        <member name="P:SchemaForge.Crucible.Error.ErrorSeverity">
+        <member name="P:SchemaForge.Crucible.SchemaError.ErrorSeverity">
             <summary>
             <see cref="T:SchemaForge.Crucible.Severity"/> of the error.
             </summary>
         </member>
-        <member name="M:SchemaForge.Crucible.Error.#ctor(System.String,SchemaForge.Crucible.Severity)">
+        <member name="M:SchemaForge.Crucible.SchemaError.#ctor(System.String,SchemaForge.Crucible.Severity)">
             <summary>
-            Builds an <see cref="T:SchemaForge.Crucible.Error"/> with the <see cref="P:SchemaForge.Crucible.Error.ErrorMessage"/>
+            Builds an <see cref="T:SchemaForge.Crucible.SchemaError"/> with the <see cref="P:SchemaForge.Crucible.SchemaError.ErrorMessage"/>
             set to <paramref name="inputMessage"/> and the <see cref="T:SchemaForge.Crucible.Severity"/>
             set to <paramref name="inputSeverity"/> if provided.
             </summary>
             <param name="inputMessage">The message to be displayed when this error is converted to string. Will display as "[<paramref name="inputSeverity"/>] <paramref name="inputMessage"/>"</param>
             <param name="inputSeverity">Severity of this error. Defaults to Fatal.</param>
         </member>
-        <member name="M:SchemaForge.Crucible.Error.ToString">
+        <member name="M:SchemaForge.Crucible.SchemaError.ToString">
             <summary>
             Converts the error's severity and message to string format.
             </summary>
-            <returns>String in the format "[<see cref="P:SchemaForge.Crucible.Error.ErrorSeverity"/>] <see cref="P:SchemaForge.Crucible.Error.ErrorMessage"/>"</returns>
+            <returns>String in the format "[<see cref="P:SchemaForge.Crucible.SchemaError.ErrorSeverity"/>] <see cref="P:SchemaForge.Crucible.SchemaError.ErrorMessage"/>"</returns>
         </member>
         <member name="T:SchemaForge.Crucible.Extensions.ArrayExtensions">
             <summary>
@@ -432,7 +432,7 @@
             <param name="separator">Separator to be used to delimit items.</param>
             <returns><paramref name="separator"/>-delimited <see cref="T:System.String"/></returns>
         </member>
-        <member name="M:SchemaForge.Crucible.Extensions.IEnumerableExtensions.AnyFatal(System.Collections.Generic.IEnumerable{SchemaForge.Crucible.Error})">
+        <member name="M:SchemaForge.Crucible.Extensions.IEnumerableExtensions.AnyFatal(System.Collections.Generic.IEnumerable{SchemaForge.Crucible.SchemaError})">
             <summary>
             Checks to see if any error in the calling error collection has severity Fatal.
             </summary>
@@ -562,7 +562,7 @@
             An important method for consumers of the library.
             </summary>
         </member>
-        <member name="M:SchemaForge.Crucible.IEnumerableExtensionsPublic.AnyFatal(System.Collections.Generic.IList{SchemaForge.Crucible.Error})">
+        <member name="M:SchemaForge.Crucible.IEnumerableExtensionsPublic.AnyFatal(System.Collections.Generic.IList{SchemaForge.Crucible.SchemaError})">
             <summary>
             Checks to see if any error in the calling error collection has severity Fatal.
             </summary>

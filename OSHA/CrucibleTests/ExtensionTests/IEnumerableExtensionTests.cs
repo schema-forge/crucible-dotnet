@@ -65,21 +65,21 @@ namespace Extensions
     [Fact]
     public void AnyFatal_IEnumerable_ReturnsTrue()
     {
-      HashSet<Error> errorSet = new() { new Error("Isildur") };
+      HashSet<SchemaError> errorSet = new() { new SchemaError("Isildur") };
       Assert.True(errorSet.AnyFatal());
     }
 
     [Fact]
     public void AnyFatal_IEnumerable_ReturnsFalse()
     {
-      HashSet<Error> errorSet = new() { new Error("Boromir",Severity.Warning) };
+      HashSet<SchemaError> errorSet = new() { new SchemaError("Boromir",Severity.Warning) };
       Assert.False(errorSet.AnyFatal());
     }
 
     [Fact]
     public void AnyFatal_IList_ReturnsFalse()
     {
-      Error[] errorList = { new Error("Boromir", Severity.Warning) };
+      SchemaError[] errorList = { new SchemaError("Boromir", Severity.Warning) };
       Assert.False(errorList.AnyFatal());
     }
   }

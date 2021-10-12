@@ -16,7 +16,7 @@ namespace SchemaTests
     [Fact]
     public void Error_ConstructorInitializesErrorMessage()
     {
-      Error error = new("You dun goofed!");
+      SchemaError error = new("You dun goofed!");
       Assert.Equal("You dun goofed!", error.ErrorMessage);
       Assert.Equal(Severity.Fatal, error.ErrorSeverity);
     }
@@ -27,7 +27,7 @@ namespace SchemaTests
     [Fact]
     public void Error_ConstructorInitializesErrorSeverity()
     {
-      Error error = new("You should not crossed the streams.", Severity.Warning);
+      SchemaError error = new("You should not crossed the streams.", Severity.Warning);
       Assert.Equal(Severity.Warning, error.ErrorSeverity);
     }
 
@@ -35,6 +35,6 @@ namespace SchemaTests
     /// Ensures that the Error constructor throws on an empty error string.
     /// </summary>
     [Fact]
-    public void Error_ConstructorThrowsOnEmptyString() => Assert.Throws<ArgumentNullException>(() => new Error(""));
+    public void Error_ConstructorThrowsOnEmptyString() => Assert.Throws<ArgumentNullException>(() => new SchemaError(""));
   }
 }
