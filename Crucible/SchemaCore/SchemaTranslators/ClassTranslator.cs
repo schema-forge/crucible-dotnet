@@ -15,8 +15,8 @@ namespace SchemaForge.Crucible
   /// <summary>
   /// Interprets any .NET object for a <see cref="Schema"/>
   /// object to validate; the object must have a property for all
-  /// <see cref="ConfigToken"/>s contained in <see cref="Schema.ConfigTokens"/>. 
-  /// Aligning property types with the types of each <see cref="ConfigToken"/>
+  /// <see cref="Field"/>s contained in <see cref="Schema.Fields"/>. 
+  /// Aligning property types with the types of each <see cref="Field"/>
   /// is recommended, though not required.
   /// </summary>
   public class ClassTranslator : ISchemaTranslator<object>
@@ -48,7 +48,7 @@ namespace SchemaForge.Crucible
     /// <param name="valueName">The string designator for the value to be extracted.</param>
     /// <param name="newValue">The new value to be inserted.</param>
     /// <returns>New object with value inserted.</returns>
-    public object InsertToken<TDefaultValueType>(object collection, string valueName, TDefaultValueType newValue)
+    public object InsertFieldValue<TDefaultValueType>(object collection, string valueName, TDefaultValueType newValue)
     {
       try
       {
@@ -69,7 +69,7 @@ namespace SchemaForge.Crucible
       }
     }
     /// <inheritdoc/>
-    public bool TokenIsNullOrEmpty(object collection, string valueName)
+    public bool FieldValueIsNullOrEmpty(object collection, string valueName)
     {
       PropertyInfo valueProperty = collection.GetType().GetProperty(valueName);
       Type valueType = valueProperty.PropertyType;
@@ -78,17 +78,17 @@ namespace SchemaForge.Crucible
         && (valueType.IsAssignableFrom(typeof(JToken)) ? ((JToken)value).IsNullOrEmpty() : value.ToString().IsNullOrEmpty());
     }
     /// <inheritdoc/>
-    public bool TryCastToken<TCastType>(object collection, string valueName, out TCastType outputValue)
+    public bool TryCastValue<TCastType>(object collection, string valueName, out TCastType outputValue)
     {
       PropertyInfo valueProperty = collection.GetType().GetProperty(valueName);
       object value = valueProperty.GetValue(collection);
       Type valueType = valueProperty.PropertyType;
       Type castType = typeof(TCastType);
 
-      return InnerTryCastToken(value, valueType, castType, out outputValue);
+      return InnerTryCastValue(value, valueType, castType, out outputValue);
     }
 
-    private bool InnerTryCastToken<TCastType>(object value, Type valueType, Type castType, out TCastType outputValue)
+    private bool InnerTryCastValue<TCastType>(object value, Type valueType, Type castType, out TCastType outputValue)
     {
       if (castType == valueType)
       {
@@ -164,7 +164,7 @@ namespace SchemaForge.Crucible
               object returnValue = Activator.CreateInstance(castType);
               MethodInfo add = returnValue.GetType().GetMethod("Add");
               
-              MethodInfo tryCastType = this.GetType().GetMethod("InnerTryCastToken",BindingFlags.NonPublic | BindingFlags.Instance);
+              MethodInfo tryCastType = this.GetType().GetMethod("InnerTryCastValue",BindingFlags.NonPublic | BindingFlags.Instance);
               MethodInfo castToInnerType = tryCastType.MakeGenericMethod(genericArguments[0]);
               while ((bool)moveNext.Invoke(enumerator, null))
               {

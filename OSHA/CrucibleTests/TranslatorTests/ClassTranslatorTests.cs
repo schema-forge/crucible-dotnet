@@ -16,20 +16,20 @@ namespace TranslatorTests
 {
   public class SimpleTestClass
   {
-    public string TestToken { get; set; }
+    public string TestField { get; set; }
   }
 
-  public class SimpleTestClassTwoTokens
+  public class SimpleTestClassTwoFields
   {
-    public string TestToken { get; set; }
-    public string AnotherToken { get; set; }
+    public string TestField { get; set; }
+    public string AnotherField { get; set; }
   }
 
-  public class SimpleTestClassThreeTokens
+  public class SimpleTestClassThreeFields
   {
-    public string TestToken { get; set; }
-    public string SecondTestToken { get; set; }
-    public string ThirdTestToken { get; set; }
+    public string TestField { get; set; }
+    public string SecondTestField { get; set; }
+    public string ThirdTestField { get; set; }
   }
 
   public class ListTestClass
@@ -40,9 +40,9 @@ namespace TranslatorTests
   #region TestConfigAsClass
   public class TestConfigAsClass
   {
-    public string RequiredToken { get; set; }
-    public string UnrequiredToken { get; set; }
-    public string ATokenThatIsNotRequiredButNonethelessHasAValueIfNotIncluded { get; set; }
+    public string RequiredField { get; set; }
+    public string UnrequiredField { get; set; }
+    public string AFieldThatIsNotRequiredButNonethelessHasAValueIfNotIncluded { get; set; }
     public string AllowValues { get; set; }
     public string ConstrainStringWithRegexExactPatterns { get; set; }
     public string ConstrainStringLengthLowerBound { get; set; }
@@ -102,7 +102,7 @@ namespace TranslatorTests
     }
 
     /// <summary>
-    /// Tests the capabilites of TryCastToken using reflection.
+    /// Tests the capabilites of <see cref="ClassTranslator.TryCastValue{TCastType}(object, string, out TCastType)"/> using reflection.
     /// </summary>
     /// <param name="expectedResult">Expected result of the conversion; true if conversion should succeed, false if it should not.</param>
     /// <param name="type">Full name of the type to attempt to which <paramref name="valueToConvert"/> will be cast.</param>
@@ -117,43 +117,43 @@ namespace TranslatorTests
     public void ConversionTests(bool expectedResult, string type, string valueToConvert)
     {
       ClassTranslator testTranslator = new();
-      string testString = "{'TestToken':'" + valueToConvert + "'}";
+      string testString = "{'TestField':'" + valueToConvert + "'}";
       SimpleTestClass testClass = JsonConvert.DeserializeObject<SimpleTestClass>(testString);
       SchemaForge.Crucible.Utilities.Conversions.RegisterDateTimeFormat("MMyyyydd"); // Add a new recognized DateTime format.
-      MethodInfo methodInfo = typeof(ClassTranslator).GetMethod("TryCastToken");
+      MethodInfo methodInfo = typeof(ClassTranslator).GetMethod("TryCastValue");
       MethodInfo genericMethodInfo = methodInfo.MakeGenericMethod(Type.GetType(type));
-      Assert.Equal(expectedResult, genericMethodInfo.Invoke(testTranslator, new object[] { testClass, "TestToken", null }));
+      Assert.Equal(expectedResult, genericMethodInfo.Invoke(testTranslator, new object[] { testClass, "TestField", null }));
     }
 
     /// <summary>
-    /// Tests the <see cref="ClassTranslator.TokenIsNullOrEmpty(JObject, string)"/>
+    /// Tests the <see cref="ClassTranslator.FieldIsNullOrEmpty(JObject, string)"/>
     /// method.
     /// </summary>
-    /// <param name="expectedResult">Expected result of TokenIsNullOrEmpty.</param>
+    /// <param name="expectedResult">Expected result of FieldIsNullOrEmpty.</param>
     /// <param name="testValue">Value to evaluate.</param>
     [Theory]
     [InlineData(true,"   ")]
     [InlineData(false,"I live!")]
-    public void TokenIsNullOrEmptyTest(bool expectedResult, string testValue)
+    public void FieldIsNullOrEmptyTest(bool expectedResult, string testValue)
     {
       ClassTranslator testTranslator = new();
-      string testString = "{'TestToken':'" + testValue + "'}";
+      string testString = "{'TestField':'" + testValue + "'}";
       SimpleTestClass testClass = JsonConvert.DeserializeObject<SimpleTestClass>(testString);
-      Assert.Equal(expectedResult,testTranslator.TokenIsNullOrEmpty(testClass, "TestToken"));
+      Assert.Equal(expectedResult,testTranslator.FieldValueIsNullOrEmpty(testClass, "TestField"));
     }
 
     /// <summary>
-    /// Tests the <see cref="ClassTranslator.InsertToken{TDefaultValueType}(JObject, string, TDefaultValueType)"/>
-    /// method by inserting a token.
+    /// Tests the <see cref="ClassTranslator.InsertField{TDefaultValueType}(JObject, string, TDefaultValueType)"/>
+    /// method by inserting a <see cref="Field"/>.
     /// </summary>
     [Fact]
-    public void InsertTokenTest()
+    public void InsertFieldTest()
     {
       ClassTranslator testTranslator = new();
-      string testString = "{'TestToken':'I am a token!'}";
-      SimpleTestClassTwoTokens testClass = JsonConvert.DeserializeObject<SimpleTestClassTwoTokens>(testString);
-      testTranslator.InsertToken(testClass, "AnotherToken", "Me too!");
-      Assert.True(testClass.AnotherToken == "Me too!");
+      string testString = "{'TestField':'I am a field!'}";
+      SimpleTestClassTwoFields testClass = JsonConvert.DeserializeObject<SimpleTestClassTwoFields>(testString);
+      testTranslator.InsertFieldValue(testClass, "AnotherField", "Me too!");
+      Assert.True(testClass.AnotherField == "Me too!");
     }
 
     /// <summary>
@@ -164,10 +164,10 @@ namespace TranslatorTests
     public void CollectionContainsTest()
     {
       ClassTranslator testTranslator = new();
-      string testString = "{'TestToken':'I am a token!'}";
+      string testString = "{'TestField':'I am a field!'}";
       SimpleTestClass testClass = JsonConvert.DeserializeObject<SimpleTestClass>(testString);
-      Assert.True(testTranslator.CollectionContains(testClass, "TestToken"));
-      Assert.False(testTranslator.CollectionContains(testClass, "You thought it was a real token but it was me, Dio!"));
+      Assert.True(testTranslator.CollectionContains(testClass, "TestField"));
+      Assert.False(testTranslator.CollectionContains(testClass, "You thought it was a real field but it was me, Dio!"));
     }
 
     /// <summary>
@@ -178,9 +178,9 @@ namespace TranslatorTests
     public void GetCollectionKeysTest()
     {
       ClassTranslator testTranslator = new();
-      string testString = "{'TestToken':'I am a token!','SecondTestToken':'Me too!','ThirdTestToken':'Me... three?'}";
-      SimpleTestClassThreeTokens testClass = JsonConvert.DeserializeObject<SimpleTestClassThreeTokens>(testString);
-      List<string> expectedList = new() { "TestToken", "SecondTestToken", "ThirdTestToken" };
+      string testString = "{'TestField':'I am a field!','SecondTestField':'Me too!','ThirdTestField':'Me... three?'}";
+      SimpleTestClassThreeFields testClass = JsonConvert.DeserializeObject<SimpleTestClassThreeFields>(testString);
+      List<string> expectedList = new() { "TestField", "SecondTestField", "ThirdTestField" };
       List<string> resultList = testTranslator.GetCollectionKeys(testClass);
       output.WriteLine($"Expected list: {expectedList.Join(", ")}");
       output.WriteLine($"Actual list: {resultList.Join(", ")}");
@@ -196,9 +196,9 @@ namespace TranslatorTests
     public void CollectionValueToStringTest()
     {
       ClassTranslator testTranslator = new();
-      string testString = "{'TestToken':'38'}";
+      string testString = "{'TestField':'38'}";
       SimpleTestClass testClass = JsonConvert.DeserializeObject<SimpleTestClass>(testString);
-      Assert.Equal("38",testTranslator.CollectionValueToString(testClass,"TestToken"));
+      Assert.Equal("38",testTranslator.CollectionValueToString(testClass,"TestField"));
     }
 
     /// <summary>
@@ -234,7 +234,7 @@ namespace TranslatorTests
       ClassTranslator testTranslator = new();
       string testString = "{'TestList':[5, 13, 22]}";
       ListTestClass testClass = JsonConvert.DeserializeObject<ListTestClass>(testString);
-      Schema testSchema = new(new ConfigToken<List<int>>("TestList", "A matter of reflection."));
+      Schema testSchema = new(new Field<List<int>>("TestList", "A matter of reflection."));
       output.WriteLine(testSchema.Validate(testClass, testTranslator).Join("\n"));
       Assert.True(!testSchema.ErrorList.AnyFatal());
     }
@@ -245,7 +245,7 @@ namespace TranslatorTests
       ClassTranslator testTranslator = new();
       string testString = "{'TestList':[5, 13, 22]}";
       ListTestClass testClass = JsonConvert.DeserializeObject<ListTestClass>(testString);
-      Schema testSchema = new(new ConfigToken<List<string>>("TestList", "A matter of reflection."));
+      Schema testSchema = new(new Field<List<string>>("TestList", "A matter of reflection."));
       output.WriteLine(testSchema.Validate(testClass, testTranslator).Join("\n"));
       Assert.True(!testSchema.ErrorList.AnyFatal());
     }

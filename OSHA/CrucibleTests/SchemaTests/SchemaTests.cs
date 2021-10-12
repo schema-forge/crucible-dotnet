@@ -29,17 +29,17 @@ namespace SchemaTests
     }
 
     /// <summary>
-    /// Ensures that the empty constructor works and allows tokens to be added.
+    /// Ensures that the empty constructor works and allows <see cref="Field"/>s to be added.
     /// </summary>
     [Fact]
     public void ConstructorTest()
     {
       Schema newSchema = new();
-      newSchema.AddTokens(new HashSet<ConfigToken>()
+      newSchema.AddFields(new HashSet<Field>()
         {
-          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
-          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
         });
 
       Assert.Equal(3, newSchema.Count());
@@ -49,13 +49,13 @@ namespace SchemaTests
     /// Ensures that constructing a schema with an IEnumerable and Schema.Count() both work properly.
     /// </summary>
     [Fact]
-    public void ConstructorWithTokensTest()
+    public void ConstructorWithFieldsTest()
     {
-      Schema newSchema = new(new HashSet<ConfigToken>()
+      Schema newSchema = new(new HashSet<Field>()
         {
-          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
-          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
         });
 
       Assert.Equal(3,newSchema.Count());
@@ -67,11 +67,11 @@ namespace SchemaTests
     [Fact]
     public void ValidSchemaTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
         {
-          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
-          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
         });
       
       TestSchema.Validate(TestConfig, new JObjectTranslator());
@@ -80,15 +80,15 @@ namespace SchemaTests
     }
 
     /// <summary>
-    /// Ensures that unrecognized tokens result in a fatal error.
+    /// Ensures that unrecognized <see cref="Field"/>s result in a fatal error.
     /// </summary>
     [Fact]
-    public void UnrecognizedTokenSchemaTest()
+    public void UnrecognizedFieldSchemaTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
       {
-          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
       });
       
       TestSchema.Validate(TestConfig, new JObjectTranslator());
@@ -97,15 +97,15 @@ namespace SchemaTests
     }
 
     /// <summary>
-    /// Ensures that unrecognized tokens result in a fatal error.
+    /// Ensures that unrecognized <see cref="Field"/>s do not result in a fatal error when permitted.
     /// </summary>
     [Fact]
-    public void UnrecognizedTokenWithAllowUnrecognizedSchemaTest()
+    public void UnrecognizedFieldWithAllowUnrecognizedSchemaTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
       {
-          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
       });
 
       TestSchema.Validate(TestConfig, new JObjectTranslator(),allowUnrecognized: true);
@@ -114,17 +114,17 @@ namespace SchemaTests
     }
 
     /// <summary>
-    /// Ensures that missing required tokens result in a fatal error.
+    /// Ensures that missing required <see cref="Field"/>s result in a fatal error.
     /// </summary>
     [Fact]
-    public void MissingRequiredTokenSchemaTest()
+    public void MissingRequiredFieldSchemaTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
       {
-        new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-        new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
-        new ConfigToken<JArray>("Lincolnshire Poacher","The first 300 numbers read out on the Lincolnshire Poacher station.",new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(300,300) }),
-        new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+        new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+        new Field<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
+        new Field<JArray>("Lincolnshire Poacher","The first 300 numbers read out on the Lincolnshire Poacher station.",new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(300,300) }),
+        new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
       });
             
       TestSchema.Validate(TestConfig, new JObjectTranslator());
@@ -133,16 +133,16 @@ namespace SchemaTests
     }
 
     /// <summary>
-    /// Ensures that a null or empty token results in a fatal error.
+    /// Ensures that a null or empty <see cref="Field"/> value results in a fatal error.
     /// </summary>
     [Fact]
-    public void NullOrEmptyTokenSchemaTest()
+    public void NullOrEmptyFieldSchemaTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
         {
-          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer."),
-          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer."),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
         });
 
       TestConfig["Kids"] = "";
@@ -153,16 +153,16 @@ namespace SchemaTests
     }
 
     /// <summary>
-    /// Ensures that a null or empty token results in a fatal error.
+    /// Ensures that a null or empty <see cref="Field"/> value does not result in a fatal error when permitted.
     /// </summary>
     [Fact]
-    public void NullOrEmptyTokenSchemaWithNullAllowedTest()
+    public void NullOrEmptyFieldSchemaWithNullAllowedTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
         {
-          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",allowNull:true),
-          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",allowNull:true),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
         });
 
       TestConfig["Kids"] = "";
@@ -173,134 +173,134 @@ namespace SchemaTests
     }
 
     /// <summary>
-    /// Ensures that the type and name arguments of Validate work properly when there is an unrecognized token.
+    /// Ensures that the type and name arguments of Validate work properly when there is an unrecognized <see cref="Field"/>.
     /// </summary>
     [Fact]
-    public void UnrecognizedTokenWithCustomNameSchemaTest()
+    public void UnrecognizedFieldWithCustomNameSchemaTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
       {
-          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
       });
 
-      TestSchema.Validate(TestConfig,new JObjectTranslator(),"He of Many Tokens");
+      TestSchema.Validate(TestConfig,new JObjectTranslator(),"He of Many Fields");
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
-      Assert.Contains($"Input He of Many Tokens contains unrecognized token: Kids", TestSchema.ErrorList.Select(x => x.ErrorMessage));
-      Assert.Contains($"Validation for He of Many Tokens failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.Contains($"Input He of Many Fields contains unrecognized field: Kids", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.Contains($"Validation for He of Many Fields failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
     }
 
     /// <summary>
-    /// Ensures that the type and name arguments of Validate work properly when there is an unrecognized token.
+    /// Ensures that the type and name arguments of Validate work properly when there is an unrecognized <see cref="Field"/>.
     /// </summary>
     [Fact]
-    public void UnrecognizedTokenWithCustomNameAllowUnrecognizedSchemaTest()
+    public void UnrecognizedFieldWithCustomNameAllowUnrecognizedSchemaTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
       {
-          new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-          new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
       });
 
-      TestSchema.Validate(TestConfig, new JObjectTranslator(), "He of Many Tokens", true);
+      TestSchema.Validate(TestConfig, new JObjectTranslator(), "He of Many Fields", true);
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
-      Assert.Contains($"Input He of Many Tokens contains unrecognized token: Kids", TestSchema.ErrorList.Select(x => x.ErrorMessage));
-      Assert.DoesNotContain($"Validation for He of Many Tokens failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.Contains($"Input He of Many Fields contains unrecognized field: Kids", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.DoesNotContain($"Validation for He of Many Fields failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
     }
 
 
     /// <summary>
-    /// Ensures that the type and name arguments of Validate work properly when a required token is missing.
+    /// Ensures that the type and name arguments of Validate work properly when a required <see cref="Field"/> is missing.
     /// </summary>
     [Fact]
-    public void MissingRequiredTokenWithCustomNameSchemaTest()
+    public void MissingRequiredFieldWithCustomNameSchemaTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
       {
-        new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-        new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
-        new ConfigToken<JArray>("Lincolnshire Poacher","The first 300 numbers read out on the Lincolnshire Poacher station.",new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(300,300) }),
-        new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+        new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+        new Field<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
+        new Field<JArray>("Lincolnshire Poacher","The first 300 numbers read out on the Lincolnshire Poacher station.",new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(300,300) }),
+        new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
       });
 
       TestSchema.Validate(TestConfig, new JObjectTranslator(), "EmptyInside :(");
       output.WriteLine(string.Join('\n', TestSchema.ErrorList));
-      Assert.Contains($"Input EmptyInside :( is missing required token Lincolnshire Poacher\nThe first 300 numbers read out on the Lincolnshire Poacher station.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
+      Assert.Contains($"Input EmptyInside :( is missing required field Lincolnshire Poacher\nThe first 300 numbers read out on the Lincolnshire Poacher station.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
       Assert.Contains($"Validation for EmptyInside :( failed.", TestSchema.ErrorList.Select(x => x.ErrorMessage));
     }
 
     /// <summary>
-    /// Ensures that AddToken works.
+    /// Ensures that AddField works.
     /// </summary>
     [Fact]
-    public void ValidSchemaAddTokenTest()
+    public void ValidSchemaAddFieldTest()
     {
-      TestSchema.AddToken(new ConfigToken<string>("ExtraCustomToken", "Super special!"));
+      TestSchema.AddField(new Field<string>("ExtraCustomField", "Super special!"));
 
       Assert.False(TestSchema.ErrorList.AnyFatal());
     }
 
     /// <summary>
-    /// Ensures that GenerateEmptyConfig() works as expected and generates a set of token names and their respective HelpStrings.
+    /// Ensures that GenerateEmptyConfig() works as expected and generates a set of <see cref="Field"/> names and their respective <see cref="Field.Description"/>s.
     /// </summary>
     [Fact]
     public void GenerateEmptyConfigTest()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
       {
-        new ConfigToken<string>("The First of Three","A sample required token."),
-        new ConfigToken<string>("The Second of Three","Another sample required token."),
-        new ConfigToken<int>("The Third of Three","Finally, a sample optional token.",required: false)
+        new Field<string>("The First of Three","A sample required field."),
+        new Field<string>("The Second of Three","Another sample required field."),
+        new Field<int>("The Third of Three","Finally, a sample optional field.",required: false)
       });
 
       string configString = TestSchema.GenerateEmptyJson().ToString();
-      string expectedString = JObject.Parse("{'The First of Three':'A sample required token.','The Second of Three':'Another sample required token.','The Third of Three':'Optional - Finally, a sample optional token.'}").ToString();
+      string expectedString = JObject.Parse("{'The First of Three':'A sample required field.','The Second of Three':'Another sample required field.','The Third of Three':'Optional - Finally, a sample optional field.'}").ToString();
       Assert.Equal(expectedString, configString);
     }
 
     /// <summary>
-    /// Ensures that AddToken throws an argument exception if adding a duplicate token is attempted.
+    /// Ensures that <see cref="Schema.AddField(Field)"/> throws an argument exception if adding a duplicate <see cref="Field"/> is attempted.
     /// </summary>
     [Fact]
-    public void AddToken_ThrowsWhenDuplicate()
+    public void AddField_ThrowsWhenDuplicate()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
       {
-        new ConfigToken<string>("The First of Three","A sample required token."),
-        new ConfigToken<string>("The Second of Three","Another sample required token."),
-        new ConfigToken<int>("The Third of Three","Finally, a sample optional token.",required: false)
+        new Field<string>("The First of Three","A sample required field."),
+        new Field<string>("The Second of Three","Another sample required field."),
+        new Field<int>("The Third of Three","Finally, a sample optional field.",required: false)
       });
-      Assert.Throws<ArgumentException>(() => TestSchema.AddToken(new ConfigToken<string>("The First of Three", "Defective, fake, insubordinate, and churlish.")));
+      Assert.Throws<ArgumentException>(() => TestSchema.AddField(new Field<string>("The First of Three", "Defective, fake, insubordinate, and churlish.")));
     }
 
     /// <summary>
-    /// Ensures that AddTokens throws an argument exception if there is a duplicate token in the set being added.
+    /// Ensures that <see cref="Schema.AddFields(IEnumerable{Field})"/> throws an argument exception if there is a duplicate <see cref="Field"/> in the set being added.
     /// </summary>
     [Fact]
-    public void AddTokens_ThrowsWhenDuplicate()
+    public void AddFields_ThrowsWhenDuplicate()
     {
-      TestSchema.AddTokens(new HashSet<ConfigToken>()
+      TestSchema.AddFields(new HashSet<Field>()
       {
-        new ConfigToken<string>("The First of Three","A sample required token."),
-        new ConfigToken<string>("The Second of Three","Another sample required token."),
-        new ConfigToken<int>("The Third of Three","Finally, a sample optional token.",required: false)
+        new Field<string>("The First of Three","A sample required field."),
+        new Field<string>("The Second of Three","Another sample required field."),
+        new Field<int>("The Third of Three","Finally, a sample optional field.",required: false)
       });
-      Assert.Throws<ArgumentException>(() => TestSchema.AddTokens(new ConfigToken[] { new ConfigToken<string>("A brand new token!", "Completely original!"),
-                                                                                      new ConfigToken<string>("The First of Three", "Once again thinks it's the most important because it was added first.") }));
+      Assert.Throws<ArgumentException>(() => TestSchema.AddFields(new Field[] { new Field<string>("A brand new field!", "Completely original!"),
+                                                                                      new Field<string>("The First of Three", "Once again thinks it's the most important because it was added first.") }));
     }
 
     /// <summary>
-    /// Ensures that the constructor throws an exception when there are duplicate tokens in the passed set of tokens.
+    /// Ensures that the constructor throws an exception when there are duplicate <see cref="Field"/>s in the passed set of <see cref="Field"/>s.
     /// </summary>
     [Fact]
-    public void ConstructorThrowsWithDuplicateTokensTest()
+    public void ConstructorThrowsWithDuplicateFieldsTest()
     {
-      Assert.Throws<ArgumentException>(() => new Schema(new ConfigToken[]
+      Assert.Throws<ArgumentException>(() => new Schema(new Field[]
         {
-        new ConfigToken<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
-        new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
-        new ConfigToken<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
-        new ConfigToken<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+        new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+        new Field<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
+        new Field<string>("Kids","The best remix of the MGMT song 'Kids'. There is only one correct answer.",new Constraint<string>[] { AllowValues("Paramond Extended Mix") }),
+        new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
         }));
     }
 
@@ -317,12 +317,12 @@ namespace SchemaTests
           'LeastEnjoyedMovie':'Avatar: The Last Airbender, courtesy of famed director M. Night Shyamalan.'
         }");
 
-      Schema movieSchema = new (new ConfigToken[]
+      Schema movieSchema = new (new Field[]
       {
-        new ConfigToken<int>("MoviesWatched","Indicates how many movies the user has watched simultaneously in the past 24 hours."),
-        new ConfigToken<int>("MoviesEnjoyed","Indicates the number of simultaneous movies the user enjoyed."),
-        new ConfigToken<string>("LeastEnjoyedMovie","Indicates that, even in the overwhelming cacophany and sense-overload of thirty seven simultaneous movies, the live-action Avatar film still stands out as the worst of them all."),
-        new ConfigToken<bool>("There is hope for the movie industry", "Indicates whether or not the user believes that good movies are still being made.",true)
+        new Field<int>("MoviesWatched","Indicates how many movies the user has watched simultaneously in the past 24 hours."),
+        new Field<int>("MoviesEnjoyed","Indicates the number of simultaneous movies the user enjoyed."),
+        new Field<string>("LeastEnjoyedMovie","Indicates that, even in the overwhelming cacophany and sense-overload of thirty seven simultaneous movies, the live-action Avatar film still stands out as the worst of them all."),
+        new Field<bool>("There is hope for the movie industry", "Indicates whether or not the user believes that good movies are still being made.",true)
       });
 
       movieSchema.Validate(testConfig, new JObjectTranslator());
@@ -344,12 +344,12 @@ namespace SchemaTests
           'There is hope for the movie industry':false
         }");
 
-      Schema movieSchema = new(new ConfigToken[]
+      Schema movieSchema = new(new Field[]
       {
-        new ConfigToken<int>("MoviesWatched","Indicates how many movies the user has watched simultaneously in the past 24 hours."),
-        new ConfigToken<int>("MoviesEnjoyed","Indicates the number of simultaneous movies the user enjoyed."),
-        new ConfigToken<string>("LeastEnjoyedMovie","Indicates that, even in the overwhelming cacophany and sense-overload of thirty seven simultaneous movies, the live-action Avatar film still stands out as the worst of them all."),
-        new ConfigToken<bool>("There is hope for the movie industry", "Indicates whether or not the user believes that good movies are still being made.",true)
+        new Field<int>("MoviesWatched","Indicates how many movies the user has watched simultaneously in the past 24 hours."),
+        new Field<int>("MoviesEnjoyed","Indicates the number of simultaneous movies the user enjoyed."),
+        new Field<string>("LeastEnjoyedMovie","Indicates that, even in the overwhelming cacophany and sense-overload of thirty seven simultaneous movies, the live-action Avatar film still stands out as the worst of them all."),
+        new Field<bool>("There is hope for the movie industry", "Indicates whether or not the user believes that good movies are still being made.",true)
       });
 
       movieSchema.Validate(testConfig, new JObjectTranslator());

@@ -18,7 +18,7 @@ namespace SchemaForge.Crucible
   public class JObjectTranslator : ISchemaTranslator<JObject>
   {
     /// <inheritdoc/>
-    public bool TryCastToken<TCastType>(JObject collection, string valueName, out TCastType outputValue)
+    public bool TryCastValue<TCastType>(JObject collection, string valueName, out TCastType outputValue)
     {
       if (typeof(TCastType) == typeof(DateTime))
       {
@@ -43,9 +43,9 @@ namespace SchemaForge.Crucible
       }
     }
     /// <inheritdoc/>
-    public bool TokenIsNullOrEmpty(JObject collection, string valueName) => collection[valueName].IsNullOrEmpty();
+    public bool FieldValueIsNullOrEmpty(JObject collection, string valueName) => collection[valueName].IsNullOrEmpty();
     /// <inheritdoc/>
-    public JObject InsertToken<TDefaultValueType>(JObject collection, string valueName, TDefaultValueType newValue)
+    public JObject InsertFieldValue<TDefaultValueType>(JObject collection, string valueName, TDefaultValueType newValue)
     {
       collection.Add(valueName, new JValue(newValue));
       return collection;

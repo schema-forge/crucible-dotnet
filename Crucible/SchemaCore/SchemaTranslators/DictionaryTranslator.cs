@@ -25,15 +25,15 @@ namespace SchemaForge.Crucible
     /// <inheritdoc/>
     public string GetEquivalentType(string cSharpType) => Conversions.GetEquivalentJsonType(cSharpType);
     /// <inheritdoc/>
-    public Dictionary<string, object> InsertToken<TDefaultValueType>(Dictionary<string, object> collection, string valueName, TDefaultValueType newValue)
+    public Dictionary<string, object> InsertFieldValue<TDefaultValueType>(Dictionary<string, object> collection, string valueName, TDefaultValueType newValue)
     {
       collection.Add(valueName, newValue);
       return collection;
     }
     /// <inheritdoc/>
-    public bool TokenIsNullOrEmpty(Dictionary<string, object> collection, string valueName) => collection[valueName].ToString().IsNullOrEmpty();
+    public bool FieldValueIsNullOrEmpty(Dictionary<string, object> collection, string valueName) => collection[valueName].ToString().IsNullOrEmpty();
     /// <inheritdoc/>
-    public bool TryCastToken<TCastType>(Dictionary<string, object> collection, string valueName, out TCastType outputValue)
+    public bool TryCastValue<TCastType>(Dictionary<string, object> collection, string valueName, out TCastType outputValue)
     {
       if (typeof(TCastType) == typeof(DateTime))
       {

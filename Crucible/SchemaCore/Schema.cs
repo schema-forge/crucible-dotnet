@@ -12,31 +12,31 @@ using static SchemaForge.Crucible.Constraints;
 
 TODO:
 
-Expose iteration over config tokens and more fine tuning functions, for the grim darkness of the future when Schemas are passed from program to program.
+Expose iteration over fields and more fine tuning functions, for the grim darkness of the future when Schemas are passed from program to program.
  
 */
 
 namespace SchemaForge.Crucible
 {
   /// <summary>
-  /// Schema objects contain a set of ConfigTokens that define each value that should be
+  /// Schema objects contain a set of <see cref="Field"/>s that define each value that should be
   /// contained in an object passed to its Validate method.
   /// </summary>
   public class Schema
   {
     /// <summary>
-    /// Set of token rules to use when a collection is passed to
+    /// Set of <see cref="Field"/>s to use when a collection is passed to
     /// <see cref="Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, bool)"/>.
     /// </summary>
-    private readonly Dictionary<string, ConfigToken> ConfigTokens = new Dictionary<string, ConfigToken>();
+    private readonly Dictionary<string, Field> Fields = new Dictionary<string, Field>();
     /// <summary>
     /// Contains all errors generated during validation and the associated
-    /// <see cref="ConfigToken.Description"/> of each token that was marked invalid.
+    /// <see cref="Field.Description"/> of each <see cref="Field"/> value that was marked invalid.
     /// </summary>
     public List<Error> ErrorList { get; } = new List<Error>();
 
     /// <summary>
-    /// Constructs an empty <see cref="Schema"/> with no <see cref="ConfigToken"/> objects.
+    /// Constructs an empty <see cref="Schema"/> with no <see cref="Field"/> objects.
     /// </summary>
     public Schema()
     {
@@ -44,135 +44,135 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Instantiates a <see cref="Schema"/> object with a set of <see cref="ConfigToken"/> objects to use.
+    /// Instantiates a <see cref="Schema"/> object with a set of <see cref="Field"/> objects to use.
     /// </summary>
-    /// <param name="tokens">Tokens to add to the token set.</param>
-    public Schema(params ConfigToken[] tokens)
+    /// <param name="fields"><see cref="Field"/>s to add to the <see cref="Field"/> set.</param>
+    public Schema(params Field[] fields)
     {
-      AddTokens(tokens);
+      AddFields(fields);
     }
 
     /// <summary>
-    /// Instantiates a <see cref="Schema"/> object with a set of <see cref="ConfigToken"/> objects to use.
+    /// Instantiates a <see cref="Schema"/> object with a set of <see cref="Field"/> objects to use.
     /// </summary>
-    /// <param name="tokens">Tokens to add to the token set.</param>
-    public Schema(IEnumerable<ConfigToken> tokens)
+    /// <param name="fields"><see cref="Field"/>s to add to the <see cref="Field"/> set.</param>
+    public Schema(IEnumerable<Field> fields)
     {
-      AddTokens(tokens);
+      AddFields(fields);
     }
 
     /// <summary>
-    /// Adds a token to the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects.
+    /// Adds a <see cref="Field"/> to the <see cref="Schema"/> object's set of <see cref="Field"/> objects.
     /// </summary>
-    /// <exception cref="ArgumentException">Throws ArgumentException if the Schema already contains a <see cref="ConfigToken"/> with the same name.</exception>
-    /// <param name="token">Token to add. The name must be different from all <see cref="ConfigToken"/> objects currently in the Schema.</param>
-    public void AddToken(ConfigToken token)
+    /// <exception cref="ArgumentException">Throws ArgumentException if the Schema already contains a <see cref="Field"/> with the same name.</exception>
+    /// <param name="field"><see cref="Field"/> to add. The name must be different from all <see cref="Field"/> objects currently in the Schema.</param>
+    public void AddField(Field field)
     {
-      if (ConfigTokens.ContainsKey(token.TokenName))
+      if (Fields.ContainsKey(field.FieldName))
       {
-        throw new ArgumentException($"ConfigToken set already contains a ConfigToken named {token.TokenName}");
+        throw new ArgumentException($"Field set already contains a Field named {field.FieldName}");
       }
-      ConfigTokens.Add(token.TokenName, token);
+      Fields.Add(field.FieldName, field);
     }
 
     /// <summary>
-    /// Adds a set of tokens to the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects.
+    /// Adds a set of <see cref="Field"/>s to the <see cref="Schema"/> object's set of <see cref="Field"/> objects.
     /// </summary>
-    /// <exception cref="ArgumentException">Throws ArgumentException if the Schema already contains a token with the same name as one or more of the tokens in <paramref name="tokens"/>.</exception>
-    /// <param name="tokens">Collection of tokens to add. There must be no tokens in the set that have a name identical to something already in the Schema's token set.</param>
-    public void AddTokens(IEnumerable<ConfigToken> tokens)
+    /// <exception cref="ArgumentException">Throws ArgumentException if the Schema already contains a <see cref="Field"/> with the same name as one or more of the <see cref="Field"/>s in <paramref name="fields"/>.</exception>
+    /// <param name="fields">Collection of <see cref="Field"/>s to add. There must be no <see cref="Field"/>s in the set that have a name identical to something already in the Schema's <see cref="Field"/> set.</param>
+    public void AddFields(IEnumerable<Field> fields)
     {
-      foreach (ConfigToken token in tokens)
+      foreach (Field field in fields)
       {
-        if (ConfigTokens.ContainsKey(token.TokenName))
+        if (Fields.ContainsKey(field.FieldName))
         {
-          throw new ArgumentException($"ConfigToken set already contains a ConfigToken named {token.TokenName}");
+          throw new ArgumentException($"Field set already contains a Field named {field.FieldName}");
         }
-        ConfigTokens.Add(token.TokenName, token);
+        Fields.Add(field.FieldName, field);
       }
     }
 
     /// <summary>
-    /// Removes one token from the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects.
+    /// Removes one <see cref="Field"/> from the <see cref="Schema"/> object's set of <see cref="Field"/> objects.
     /// </summary>
-    /// <exception cref="ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
-    /// <param name="tokenName">Name of the token to remove; corresponds to <see cref="ConfigToken.TokenName"/>.</param>
-    public void RemoveToken(string tokenName)
+    /// <exception cref="ArgumentException">Throws ArgumentException if attempting to remove a <see cref="Field"/> not already in the set.</exception>
+    /// <param name="fieldName">Name of the <see cref="Field"/> to remove; corresponds to <see cref="Field.FieldName"/>.</param>
+    public void RemoveField(string fieldName)
     {
-      if(ConfigTokens.ContainsKey(tokenName))
+      if(Fields.ContainsKey(fieldName))
       {
-        ConfigTokens.Remove(tokenName);
+        Fields.Remove(fieldName);
       }
       else
       {
-        throw new ArgumentException($"Attempted to remove token {tokenName} from Schema, but Schema did not contain {tokenName}");
+        throw new ArgumentException($"Attempted to remove field {fieldName} from Schema, but Schema did not contain {fieldName}");
       }
     }
 
     /// <summary>
-    /// Removes all tokens from the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects
-    /// where <see cref="ConfigToken.TokenName"/> is found in <paramref name="tokenNames"/>.
+    /// Removes all <see cref="Field"/>s from the <see cref="Schema"/> object's set of <see cref="Field"/> objects
+    /// where <see cref="Field.FieldName"/> is found in <paramref name="fieldNames"/>.
     /// </summary>
-    /// <exception cref="ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
-    /// <param name="tokenNames">List of token names to remove; corresponds to <see cref="ConfigToken.TokenName"/>.</param>
-    public void RemoveTokens(IEnumerable<string> tokenNames)
+    /// <exception cref="ArgumentException">Throws ArgumentException if attempting to remove a <see cref="Field"/> not already in the set.</exception>
+    /// <param name="fieldNames">List of <see cref="Field"/> names to remove; corresponds to <see cref="Field.FieldName"/>.</param>
+    public void RemoveFields(IEnumerable<string> fieldNames)
     {
-      foreach (string tokenName in tokenNames)
+      foreach (string fieldName in fieldNames)
       {
-        if (ConfigTokens.ContainsKey(tokenName))
+        if (Fields.ContainsKey(fieldName))
         {
-          ConfigTokens.Remove(tokenName);
+          Fields.Remove(fieldName);
         }
         else
         {
-          throw new ArgumentException($"Attempted to remove token {tokenName} from Schema, but Schema did not contain {tokenName}");
+          throw new ArgumentException($"Attempted to remove field {fieldName} from Schema, but Schema did not contain {fieldName}");
         }
       }
     }
 
     /// <summary>
-    /// Removes all tokens from the <see cref="Schema"/> object's set of <see cref="ConfigToken"/> objects
-    /// where <see cref="ConfigToken.TokenName"/> is found in <paramref name="tokenNames"/>.
+    /// Removes all <see cref="Field"/>s from the <see cref="Schema"/> object's set of <see cref="Field"/> objects
+    /// where <see cref="Field.FieldName"/> is found in <paramref name="fieldNames"/>.
     /// </summary>
-    /// <exception cref="ArgumentException">Throws ArgumentException if attempting to remove a token not already in the set.</exception>
-    /// <param name="tokenNames">List of token names to remove; corresponds to <see cref="ConfigToken.TokenName"/>.</param>
-    public void RemoveTokens(params string[] tokenNames)
+    /// <exception cref="ArgumentException">Throws ArgumentException if attempting to remove a <see cref="Field"/> not already in the set.</exception>
+    /// <param name="fieldNames">List of <see cref="Field"/> names to remove; corresponds to <see cref="Field.FieldName"/>.</param>
+    public void RemoveFields(params string[] fieldNames)
     {
-      foreach (string tokenName in tokenNames)
+      foreach (string fieldName in fieldNames)
       {
-        if (ConfigTokens.ContainsKey(tokenName))
+        if (Fields.ContainsKey(fieldName))
         {
-          ConfigTokens.Remove(tokenName);
+          Fields.Remove(fieldName);
         }
         else
         {
-          throw new ArgumentException($"Attempted to remove token {tokenName} from Schema, but Schema did not contain {tokenName}");
+          throw new ArgumentException($"Attempted to remove field {fieldName} from Schema, but Schema did not contain {fieldName}");
         }
       }
     }
 
     /// <summary>
-    /// Returns the number of tokens contained in the <see cref="Schema"/>.
+    /// Returns the number of <see cref="Field"/>s contained in the <see cref="Schema"/>.
     /// </summary>
-    /// <returns>The number of tokens contained in the <see cref="Schema"/>.</returns>
-    public int Count() => ConfigTokens.Count;
+    /// <returns>The number of <see cref="Field"/>s contained in the <see cref="Schema"/>.</returns>
+    public int Count() => Fields.Count;
 
     /// <summary>
-    /// Checks <paramref name="collection"/> using the set of <see cref="ConfigTokens"/>.
+    /// Checks <paramref name="collection"/> using the set of <see cref="Fields"/>.
     /// If name and type are provided, the message
     /// "Validation for <paramref name="name"/> failed."
     /// will be added to <see cref="ErrorList"/> on validation failure.
     /// </summary>
-    /// <param name="collection">Collection object to check using the <see cref="ConfigToken"/>
-    /// rules set in <see cref="ConfigTokens"/>.</param>
+    /// <param name="collection">Collection object to check using the <see cref="Field"/>
+    /// rules set in <see cref="Fields"/>.</param>
     /// <param name="translator"><see cref="ISchemaTranslator{TCollectionType}"/>
     /// used to interpret the collection for the <see cref="Schema"/> and extract values.</param>
     /// <param name="name">If name and type are provided, the message 
     /// "Validation for <paramref name="name"/> failed."
     /// will be added to ErrorList on validation failure.</param>
-    /// <param name="allowUnrecognized">If false, unrecognized tokens (that is,
-    /// tokens present in the object being validated but not in the Schea) will raise
-    /// a <see cref="Severity.Fatal"/> error. If true, unrecognized tokens will
+    /// <param name="allowUnrecognized">If false, unrecognized <see cref="Field"/>s (that is,
+    /// <see cref="Field"/>s present in the object being validated but not in the Schema) will raise
+    /// a <see cref="Severity.Fatal"/> error. If true, unrecognized <see cref="Field"/>s will
     /// raise a <see cref="Severity.Info"/> error.</param>
     public virtual List<Error> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, bool allowUnrecognized = false)
     {
@@ -183,64 +183,64 @@ namespace SchemaForge.Crucible
       {
         message = $"Validation for {name} failed.";
       }
-      foreach (ConfigToken token in ConfigTokens.Values)
+      foreach (Field field in Fields.Values)
       {
-        if (!translator.CollectionContains(collection, token.TokenName))
+        if (!translator.CollectionContains(collection, field.FieldName))
         {
-          if(token.Required)
+          if(field.Required)
           {
             if (message.IsNullOrEmpty())
             {
-              ErrorList.Add(new Error($"Input collection is missing required token {token.TokenName}\n{token.Description}"));
+              ErrorList.Add(new Error($"Input collection is missing required field {field.FieldName}\n{field.Description}"));
             }
             else
             {
-              ErrorList.Add(new Error($"Input {name} is missing required token {token.TokenName}\n{token.Description}"));
+              ErrorList.Add(new Error($"Input {name} is missing required field {field.FieldName}\n{field.Description}"));
             }
           }
-          else if(token.DefaultValue.Exists())
+          else if(field.DefaultValue.Exists())
           {
-            collection = token.InsertDefaultValue(collection, translator); // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
+            collection = field.InsertDefaultValue(collection, translator); // THIS MUTATES THE INPUT CONFIG. USE WITH CAUTION.
           }
           else
           {
-            ErrorList.Add(new Error($"Input collection is missing optional token {token.TokenName}",Severity.Info));
+            ErrorList.Add(new Error($"Input collection is missing optional field {field.FieldName}",Severity.Info));
           }
         }
-        else if (!token.Validate(collection,translator))
+        else if (!field.Validate(collection,translator))
         {
-          ErrorList.AddRange(token.ErrorList);
-          ErrorList.Add(new Error(token.Description,Severity.Info));
+          ErrorList.AddRange(field.ErrorList);
+          ErrorList.Add(new Error(field.Description,Severity.Info));
         }
       }
       /*
 
-      The decision to invalidate the config due to unrecognized tokens stems
-        from the possibility that an end user might misspell an optional token
+      The decision to invalidate the config due to unrecognized fields stems
+        from the possibility that an end user might misspell an optional field
         when forming their configuration file or request.
 
-      If the user includes an optional token with a typo in the token name, it
-        will not be flagged as a missing required token, but it will also not
-        have the effect the user intended from including the optional token.
+      If the user includes an optional field with a typo in the field name, it
+        will not be flagged as a missing required field, but it will also not
+        have the effect the user intended from including the optional field.
 
       Such a problem would be very frustrating and possibly difficult to debug;
         therefore, we invalidate the collection if there are any tokens that
-        are not accounted for in ConfigTokens by default.
+        are not accounted for in Fields by default.
 
       */
       List<string> collectionKeys = translator.GetCollectionKeys(collection);
-      HashSet<string> configTokenNames = ConfigTokens.Select(x => x.Value.TokenName).ToHashSet();
+      HashSet<string> fieldNames = Fields.Select(x => x.Value.FieldName).ToHashSet();
       foreach (string key in collectionKeys)
       {
-        if (!configTokenNames.Contains(key))
+        if (!fieldNames.Contains(key))
         {
           if (message.IsNullOrEmpty())
           {
-            ErrorList.Add(new Error($"Input object contains unrecognized token: {key}",allowUnrecognized?Severity.Info:Severity.Fatal));
+            ErrorList.Add(new Error($"Input object contains unrecognized field: {key}",allowUnrecognized?Severity.Info:Severity.Fatal));
           }
           else
           {
-            ErrorList.Add(new Error($"Input {name} contains unrecognized token: {key}", allowUnrecognized?Severity.Info:Severity.Fatal));
+            ErrorList.Add(new Error($"Input {name} contains unrecognized field: {key}", allowUnrecognized?Severity.Info:Severity.Fatal));
           }
         }
       }
@@ -267,9 +267,9 @@ namespace SchemaForge.Crucible
     public override string ToString()
     {
       JObject schemaJson = new JObject();
-      foreach(ConfigToken token in ConfigTokens.Values)
+      foreach(Field field in Fields.Values)
       {
-        schemaJson.Add(token.TokenName, token.JsonConstraint);
+        schemaJson.Add(field.FieldName, field.JsonConstraint);
       }
       return schemaJson.ToString();
     }
@@ -282,22 +282,25 @@ namespace SchemaForge.Crucible
     */
 
     /// <summary>
-    /// This method can be used to generate a new example request or configuration file with all the required and optional tokens along with their <see cref="ConfigToken.Description"/>.
+    /// This method can be used to generate a new example request or configuration file with all the required and optional <see cref="Field"/>s along with their <see cref="Field.Description"/>.
     /// </summary>
-    /// <returns>A <see cref="JObject"/> with all tokens from <see cref="ConfigTokens"/>, using <see cref="ConfigToken.TokenName"/> as the name and <see cref="ConfigToken.Description"/> as the property value.
-    /// If the Descriptions are well-written, the return value will serve as an excellent example for an end user to fill in.</returns>
+    /// <returns>A <see cref="JObject"/> with all <see cref="Field"/>s
+    /// from <see cref="Fields"/>, using <see cref="Field.FieldName"/>
+    /// as the name and <see cref="Field.Description"/> as the property value.
+    /// If the Descriptions are well-written, the return value will serve as an
+    /// excellent example for an end user to fill in.</returns>
     public JObject GenerateEmptyJson()
     {
       JObject newConfig = new JObject();
-      foreach (ConfigToken token in ConfigTokens.Values)
+      foreach (Field field in Fields.Values)
       {
-        if(token.Required)
+        if(field.Required)
         {
-          newConfig.Add(token.TokenName, token.Description);
+          newConfig.Add(field.FieldName, field.Description);
         }
         else
         {
-          newConfig.Add(token.TokenName, "Optional - " + token.Description);
+          newConfig.Add(field.FieldName, "Optional - " + field.Description);
         }
       }
       return newConfig;
@@ -310,9 +313,9 @@ namespace SchemaForge.Crucible
     public Schema Clone()
     {
       Schema newSchema = new Schema();
-      foreach(ConfigToken token in ConfigTokens.Values)
+      foreach(Field token in Fields.Values)
       {
-        newSchema.AddToken(token);
+        newSchema.AddField(token);
       }
       return newSchema;
     }

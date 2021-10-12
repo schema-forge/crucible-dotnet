@@ -20,7 +20,7 @@ namespace SchemaTests
     //public static void DeserializeTypeTests(bool expected, string typeString, JToken inputValue, params Constraint[] constraints)
     //{
     //  ConstraintContainer container = ShippingAndReceiving.DeserializeType(typeString, constraints);
-    //  List<Error> resultList = container.ApplyConstraints(inputValue,"Test Token");
+    //  List<Error> resultList = container.ApplyConstraints(inputValue,"Test Field");
     //  Assert.Equal(expected, !resultList.AnyFatal());
     //}
 
@@ -54,7 +54,7 @@ namespace SchemaTests
     //public static void GetConstraintsForTypeTests(bool expected, JToken inputValue, params Constraint[] constraints)
     //{
     //  ConstraintContainer container = ShippingAndReceiving.GetConstraintsForType<long>(constraints);
-    //  List<Error> resultList = container.ApplyConstraints(inputValue, "Test Token");
+    //  List<Error> resultList = container.ApplyConstraints(inputValue, "Test Field");
     //  Assert.Equal(expected, !resultList.AnyFatal());
     //}
 

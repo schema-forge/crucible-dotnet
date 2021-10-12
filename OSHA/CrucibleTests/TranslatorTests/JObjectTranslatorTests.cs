@@ -24,7 +24,7 @@ namespace TranslatorTests
     }
 
     /// <summary>
-    /// Tests the capabilites of TryCastToken using reflection.
+    /// Tests the capabilites of <see cref="JObjectTranslator.TryCastValue{TCastType}(JObject, string, out TCastType)"/> using reflection.
     /// </summary>
     /// <param name="expectedResult">Expected result of the conversion; true if conversion should succeed, false if it should not.</param>
     /// <param name="type">Full name of the type to attempt to which <paramref name="valueToConvert"/> will be cast.</param>
@@ -40,38 +40,38 @@ namespace TranslatorTests
     {
       JObjectTranslator testTranslator = new();
       SchemaForge.Crucible.Utilities.Conversions.RegisterDateTimeFormat("MMyyyydd"); // Add a new recognized DateTime format.
-      MethodInfo methodInfo = typeof(JObjectTranslator).GetMethod("TryCastToken");
+      MethodInfo methodInfo = typeof(JObjectTranslator).GetMethod("TryCastValue");
       MethodInfo genericMethodInfo = methodInfo.MakeGenericMethod(Type.GetType(type));
-      Assert.Equal(expectedResult, genericMethodInfo.Invoke(testTranslator, new object[] { new JObject() { { "TestToken", valueToConvert } }, "TestToken", null }));
+      Assert.Equal(expectedResult, genericMethodInfo.Invoke(testTranslator, new object[] { new JObject() { { "TestField", valueToConvert } }, "TestField", null }));
     }
 
     /// <summary>
-    /// Tests the <see cref="JObjectTranslator.TokenIsNullOrEmpty(JObject, string)"/>
+    /// Tests the <see cref="JObjectTranslator.FieldValueIsNullOrEmpty(JObject, string)"/>
     /// method.
     /// </summary>
-    /// <param name="expectedResult">Expected result of TokenIsNullOrEmpty.</param>
+    /// <param name="expectedResult">Expected result of FieldValueIsNullOrEmpty.</param>
     /// <param name="testValue">Value to evaluate.</param>
     [Theory]
     [InlineData(true,"   ")]
     [InlineData(false,"I'm here, I'm here!")]
-    public void TokenIsNullOrEmptyTest(bool expectedResult, string testValue)
+    public void FieldIsNullOrEmptyTest(bool expectedResult, string testValue)
     {
       JObjectTranslator testTranslator = new();
-      Assert.Equal(expectedResult,testTranslator.TokenIsNullOrEmpty(new JObject() { { "TestToken", testValue } }, "TestToken"));
+      Assert.Equal(expectedResult,testTranslator.FieldValueIsNullOrEmpty(new JObject() { { "TestField", testValue } }, "TestField"));
     }
 
     /// <summary>
-    /// Tests the <see cref="JObjectTranslator.InsertToken{TDefaultValueType}(JObject, string, TDefaultValueType)"/>
-    /// method by inserting a token.
+    /// Tests the <see cref="JObjectTranslator.InsertFieldValue{TDefaultValueType}(JObject, string, TDefaultValueType)"/>
+    /// method by inserting a field.
     /// </summary>
     [Fact]
-    public void InsertTokenTest()
+    public void InsertFieldTest()
     {
       JObjectTranslator testTranslator = new();
-      JObject testObject = new() { { "TestToken", "I'm a token!" } };
-      testTranslator.InsertToken(testObject, "Another token", "Me too!");
-      Assert.True(testObject.ContainsKey("Another token"));
-      Assert.True(testObject["Another token"].Value<string>() == "Me too!");
+      JObject testObject = new() { { "TestField", "I'm a field!" } };
+      testTranslator.InsertFieldValue(testObject, "Another field", "Me too!");
+      Assert.True(testObject.ContainsKey("Another field"));
+      Assert.True(testObject["Another field"].Value<string>() == "Me too!");
     }
 
     /// <summary>
@@ -82,9 +82,9 @@ namespace TranslatorTests
     public void CollectionContainsTest()
     {
       JObjectTranslator testTranslator = new();
-      JObject testObject = new() { { "TestToken", "I'm a token!" } };
-      Assert.True(testTranslator.CollectionContains(testObject, "TestToken"));
-      Assert.False(testTranslator.CollectionContains(testObject, "You thought it was a real token but it was me, Dio!"));
+      JObject testObject = new() { { "TestField", "I'm a field!" } };
+      Assert.True(testTranslator.CollectionContains(testObject, "TestField"));
+      Assert.False(testTranslator.CollectionContains(testObject, "You thought it was a real field but it was me, Dio!"));
     }
 
     /// <summary>
@@ -95,8 +95,8 @@ namespace TranslatorTests
     public void GetCollectionKeysTest()
     {
       JObjectTranslator testTranslator = new();
-      JObject testObject = new() { { "TestToken", "I'm a token!" }, { "SecondTestToken", "Me too!" },{ "ThirdTestToken", "Me... three?" } };
-      List<string> expectedList = new() { "TestToken", "SecondTestToken", "ThirdTestToken" };
+      JObject testObject = new() { { "TestField", "I'm a field!" }, { "SecondTestField", "Me too!" },{ "ThirdTestField", "Me... three?" } };
+      List<string> expectedList = new() { "TestField", "SecondTestField", "ThirdTestField" };
       List<string> resultList = testTranslator.GetCollectionKeys(testObject);
       output.WriteLine($"Expected list: {expectedList.Join(", ")}");
       output.WriteLine($"Actual list: {resultList.Join(", ")}");
@@ -112,8 +112,8 @@ namespace TranslatorTests
     public void CollectionValueToStringTest()
     {
       JObjectTranslator testTranslator = new();
-      JObject testObject = new() { { "TestToken", 38 } };
-      Assert.Equal("38",testTranslator.CollectionValueToString(testObject,"TestToken"));
+      JObject testObject = new() { { "TestField", 38 } };
+      Assert.Equal("38",testTranslator.CollectionValueToString(testObject,"TestField"));
     }
 
     /// <summary>

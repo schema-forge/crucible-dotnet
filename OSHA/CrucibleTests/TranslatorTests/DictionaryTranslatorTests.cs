@@ -25,7 +25,7 @@ namespace TranslatorTests
     }
 
     /// <summary>
-    /// Tests the capabilites of TryCastToken using reflection.
+    /// Tests the capabilites of <see cref="ISchemaTranslator{TCollectionType}.TryCastValue{TCastType}(TCollectionType, string, out TCastType)"/> using reflection.
     /// </summary>
     /// <param name="expectedResult">Expected result of the conversion; true if conversion should succeed, false if it should not.</param>
     /// <param name="type">Full name of the type to attempt to which <paramref name="valueToConvert"/> will be cast.</param>
@@ -40,44 +40,44 @@ namespace TranslatorTests
     public void ConversionTests(bool expectedResult, string type, string valueToConvert)
     {
       DictionaryTranslator testTranslator = new();
-      string testString = "{'TestToken':'" + valueToConvert + "'}";
+      string testString = "{'TestField':'" + valueToConvert + "'}";
       Dictionary<string, object> testDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(testString);
       SchemaForge.Crucible.Utilities.Conversions.RegisterDateTimeFormat("MMyyyydd"); // Add a new recognized DateTime format.
-      MethodInfo methodInfo = typeof(DictionaryTranslator).GetMethod("TryCastToken");
+      MethodInfo methodInfo = typeof(DictionaryTranslator).GetMethod("TryCastValue");
       MethodInfo genericMethodInfo = methodInfo.MakeGenericMethod(Type.GetType(type));
-      Assert.Equal(expectedResult, genericMethodInfo.Invoke(testTranslator, new object[] { testDictionary, "TestToken", null }));
+      Assert.Equal(expectedResult, genericMethodInfo.Invoke(testTranslator, new object[] { testDictionary, "TestField", null }));
     }
 
     /// <summary>
-    /// Tests the <see cref="DictionaryTranslator.TokenIsNullOrEmpty(JObject, string)"/>
+    /// Tests the <see cref="DictionaryTranslator.FieldIsNullOrEmpty(JObject, string)"/>
     /// method.
     /// </summary>
-    /// <param name="expectedResult">Expected result of TokenIsNullOrEmpty.</param>
+    /// <param name="expectedResult">Expected result of FieldIsNullOrEmpty.</param>
     /// <param name="testValue">Value to evaluate.</param>
     [Theory]
     [InlineData(true,"   ")]
     [InlineData(false,"I live!")]
-    public void TokenIsNullOrEmptyTest(bool expectedResult, string testValue)
+    public void FieldIsNullOrEmptyTest(bool expectedResult, string testValue)
     {
       DictionaryTranslator testTranslator = new();
-      string testString = "{'TestToken':'" + testValue + "'}";
+      string testString = "{'TestField':'" + testValue + "'}";
       Dictionary<string, object> testDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(testString);
-      Assert.Equal(expectedResult,testTranslator.TokenIsNullOrEmpty(testDictionary, "TestToken"));
+      Assert.Equal(expectedResult,testTranslator.FieldValueIsNullOrEmpty(testDictionary, "TestField"));
     }
 
     /// <summary>
-    /// Tests the <see cref="DictionaryTranslator.InsertToken{TDefaultValueType}(JObject, string, TDefaultValueType)"/>
-    /// method by inserting a token.
+    /// Tests the <see cref="DictionaryTranslator.InsertFieldValue{TDefaultValueType}(Dictionary{string, object}, string, TDefaultValueType)"/>
+    /// method by inserting a <see cref="Field"/>.
     /// </summary>
     [Fact]
-    public void InsertTokenTest()
+    public void InsertFieldTest()
     {
       DictionaryTranslator testTranslator = new();
-      string testString = "{'TestToken':'I am a token!'}";
+      string testString = "{'TestField':'I am a field!'}";
       Dictionary<string, object> testDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(testString);
-      testTranslator.InsertToken(testDictionary, "Another token", "Me too!");
-      Assert.True(testDictionary.ContainsKey("Another token"));
-      Assert.True(testDictionary["Another token"].ToString() == "Me too!");
+      testTranslator.InsertFieldValue(testDictionary, "Another field", "Me too!");
+      Assert.True(testDictionary.ContainsKey("Another field"));
+      Assert.True(testDictionary["Another field"].ToString() == "Me too!");
     }
 
     /// <summary>
@@ -88,10 +88,10 @@ namespace TranslatorTests
     public void CollectionContainsTest()
     {
       DictionaryTranslator testTranslator = new();
-      string testString = "{'TestToken':'I am a token!'}";
+      string testString = "{'TestField':'I am a field!'}";
       Dictionary<string, object> testDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(testString);
-      Assert.True(testTranslator.CollectionContains(testDictionary, "TestToken"));
-      Assert.False(testTranslator.CollectionContains(testDictionary, "You thought it was a real token but it was me, Dio!"));
+      Assert.True(testTranslator.CollectionContains(testDictionary, "TestField"));
+      Assert.False(testTranslator.CollectionContains(testDictionary, "You thought it was a real field but it was me, Dio!"));
     }
 
     /// <summary>
@@ -102,9 +102,9 @@ namespace TranslatorTests
     public void GetCollectionKeysTest()
     {
       DictionaryTranslator testTranslator = new();
-      string testString = "{'TestToken':'I am a token!','SecondTestToken':'Me too!','ThirdTestToken':'Me... three?'}";
+      string testString = "{'TestField':'I am a field!','SecondTestField':'Me too!','ThirdTestField':'Me... three?'}";
       Dictionary<string, object> testDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(testString);
-      List<string> expectedList = new() { "TestToken", "SecondTestToken", "ThirdTestToken" };
+      List<string> expectedList = new() { "TestField", "SecondTestField", "ThirdTestField" };
       List<string> resultList = testTranslator.GetCollectionKeys(testDictionary);
       output.WriteLine($"Expected list: {expectedList.Join(", ")}");
       output.WriteLine($"Actual list: {resultList.Join(", ")}");
@@ -120,9 +120,9 @@ namespace TranslatorTests
     public void CollectionValueToStringTest()
     {
       DictionaryTranslator testTranslator = new();
-      string testString = "{'TestToken':'38'}";
+      string testString = "{'TestField':'38'}";
       Dictionary<string, object> testDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(testString);
-      Assert.Equal("38",testTranslator.CollectionValueToString(testDictionary,"TestToken"));
+      Assert.Equal("38",testTranslator.CollectionValueToString(testDictionary,"TestField"));
     }
 
     /// <summary>

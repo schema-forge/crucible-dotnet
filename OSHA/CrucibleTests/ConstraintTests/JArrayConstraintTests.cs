@@ -33,11 +33,11 @@ namespace ConstraintTests
     [InlineData(false, "{'TestArray':['beat']}", 2)] // Too few.
     public void ConstrainCollectionCountLowerBoundTests(bool expectedResult, string constrainedJson, int lowerBound)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCountLowerBound<JArray>(lowerBound) });
-      testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      TestField = new Field<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCountLowerBound<JArray>(lowerBound) });
+      testResult = TestField.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -55,19 +55,19 @@ namespace ConstraintTests
     [InlineData(false, "{'TestArray':['doomed']}", 4, 2)] // Exception test.
     public void ConstrainCollectionCountTests(bool expectedResult, string constrainedJson, int lowerBound, int upperBound)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
       if (lowerBound > upperBound)
       {
-        Assert.Throws<ArgumentException>(() => new ConfigToken<JArray>("TestToken", "I don't want any more.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(lowerBound, upperBound) }));
+        Assert.Throws<ArgumentException>(() => new Field<JArray>("TestField", "I don't want any more.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(lowerBound, upperBound) }));
         return;
       }
       else
       {
-        testToken = new ConfigToken<JArray>("TestArray", "Humans require ice cream.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(lowerBound, upperBound) });
-        testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+        TestField = new Field<JArray>("TestArray", "Humans require ice cream.", new Constraint<JArray>[] { ConstrainCollectionCount<JArray>(lowerBound, upperBound) });
+        testResult = TestField.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       }
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -82,11 +82,11 @@ namespace ConstraintTests
     [InlineData(false, "{'TestArray':['beat','up','my','grandmother']}", 2)] // Too many.s
     public void ConstrainCollectionCountUpperBoundTests(bool expectedResult, string constrainedJson, int upperBound)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCountUpperBound<JArray>(upperBound) });
-      testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      TestField = new Field<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCountUpperBound<JArray>(upperBound) });
+      testResult = TestField.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -102,11 +102,11 @@ namespace ConstraintTests
     [InlineData(false, "{'TestArray':[1,'Cake and grief counseling will be available at the conclusion of the test.',15]}")]
     public void ApplyTypeConstraintsToAllArrayValuesTests(bool expectedResult, string constrainedJson)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "Where's David?", new Constraint<JArray>[] { ApplyConstraintsToJArray<int>() });
-      testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      TestField = new Field<JArray>("TestArray", "Where's David?", new Constraint<JArray>[] { ApplyConstraintsToJArray<int>() });
+      testResult = TestField.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -123,12 +123,12 @@ namespace ConstraintTests
     [InlineData(false, "{'TestArray':[1,'Please do not attempt to remove testing apparatus from the testing area.',15]}")]
     public void ApplyOneConstraintToAllArrayValuesTests(bool expectedResult, string constrainedJson)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "Everyone you love is gone.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainValueLowerBound(5)) });
-      testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      TestField = new Field<JArray>("TestArray", "Everyone you love is gone.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainValueLowerBound(5)) });
+      testResult = TestField.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine($"Input array: {string.Join(",", JObject.Parse(constrainedJson)["TestArray"])}");
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(expectedResult, testResult);
     }
 
@@ -144,12 +144,12 @@ namespace ConstraintTests
     [InlineData(false, "{'TestArray':['Invalid value!','A much calmer and more relaxed valid value.']}")] // First value fails both constraints.
     public void ApplyTwoConstraintsToAllArrayValuesTests(bool expectedResult, string constrainedJson)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
-      testToken = new ConfigToken<JArray>("TestArray", "There is only ice cream.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainStringLengthLowerBound(15), ForbidSubstrings("/", "?", "!")) });
-      testResult = testToken.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      TestField = new Field<JArray>("TestArray", "There is only ice cream.", new Constraint<JArray>[] { ApplyConstraintsToJArray(ConstrainStringLengthLowerBound(15), ForbidSubstrings("/", "?", "!")) });
+      testResult = TestField.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine($"Input array: {string.Join(",", JObject.Parse(constrainedJson)["TestArray"])}");
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
   }

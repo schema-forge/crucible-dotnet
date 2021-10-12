@@ -29,7 +29,7 @@ namespace SchemaForge.Crucible
     /// <returns>(bool, <typeparamref name="TCastType"/>) where bool indicates
     /// success of the cast and <typeparamref name="TCastType"/> is the cast
     /// value if successful, default otherwise.</returns>
-    public bool TryCastToken<TCastType>(TCollectionType collection, string valueName, out TCastType outputValue);
+    public bool TryCastValue<TCastType>(TCollectionType collection, string valueName, out TCastType outputValue);
 
     /// <summary>
     /// Extracts a value from <paramref name="collection"/> with the designation
@@ -38,7 +38,7 @@ namespace SchemaForge.Crucible
     /// <param name="collection">The collection from which to extract the value.</param>
     /// <param name="valueName">The string designator for the value to be extracted.</param>
     /// <returns>bool indicating if the value is null or empty.</returns>
-    public bool TokenIsNullOrEmpty(TCollectionType collection, string valueName);
+    public bool FieldValueIsNullOrEmpty(TCollectionType collection, string valueName);
 
     /// <summary>
     /// Inserts <paramref name="newValue"/> into <paramref name="collection"/>
@@ -50,7 +50,7 @@ namespace SchemaForge.Crucible
     /// <param name="valueName">The string designator for the value to be extracted.</param>
     /// <param name="newValue">The new value to be inserted.</param>
     /// <returns>New <typeparamref name="TCollectionType"/> with value inserted.</returns>
-    public TCollectionType InsertToken<TDefaultValueType>(TCollectionType collection, string valueName, TDefaultValueType newValue);
+    public TCollectionType InsertFieldValue<TDefaultValueType>(TCollectionType collection, string valueName, TDefaultValueType newValue);
 
     /// <summary>
     /// Searches <paramref name="collection"/> for a value with string designation <paramref name="valueName"/>
@@ -70,7 +70,7 @@ namespace SchemaForge.Crucible
     public string CollectionValueToString(TCollectionType collection, string valueName);
 
     /// <summary>
-    /// Extracts a list of all string representations of tokens inside <paramref name="collection"/>.
+    /// Extracts a list of all string representations of <see cref="Field"/>s inside <paramref name="collection"/>.
     /// </summary>
     /// <param name="collection">The collection from which to extract all keys.</param>
     /// <returns>List{string} containing all collection keys.</returns>
