@@ -19,7 +19,7 @@ namespace SchemaForge.Crucible.Utilities
   public class Conversions
   {
 
-    internal static readonly Dictionary<string, string> JsonTypeMap = new()
+    internal static readonly Dictionary<string, string> JsonTypeMap = new Dictionary<string, string>()
     {
       { "Byte", "Number" },
       { "SByte", "Number" },
@@ -45,7 +45,7 @@ namespace SchemaForge.Crucible.Utilities
     /// <summary>
     /// Holds the <see cref="DateTime"/> formats in <see cref="DateTime"/> Custom Format Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"
     /// </summary>
-    private static HashSet<string> DateTimeFormats = new();
+    private static HashSet<string> DateTimeFormats = new HashSet<string>();
 
     /// <summary>
     /// Checks whether or not <see cref="TryConvertDateTime(string, out DateTime)"/> recognizes the passed format.

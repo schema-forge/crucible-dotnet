@@ -164,7 +164,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         if (inputValue.CompareTo(lowerBound) < 0)
         {
           internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is less than enforced lower bound {lowerBound}"));
@@ -185,7 +185,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         if (inputValue.CompareTo(upperBound) > 0)
         {
           internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is greater than enforced upper bound {upperBound}"));
@@ -212,7 +212,7 @@ namespace SchemaForge.Crucible
       }
       List<Error> InnerMethod(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         if (inputValue.CompareTo(lowerBound) < 0 || inputValue.CompareTo(upperBound) > 0)
         {
           internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value must be greater than or equal to {lowerBound} and less than or equal to {upperBound}"));
@@ -241,7 +241,7 @@ namespace SchemaForge.Crucible
       }
       List<Error> InnerMethod(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         foreach ((TValueType, TValueType) domain in domains)
         {
           if (inputValue.CompareTo(domain.Item1) > 0 && inputValue.CompareTo(domain.Item2) < 0)
@@ -269,7 +269,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(string inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         if(inputValue.Contains('.'))
         {
           string[] splitDouble = inputValue.Split('.');
@@ -298,7 +298,7 @@ namespace SchemaForge.Crucible
       // Switch case to reroute types to appropriate overloads?
       List<Error> InnerMethod(T inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         if (!acceptableValues.Contains(inputValue)) //Returns false if inputValue is not in provided list
         {
           internalErrorList.Add(new Error($"Input {inputName} with value {inputValue} is not valid. Valid values: {string.Join(", ", acceptableValues)}")); // Tell the user what's wrong and how to fix it.
@@ -316,7 +316,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         foreach (Regex pattern in patterns)
         {
           if(pattern.Match(inputString).Length == inputString.Length)
@@ -346,7 +346,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         if (inputString.Length < lowerBound)
         {
           internalErrorList.Add(new Error($"Token {inputName} with value {inputString} must have a length of at least {lowerBound}. Actual length: {inputString.Length}"));
@@ -371,7 +371,7 @@ namespace SchemaForge.Crucible
       }
       List<Error> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         if (inputString.Length < lowerBound || inputString.Length > upperBound)
         {
           internalErrorList.Add(new Error($"Token {inputName} with value {inputString} must have a length of at least {lowerBound} and at most {upperBound}. Actual length: {inputString.Length}"));
@@ -390,7 +390,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         if (inputString.Length > upperBound)
         {
           internalErrorList.Add(new Error($"Token {inputName} with value {inputString} must have a length no longer than {upperBound}. Actual length: {inputString.Length}"));
@@ -414,7 +414,7 @@ namespace SchemaForge.Crucible
       }
       List<Error> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         bool containsForbidden = false;
         foreach (string forbiddenSubstring in forbiddenSubstrings)
         {
@@ -446,7 +446,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(T inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         int count = inputArray.Count();
         if (count < lowerBound)
         {
@@ -472,7 +472,7 @@ namespace SchemaForge.Crucible
       }
       List<Error> InnerMethod(T inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         int count = inputArray.Count();
         if (count < lowerBound || count > upperBound)
         {
@@ -492,7 +492,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(T inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         int count = inputArray.Count();
         if (count > upperBound)
         {
@@ -513,7 +513,7 @@ namespace SchemaForge.Crucible
     /// <returns>List{Error} generated by applying all of the constraints.</returns>
     private static List<Error> ApplyConstraintsHelper<TValueType>(JToken inputToken, string tokenName, Constraint<TValueType>[] constraints)
     {
-      List<Error> internalErrorList = new();
+      List<Error> internalErrorList = new List<Error>();
       try
       {
         if (constraints.Exists())
@@ -542,7 +542,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(JArray inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         foreach(JToken token in inputArray)
         {
           try
@@ -556,7 +556,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      JArray constraintArray = new();
+      JArray constraintArray = new JArray();
       constraintArray.Add(ConfigToken.GetConstraintObject(constraints));
       return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
@@ -582,7 +582,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(JArray inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         foreach (JToken token in inputArray)
         {
           try
@@ -603,7 +603,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      JArray constraintArray = new();
+      JArray constraintArray = new JArray();
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfTElementType1));
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfTElementType2));
       return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
@@ -635,7 +635,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(JArray inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         foreach (JToken token in inputArray)
         {
           try
@@ -663,7 +663,7 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      JArray constraintArray = new();
+      JArray constraintArray = new JArray();
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfT1));
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfT2));
       constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfT3));
@@ -684,7 +684,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(JObject inputJson, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         internalErrorList.AddRange(inputSchema.Validate(inputJson, new JObjectTranslator(), $"inner object {inputName}"));
         return internalErrorList;
       }
@@ -704,7 +704,7 @@ namespace SchemaForge.Crucible
     {
       List<Error> InnerMethod(JObject inputJson, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         string type = inputJson[typeToken].ToString();
         if(typeMap.ContainsKey(type))
         {
@@ -742,7 +742,7 @@ namespace SchemaForge.Crucible
       }
       List<Error> InnerMethod(string inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         foreach(string format in formats)
         {
           if(DateTime.TryParseExact(inputValue, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _))
@@ -785,7 +785,7 @@ namespace SchemaForge.Crucible
       }
       List<Error> InnerFunction(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<Error> internalErrorList = new List<Error>();
         List<Error>[] constraintResults = new List<Error>[constraints.Length];
         for (int i = constraints.Length; i-- > 0;)
         {
@@ -813,7 +813,7 @@ namespace SchemaForge.Crucible
         internalErrorList.Add(new Error($"{inputName} Any clause output complete.", Severity.Info));
         return internalErrorList;
       }
-      JObject constraintObject = new();
+      JObject constraintObject = new JObject();
       foreach (Constraint<TValueType> constraint in constraints)
       {
         constraintObject.Add(constraint.Property);

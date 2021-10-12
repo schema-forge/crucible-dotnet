@@ -66,7 +66,7 @@ namespace SchemaForge.Crucible
       }
       else
       {
-        List<int> argsInt = new();
+        List<int> argsInt = new List<int>();
         foreach (string stringArg in argString)
         {
           if (stringArg.Contains('.') && !EndsInZeroHelper(stringArg))
@@ -100,7 +100,7 @@ namespace SchemaForge.Crucible
       }
       else
       {
-        List<double> argsDouble = new();
+        List<double> argsDouble = new List<double>();
         foreach (string stringArg in argString)
         {
           if (double.TryParse(stringArg, out double doubleArg))
@@ -116,7 +116,7 @@ namespace SchemaForge.Crucible
       }
     }
 
-    private static readonly Dictionary<string, string> InternalTypeMap = new()
+    private static readonly Dictionary<string, string> InternalTypeMap = new Dictionary<string, string>()
     {
       { "Byte", "Integer" },
       { "SByte", "Integer" },
@@ -170,7 +170,7 @@ namespace SchemaForge.Crucible
     /// <returns>ConstraintContainer containing constraints of that particular type.</returns>
     public static Constraint<T>[] GetConstraintsForType<T>(Constraint[] constraints)
     {
-      List<Constraint<T>> constraintList = new();
+      List<Constraint<T>> constraintList = new List<Constraint<T>>();
       foreach (Constraint constraint in constraints)
       {
         constraintList.Add(new Constraint<T>((Func<T, string, List<Error>>)constraint.GetFunction(), constraint.Property));

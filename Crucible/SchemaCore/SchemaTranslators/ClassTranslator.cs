@@ -121,8 +121,8 @@ namespace SchemaForge.Crucible
             JObject Traverse(object localValue)
             {
               PropertyInfo[] properties = localValue.GetType().GetProperties();
-              JObject returnObject = new();
-              List<Type> rawAddTypes = new() { typeof(DateTime), typeof(string) };
+              JObject returnObject = new JObject();
+              List<Type> rawAddTypes = new List<Type>() { typeof(DateTime), typeof(string) };
               foreach (PropertyInfo property in properties)
               {
                 if (property.PropertyType.IsValueType || property.PropertyType.IsAssignableFrom(typeof(JToken)) || rawAddTypes.Contains(property.PropertyType))
@@ -180,7 +180,7 @@ namespace SchemaForge.Crucible
             }
             else
             {
-              List<object> returnValue = new();
+              List<object> returnValue = new List<object>();
               while ((bool)moveNext.Invoke(enumerator, null))
               {
                 returnValue.Add(current.GetValue(enumerator));
@@ -197,7 +197,7 @@ namespace SchemaForge.Crucible
               }
             }
           }
-          catch (Exception e)
+          catch
           {
             outputValue = default;
             return false;

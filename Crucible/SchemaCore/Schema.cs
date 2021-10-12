@@ -28,12 +28,12 @@ namespace SchemaForge.Crucible
     /// Set of token rules to use when a collection is passed to
     /// <see cref="Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, bool)"/>.
     /// </summary>
-    private readonly Dictionary<string, ConfigToken> ConfigTokens = new();
+    private readonly Dictionary<string, ConfigToken> ConfigTokens = new Dictionary<string, ConfigToken>();
     /// <summary>
     /// Contains all errors generated during validation and the associated
     /// <see cref="ConfigToken.Description"/> of each token that was marked invalid.
     /// </summary>
-    public List<Error> ErrorList { get; } = new();
+    public List<Error> ErrorList { get; } = new List<Error>();
 
     /// <summary>
     /// Constructs an empty <see cref="Schema"/> with no <see cref="ConfigToken"/> objects.
@@ -266,7 +266,7 @@ namespace SchemaForge.Crucible
     /// <returns>String version of a <see cref="JObject"/> representation of the current schema controller.</returns>
     public override string ToString()
     {
-      JObject schemaJson = new();
+      JObject schemaJson = new JObject();
       foreach(ConfigToken token in ConfigTokens.Values)
       {
         schemaJson.Add(token.TokenName, token.JsonConstraint);
@@ -288,7 +288,7 @@ namespace SchemaForge.Crucible
     /// If the Descriptions are well-written, the return value will serve as an excellent example for an end user to fill in.</returns>
     public JObject GenerateEmptyJson()
     {
-      JObject newConfig = new();
+      JObject newConfig = new JObject();
       foreach (ConfigToken token in ConfigTokens.Values)
       {
         if(token.Required)
@@ -309,7 +309,7 @@ namespace SchemaForge.Crucible
     /// <returns>A new <see cref="Schema"/> that is a clone of this <see cref="Schema"/>.</returns>
     public Schema Clone()
     {
-      Schema newSchema = new();
+      Schema newSchema = new Schema();
       foreach(ConfigToken token in ConfigTokens.Values)
       {
         newSchema.AddToken(token);

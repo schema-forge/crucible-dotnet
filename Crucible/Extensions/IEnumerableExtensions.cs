@@ -42,8 +42,7 @@ namespace SchemaForge.Crucible.Extensions
     /// <returns>Bool indicating if the error collection contains a fatal error.</returns>
     public static bool AnyFatal(this IEnumerable<Error> errorCollection)
     {
-      List<Severity> fatalTypes = new() { Severity.Fatal };
-      return errorCollection.Any(x => fatalTypes.Contains(x.ErrorSeverity));
+      return errorCollection.Any(x => x.ErrorSeverity == Severity.Fatal);
     }
 
     /// <summary>
