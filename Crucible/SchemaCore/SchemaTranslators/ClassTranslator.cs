@@ -182,7 +182,7 @@ namespace SchemaForge.Crucible
                 object innerConvertedValue = null;
                 object[] args = new object[] { currentValue, currentValueType, innerConvertedValue };
                 castToInnerType.Invoke(this, args);
-                add.Invoke(returnValue, new object[] { args[3] });
+                add.Invoke(returnValue, new object[] { args[2] });
               }
               outputValue = (TCastType)returnValue;
               return true;

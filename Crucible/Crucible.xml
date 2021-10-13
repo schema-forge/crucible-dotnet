@@ -351,8 +351,8 @@
         </member>
         <member name="T:SchemaForge.Crucible.SchemaError">
             <summary>
-            In SchemaForge, an Error is an object generated when using a Schema to validate another object.
-            When converted to a string, Errors show their severity and error message.
+            In SchemaForge, a <see cref="T:SchemaForge.Crucible.SchemaError"/> is an object generated when using a <see cref="T:SchemaForge.Crucible.Schema"/> to validate another object.
+            When converted to a string, <see cref="T:SchemaForge.Crucible.SchemaError"/>s show their severity and error message.
             </summary>
         </member>
         <member name="P:SchemaForge.Crucible.SchemaError.ErrorMessage">
@@ -1140,7 +1140,7 @@
             "Validation for <paramref name="name"/> failed."
             will be added to ErrorList on validation failure.</param>
             <param name="allowUnrecognized">If false, unrecognized <see cref="T:SchemaForge.Crucible.Field"/>s (that is,
-            <see cref="T:SchemaForge.Crucible.Field"/>s present in the object being validated but not in the Schema) will raise
+            <see cref="T:SchemaForge.Crucible.Field"/>s present in the object being validated but not in the <see cref="T:SchemaForge.Crucible.Schema"/>) will raise
             a <see cref="F:SchemaForge.Crucible.Severity.Fatal"/> error. If true, unrecognized <see cref="T:SchemaForge.Crucible.Field"/>s will
             raise a <see cref="F:SchemaForge.Crucible.Severity.Info"/> error.</param>
         </member>
@@ -1209,6 +1209,17 @@
         <member name="M:SchemaForge.Crucible.ClassTranslator.TryCastValue``1(System.Object,System.String,``0@)">
             <inheritdoc/>
         </member>
+        <member name="M:SchemaForge.Crucible.ClassTranslator.InnerTryCastValue``1(System.Object,System.Type,``0@)">
+            <summary>
+            Performs the bulk of TryCastValue's work. Included as a separate method
+            to allow calling itself when dealing with IEnumerables that need their constituent values casted to something else.
+            </summary>
+            <typeparam name="TCastType">Type to which <paramref name="value"/> will be cast.</typeparam>
+            <param name="value">Value to be converted.</param>
+            <param name="valueType">Original type of <paramref name="value"/>.</param>
+            <param name="outputValue"><paramref name="value"/> as <typeparamref name="TCastType"/></param>
+            <returns>Bool indicating if cast was successful.</returns>
+        </member>
         <member name="T:SchemaForge.Crucible.DictionaryTranslator">
             <summary>
             Interprets (string, object) <see cref="T:System.Collections.Generic.Dictionary`2"/> objects for a <see cref="T:SchemaForge.Crucible.Schema"/>
@@ -1260,10 +1271,10 @@
         <member name="M:SchemaForge.Crucible.ISchemaTranslator`1.FieldValueIsNullOrEmpty(`0,System.String)">
             <summary>
             Extracts a value from <paramref name="collection"/> with the designation
-            <paramref name="valueName"/> and determines whether this value is null or empty.
+            <paramref name="fieldName"/> and determines whether this value is null or empty.
             </summary>
             <param name="collection">The collection from which to extract the value.</param>
-            <param name="valueName">The string designator for the value to be extracted.</param>
+            <param name="fieldName">The key for the value to be extracted.</param>
             <returns>bool indicating if the value is null or empty.</returns>
         </member>
         <member name="M:SchemaForge.Crucible.ISchemaTranslator`1.InsertFieldValue``1(`0,System.String,``0)">
