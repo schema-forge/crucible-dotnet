@@ -23,7 +23,7 @@ namespace ConstraintTests
     }
 
     /// <summary>
-    /// Tests ApplySchema using a constructed schema with two required tokens.
+    /// Tests ApplySchema using a constructed schema with two required <see cref="Field"/>s.
     /// </summary>
     /// <param name="expectedResult">Expected validation result.</param>
     /// <param name="constrainedJson">Json that will be tested against the schema.</param>
@@ -31,21 +31,21 @@ namespace ConstraintTests
     [InlineData(false, "{}")]
     [InlineData(true, "{'Ripe':true,'MarketValue':3}")]
     [InlineData(false, "{'Ripe':'Brotato','MarketValue':3}")]
-    [InlineData(false, "{'Ripe':true,'MarketValue':3,'youthoughtitwasarealtokenbutitwasme':'DIO'}")]
-    public void ConstrainJsonTokensTests(bool expectedResult, string constrainedJson)
+    [InlineData(false, "{'Ripe':true,'MarketValue':3,'youthoughtitwasarealvaluebutitwasme':'DIO'}")]
+    public void ApplySchemaTests(bool expectedResult, string constrainedJson)
     {
-      Schema appliedSchema = new(new ConfigToken[] {
-            new ConfigToken<bool>("Ripe","Bool: Indicates whether or not the fruit is ripe."),
-            new ConfigToken<int>("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",new Constraint<int>[] { ConstrainValue((0,5),(10,15)) })
+      Schema appliedSchema = new(new Field[] {
+            new Field<bool>("Ripe","Bool: Indicates whether or not the fruit is ripe."),
+            new Field<int>("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",new Constraint<int>[] { ConstrainValue((0,5),(10,15)) })
           });
-      ConfigToken<JObject> testToken = new("FruitProperties", "Json: Additional properties of the fruit in question.", new Constraint<JObject>[] { ApplySchema(appliedSchema) });
-      bool testResult = testToken.Validate(JObject.Parse(constrainedJson),new JTokenTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Field<JObject> TestField = new("FruitProperties", "Json: Additional properties of the fruit in question.", new Constraint<JObject>[] { ApplySchema(appliedSchema) });
+      bool testResult = TestField.Validate(JObject.Parse(constrainedJson),new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
     /// <summary>
-    /// Tests ApplySchema using a constructed schema with two required tokens and one optional token.
+    /// Tests ApplySchema using a constructed schema with two required <see cref="Field"/>s and one optional <see cref="Field"/>.
     /// </summary>
     /// <param name="expectedResult">Expected validation result.</param>
     /// <param name="constrainedJson">Json that will be tested against the schema.</param>
@@ -55,17 +55,17 @@ namespace ConstraintTests
     [InlineData(false, "{'Ripe':'Brotato','MarketValue':3}")]
     [InlineData(true, "{'Ripe':true,'MarketValue':3,'Color':'bloo'}")]
     [InlineData(false, "{'Ripe':true,'MarketValue':3,'Color':['youthoughtitwasarealcolorbutitwasmeDIO']}")]
-    [InlineData(false, "{'Ripe':true,'MarketValue':3,'youthoughtitwasarealtokenbutitwasme':'DIO'}")]
-    public void ConstrainJsonTokensWithOptionalTests(bool expectedResult, string constrainedJson)
+    [InlineData(false, "{'Ripe':true,'MarketValue':3,'youthoughtitwasarealvaluebutitwasme':'DIO'}")]
+    public void ApplySchemaWithOptionalTests(bool expectedResult, string constrainedJson)
     {
-      Schema appliedSchema = new(new ConfigToken[] {
-            new ConfigToken<bool>("Ripe","Bool: Indicates whether or not the fruit is ripe."),
-            new ConfigToken<int>("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",new Constraint<int>[] { ConstrainValue((0,5),(10,15)) }),
-            new ConfigToken<string>("Color","String: Indicates the color of the fruit.",required: false)
+      Schema appliedSchema = new(new Field[] {
+            new Field<bool>("Ripe","Bool: Indicates whether or not the fruit is ripe."),
+            new Field<int>("MarketValue","Int: Average price of one pound of the fruit in question. Decimals are not allowed because everyone who appends .99 to their prices in order to trick the human brain is insubordinate and churlish.",new Constraint<int>[] { ConstrainValue((0,5),(10,15)) }),
+            new Field<string>("Color","String: Indicates the color of the fruit.",required: false)
           });
-      ConfigToken<JObject> testToken = new("FruitProperties", "Json: Additional properties of the fruit in question.", new Constraint<JObject>[] { ApplySchema(appliedSchema) });
-      bool testResult = testToken.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Field<JObject> TestField = new("FruitProperties", "Json: Additional properties of the fruit in question.", new Constraint<JObject>[] { ApplySchema(appliedSchema) });
+      bool testResult = TestField.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -84,28 +84,42 @@ namespace ConstraintTests
     [InlineData(false, "{}", 3, 1)] // Exception test.
     public void ConstrainCollectionCountTests(bool expectedResult, string constrainedJson, params int[] constraints)
     {
-      ConfigToken<JObject> testToken;
+      Field<JObject> TestField;
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken<JObject>("TestToken", "Eat the ice cream.", new Constraint<JObject>[] { ConstrainCollectionCountLowerBound<JObject>(constraints[0]) });
-        testResult = testToken.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
+        TestField = new Field<JObject>("TestField", "Eat the ice cream.", new Constraint<JObject>[] { ConstrainCollectionCountLowerBound<JObject>(constraints[0]) });
+        testResult = TestField.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken<JObject>("TestToken", "Eat the ice cream.", new Constraint<JObject>[] { ConstrainCollectionCount<JObject>(constraints[0], constraints[1]) }));
+          Assert.Throws<ArgumentException>(() => new Field<JObject>("TestField", "Eat the ice cream.", new Constraint<JObject>[] { ConstrainCollectionCount<JObject>(constraints[0], constraints[1]) }));
           return;
         }
         else
         {
-          testToken = new ConfigToken<JObject>("TestToken", "Eat the ice cream.", new Constraint<JObject>[] { ConstrainCollectionCount<JObject>(constraints[0], constraints[1]) });
-          testResult = testToken.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
+          TestField = new Field<JObject>("TestField", "Eat the ice cream.", new Constraint<JObject>[] { ConstrainCollectionCount<JObject>(constraints[0], constraints[1]) });
+          testResult = TestField.Validate(JObject.Parse(constrainedJson), new JTokenTranslator());
         }
       }
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
-      Assert.Equal(testResult, expectedResult);
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
+      Assert.Equal(expectedResult, testResult);
+    }
+
+    [Theory]
+    [InlineData(true,"{'SubObject':{'Type':'Fruit','Fruit':'Watermelon'}}")]
+    [InlineData(true, "{'SubObject':{'Type':'Luxury','Luxury Good':'Silk Napkins'}}")]
+    [InlineData(false, "{'SubObject':{'Type':'Fruit','Luxury Good':'Those Fake Sparkly Apples People Sometimes Put In Decorative Bowls'}}")]
+    [InlineData(false, "{'SubObject':{'Type':'Vegetable','Luxury Good':'Cabbage'}}")]
+    public void ApplySchemaByTypeTest(bool expectedResult, string testJson)
+    {
+      Schema fruitSchema = new(new Field<string>("Type","The type of this object."), new Field<string>("Fruit","A fruit name."));
+      Schema luxurySchema = new(new Field<string>("Type", "The type of this object."), new Field<string>("Luxury Good", "A fruit name."));
+      Dictionary<string, Schema> typeMap = new() { { "Fruit", fruitSchema }, { "Luxury", luxurySchema } };
+      Schema metaSchema = new(new Field<JObject>("SubObject", "Either a fruit or a luxury good. Choose wisely.",new Constraint<JObject>[] { ApplySchema("Type", typeMap) }));
+      Assert.Equal(expectedResult, !metaSchema.Validate(JObject.Parse(testJson), new JObjectTranslator()).AnyFatal());
     }
   }
 }

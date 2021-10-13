@@ -33,9 +33,9 @@ namespace ConstraintTests
     [InlineData(false, "HowDareYouFeedMeThisString", "AcceptableString", "AnotherAcceptableString", "YetAnotherAcceptableString")]
     public void AllowValuesInnerFunctionTest(bool expectedResult, string constrainedString, params string[] acceptableStrings)
     {
-      ConfigToken testToken = new ConfigToken<string>("TestToken", "There Is No String", new Constraint<string>[] { AllowValues(acceptableStrings) });
-      bool testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Field TestField = new Field<string>("TestField", "There Is No String", new Constraint<string>[] { AllowValues(acceptableStrings) });
+      bool testResult = TestField.Validate(new JValue(constrainedString), new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -49,9 +49,9 @@ namespace ConstraintTests
     [MemberData(nameof(ConstrainRegexTestData))]
     public void ConstrainStringRegexExactInnerFunctionTest(bool expectedResult, string constrainedString, params Regex[] patterns)
     {
-      ConfigToken testToken = new ConfigToken<string>("TestToken", "There is only yourself.", new Constraint<string>[] { ConstrainStringWithRegexExact(patterns) });
-      bool testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      Field TestField = new Field<string>("TestField", "There is only yourself.", new Constraint<string>[] { ConstrainStringWithRegexExact(patterns) });
+      bool testResult = TestField.Validate(new JValue(constrainedString), new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -79,11 +79,11 @@ namespace ConstraintTests
     [InlineData(false, "AnInsubordinateAndChurlishString", 33)]
     public void ConstrainStringLengthLowerBoundTest(bool expectedResult, string constrainedString, int lowerBound)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
-      testToken = new ConfigToken<string>("TestToken", "There Is No String", new Constraint<string>[] { ConstrainStringLengthLowerBound(lowerBound) });
-      testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      TestField = new Field<string>("TestField", "There Is No String", new Constraint<string>[] { ConstrainStringLengthLowerBound(lowerBound) });
+      testResult = TestField.Validate(new JValue(constrainedString), new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -100,19 +100,19 @@ namespace ConstraintTests
     [InlineData(false, "ThisTestWasWrittenIncorrectly", 8, 5)]
     public void ConstrainStringLengthTest(bool expectedResult, string constrainedString, int lowerBound, int upperBound)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
       if (lowerBound > upperBound)
       {
-        Assert.Throws<ArgumentException>(() => new ConfigToken<string>("TestToken", "Doomed", new Constraint<string>[] { ConstrainStringLength(lowerBound, upperBound) }));
+        Assert.Throws<ArgumentException>(() => new Field<string>("TestField", "Doomed", new Constraint<string>[] { ConstrainStringLength(lowerBound, upperBound) }));
         return;
       }
       else
       {
-        testToken = new ConfigToken<string>("TestToken", "Another Movie Quote", new Constraint<string>[] { ConstrainStringLength(lowerBound, upperBound) });
-        testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
+        TestField = new Field<string>("TestField", "Another Movie Quote", new Constraint<string>[] { ConstrainStringLength(lowerBound, upperBound) });
+        testResult = TestField.Validate(new JValue(constrainedString), new JTokenTranslator());
       }
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -127,12 +127,12 @@ namespace ConstraintTests
     [InlineData(false, "AnInsubordinateAndChurlishString", 3)]
     public void ConstrainStringLengthUpperBoundTest(bool expectedResult, string constrainedString, int upperBound)
     {
-      ConfigToken testToken;
+      Field TestField;
       output.WriteLine($"String length: {constrainedString.Length}\nUpper bound: {upperBound}");
       bool testResult;
-      testToken = new ConfigToken<string>("TestToken", "There Is No String", new Constraint<string>[] { ConstrainStringLengthUpperBound(upperBound) });
-      testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      TestField = new Field<string>("TestField", "There Is No String", new Constraint<string>[] { ConstrainStringLengthUpperBound(upperBound) });
+      testResult = TestField.Validate(new JValue(constrainedString), new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -154,14 +154,14 @@ namespace ConstraintTests
     {
       if (forbiddenSubstrings.Length > 0)
       {
-        ConfigToken<string> testToken = new("TestToken", "One Million Watts", new Constraint<string>[] { ForbidSubstrings(forbiddenSubstrings) });
-        bool testResult = testToken.Validate(new JValue(constrainedString), new JTokenTranslator());
-        output.WriteLine(string.Join('\n', testToken.ErrorList));
+        Field<string> TestField = new("TestField", "One Million Watts", new Constraint<string>[] { ForbidSubstrings(forbiddenSubstrings) });
+        bool testResult = TestField.Validate(new JValue(constrainedString), new JTokenTranslator());
+        output.WriteLine(string.Join('\n', TestField.ErrorList));
         Assert.Equal(testResult, expectedResult);
       }
       else
       {
-        Assert.Throws<ArgumentException>(() => new ConfigToken<string>("TestToken", "There Is No String", new Constraint<string>[] { ForbidSubstrings(forbiddenSubstrings) }));
+        Assert.Throws<ArgumentException>(() => new Field<string>("TestField", "There Is No String", new Constraint<string>[] { ForbidSubstrings(forbiddenSubstrings) }));
       }
     }
 

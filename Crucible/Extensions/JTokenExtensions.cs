@@ -100,7 +100,7 @@ namespace SchemaForge.Crucible.Extensions
           return false;
         }
       }
-      List<T> newList = new();
+      List<T> newList = new List<T>();
       foreach (JToken i in input)
       {
         if (TryConvert(i, out T output))

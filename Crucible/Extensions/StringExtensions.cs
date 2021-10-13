@@ -32,7 +32,7 @@ namespace SchemaForge.Crucible.Extensions
       {
         throw new ArgumentException("The search string must not be empty.");
       }
-      List<int> indexes = new();
+      List<int> indexes = new List<int>();
       int loc = 0;
       while (true)
       {
@@ -62,7 +62,7 @@ namespace SchemaForge.Crucible.Extensions
       {
         throw new ArgumentException("The string to search must not be empty.");
       }
-      List<int> indexes = new();
+      List<int> indexes = new List<int>();
       int loc = 0;
       while (true)
       {

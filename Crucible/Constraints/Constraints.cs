@@ -24,15 +24,15 @@ namespace SchemaForge.Crucible
     /// </summary>
     Standard,
     /// <summary>
-    /// Indicates that this constraint applies to the string version of the token value.
+    /// Indicates that this constraint applies to the string version of the <see cref="Field"/> value.
     /// </summary>
     Format
   }
 
   /// <summary>
-  /// An object that represents a rule that a token value must follow. When
-  /// passed to a <see cref="ConfigToken"/>, the passed Function
-  /// will be executed on the value corresponding with the <see cref="ConfigToken"/>.
+  /// An object that represents a rule that a <see cref="Field"/> value must follow. When
+  /// passed to a <see cref="Field"/>, the passed Function
+  /// will be executed on the value corresponding with the <see cref="Field"/>.
   /// </summary>
   public abstract class Constraint
   {
@@ -50,41 +50,41 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// List of errors generated during creation of the constraint.
     /// </summary>
-    public List<Error> Errors { get; protected set; }
+    public List<SchemaError> Errors { get; protected set; }
 
     /// <summary>
-    /// Gives the type of the constraint; <see cref="ConstraintType.Format"/> constraints are applied to the original token
+    /// Gives the type of the constraint; <see cref="ConstraintType.Format"/> constraints are applied to the original <see cref="Field"/>
     /// value cast to string while <see cref="ConstraintType.Standard"/> constraints are applied after casting to the required type.
     /// </summary>
     public ConstraintType ConstraintType { get; protected set; } = ConstraintType.Standard;
   }
 
   /// <summary>
-  /// An object that represents a rule that a token value must follow. When
-  /// passed to a <see cref="ConfigToken"/>, the <see cref="Function"/>
-  /// will be executed on the value corresponding with the ConfigToken.
+  /// An object that represents a rule that a <see cref="Field"/> value must follow. When
+  /// passed to a <see cref="Field"/>, the <see cref="Function"/>
+  /// will be executed on the value corresponding with the <see cref="Field"/>.
   /// </summary>
-  /// <typeparam name="TValueType">Type of the constraint; must match up with the <see cref="ConfigToken"/> to which the Constraint is being passed.</typeparam>
+  /// <typeparam name="TValueType">Type of the constraint; must match up with the <see cref="Field"/> to which the Constraint is being passed.</typeparam>
   public class Constraint<TValueType> : Constraint
   {
     /// <summary>
     /// Function that will be applied by the constraint if this is a <see cref="ConstraintType.Standard"/> constraint.
     /// </summary>
-    public Func<TValueType, string, List<Error>> Function { get; protected set; }
+    public Func<TValueType, string, List<SchemaError>> Function { get; protected set; }
 
     /// <summary>
     /// Function that will be applied by the constraint if this is a <see cref="ConstraintType.Format"/> constraint.
     /// </summary>
-    public Func<string, string, List<Error>> FormatFunction { get; protected set; }
+    public Func<string, string, List<SchemaError>> FormatFunction { get; protected set; }
 
     /// <summary>
-    /// Constraint objects represent a rule that is applied to a token; <paramref name="inputFunction"/> is the validation function that will be executed on the token's value while the <paramref name="inputProperty"/> is the representation of the constraint as a <see cref="JProperty"/>.
+    /// Constraint objects represent a rule that is applied to a <see cref="Field"/>; <paramref name="inputFunction"/> is the validation function that will be executed on the <see cref="Field"/>'s value while the <paramref name="inputProperty"/> is the representation of the constraint as a <see cref="JProperty"/>.
     /// </summary>
     /// <exception cref="ArgumentNullException">Throws <see cref="ArgumentNullException"/> if <paramref name="inputProperty"/> name or value is null or empty.</exception>
-    /// <param name="inputFunction">Function to execute from this <see cref="Constraint"/>. The TValueType in the function is the value being tested; the string is the name of the token in the object being tested.</param>
+    /// <param name="inputFunction">Function to execute from this <see cref="Constraint"/>. The TValueType in the function is the value being tested; the string is the name of the <see cref="Field"/> in the object being tested.</param>
     /// <param name="inputProperty">JProperty representation of this <see cref="Constraint"/>. Neither name nor value can be null or whitespace.</param>
     /// <param name="constraintErrors">Errors generated while creating this <see cref="Constraint"/>.</param>
-    public Constraint(Func<TValueType, string, List<Error>> inputFunction, JProperty inputProperty = null, List<Error> constraintErrors = null)
+    public Constraint(Func<TValueType, string, List<SchemaError>> inputFunction, JProperty inputProperty = null, List<SchemaError> constraintErrors = null)
     {
       if (inputProperty.Exists())
       {
@@ -99,7 +99,7 @@ namespace SchemaForge.Crucible
         Property = inputProperty;
       }
       Function = inputFunction;
-      Errors = constraintErrors.Exists() ? constraintErrors : new List<Error>();
+      Errors = constraintErrors.Exists() ? constraintErrors : new List<SchemaError>();
     }
 
     /// <summary>
@@ -110,11 +110,13 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <exception cref="ArgumentNullException">Throws <see cref="ArgumentNullException"/> if <paramref name="inputProperty"/>
     /// name or value is null or empty or if attempting to pass <see cref="ConstraintType.Standard"/> to this overload.</exception>
-    /// <param name="inputFunction">Function to execute from this constraint. The first string argument is the input data value cast to string; the second string argument is the name of the token in the object being tested.</param>
+    /// <param name="inputFunction">Function to execute from this constraint.
+    /// The first string argument is the input data value cast to string; the
+    /// second string argument is the name of the <see cref="Field"/> in the object being tested.</param>
     /// <param name="constraintType">Type of this constraint. Currently, only <see cref="ConstraintType.Format"/> is supported here.</param>
     /// <param name="inputProperty">JProperty representation of this constraint. Neither name nor value can be null or whitespace.</param>
     /// <param name="constraintErrors">Errors generated while creating this constraint.</param>
-    public Constraint(Func<string, string, List<Error>> inputFunction, ConstraintType constraintType, JProperty inputProperty = null, List<Error> constraintErrors = null)
+    public Constraint(Func<string, string, List<SchemaError>> inputFunction, ConstraintType constraintType, JProperty inputProperty = null, List<SchemaError> constraintErrors = null)
     {
       if (constraintType == ConstraintType.Format)
       {
@@ -132,7 +134,7 @@ namespace SchemaForge.Crucible
           Property = inputProperty;
         }
         FormatFunction = inputFunction;
-        Errors = constraintErrors.Exists() ? constraintErrors : new List<Error>();
+        Errors = constraintErrors.Exists() ? constraintErrors : new List<SchemaError>();
       }
       else if (constraintType == ConstraintType.Standard)
       {
@@ -162,12 +164,12 @@ namespace SchemaForge.Crucible
     /// <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is greater than the provided lower bound.</returns>
     public static Constraint<TValueType> ConstrainValueLowerBound<TValueType>(TValueType lowerBound) where TValueType : IComparable, IComparable<TValueType>, IFormattable
     {
-      List<Error> InnerMethod(TValueType inputValue, string inputName)
+      List<SchemaError> InnerMethod(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         if (inputValue.CompareTo(lowerBound) < 0)
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is less than enforced lower bound {lowerBound}"));
+          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputValue} is less than enforced lower bound {lowerBound}"));
           return internalErrorList;
         }
         return internalErrorList;
@@ -183,12 +185,12 @@ namespace SchemaForge.Crucible
     /// <returns>Function checking to ensure that the value of the passed <typeparamref name="TValueType"/> is greater than the provided lower bound.</returns>
     public static Constraint<TValueType> ConstrainValueUpperBound<TValueType>(TValueType upperBound) where TValueType : IComparable, IComparable<TValueType>, IFormattable
     {
-      List<Error> InnerMethod(TValueType inputValue, string inputName)
+      List<SchemaError> InnerMethod(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         if (inputValue.CompareTo(upperBound) > 0)
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is greater than enforced upper bound {upperBound}"));
+          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputValue} is greater than enforced upper bound {upperBound}"));
           return internalErrorList;
         }
         return internalErrorList;
@@ -210,12 +212,12 @@ namespace SchemaForge.Crucible
       {
         throw new ArgumentException($"ConstrainValue lower bound must be less than or equal to upper bound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
-      List<Error> InnerMethod(TValueType inputValue, string inputName)
+      List<SchemaError> InnerMethod(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         if (inputValue.CompareTo(lowerBound) < 0 || inputValue.CompareTo(upperBound) > 0)
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value must be greater than or equal to {lowerBound} and less than or equal to {upperBound}"));
+          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputValue} is invalid. Value must be greater than or equal to {lowerBound} and less than or equal to {upperBound}"));
           return internalErrorList;
         }
         return internalErrorList;
@@ -239,9 +241,9 @@ namespace SchemaForge.Crucible
           throw new ArgumentException($"Domain {domain} is invalid: Item 1 (lower bound) must be less than Item 2 (upper bound)");
         }
       }
-      List<Error> InnerMethod(TValueType inputValue, string inputName)
+      List<SchemaError> InnerMethod(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         foreach ((TValueType, TValueType) domain in domains)
         {
           if (inputValue.CompareTo(domain.Item1) > 0 && inputValue.CompareTo(domain.Item2) < 0)
@@ -249,7 +251,7 @@ namespace SchemaForge.Crucible
             return internalErrorList; // Return empty error list if a match is found.
           }
         }
-        internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}"));
+        internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputValue} is invalid. Value must fall within one of the following domains, inclusive: {string.Join(" ", domains.Select(x => x.ToString()))}"));
         return internalErrorList;
       }
       return new Constraint<TValueType>(InnerMethod, new JProperty(nameof(ConstrainValue), JArray.FromObject(domains.Select(x => "(" + x.Item1 + ", " + x.Item2 + ")"))));
@@ -267,15 +269,15 @@ namespace SchemaForge.Crucible
           IEquatable<TValueType>,
           IFormattable
     {
-      List<Error> InnerMethod(string inputValue, string inputName)
+      List<SchemaError> InnerMethod(string inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         if(inputValue.Contains('.'))
         {
           string[] splitDouble = inputValue.Split('.');
           if(splitDouble[1].Length > upperBound)
           {
-            internalErrorList.Add(new Error($"Token {inputName} with value {inputValue} is invalid. Value can have no more than {upperBound} digits after the decimal."));
+            internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputValue} is invalid. Value can have no more than {upperBound} digits after the decimal."));
           }
         }
         return internalErrorList;
@@ -296,27 +298,27 @@ namespace SchemaForge.Crucible
     {
       // TODO: Optimize collection for searching?
       // Switch case to reroute types to appropriate overloads?
-      List<Error> InnerMethod(T inputValue, string inputName)
+      List<SchemaError> InnerMethod(T inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         if (!acceptableValues.Contains(inputValue)) //Returns false if inputValue is not in provided list
         {
-          internalErrorList.Add(new Error($"Input {inputName} with value {inputValue} is not valid. Valid values: {string.Join(", ", acceptableValues)}")); // Tell the user what's wrong and how to fix it.
+          internalErrorList.Add(new SchemaError($"Input {inputName} with value {inputValue} is not valid. Valid values: {string.Join(", ", acceptableValues)}")); // Tell the user what's wrong and how to fix it.
         }
         return internalErrorList;
       }
       return new Constraint<T>(InnerMethod,new JProperty(nameof(AllowValues),JArray.FromObject(acceptableValues)));
     }
     /// <summary>
-    /// Ensures that the token value is an exact match to at least one of the passed <paramref name="patterns"/>.
+    /// Ensures that the <see cref="Field"/> value is an exact match to at least one of the passed <paramref name="patterns"/>.
     /// </summary>
     /// <param name="patterns">Valid Regex pattern(s) used in the returned function.</param>
     /// <returns>Function checking to ensure that the string value isan exact match to at least one of the passed <paramref name="patterns"/>.</returns>
     public static Constraint<string> ConstrainStringWithRegexExact(params Regex[] patterns)
     {
-      List<Error> InnerMethod(string inputString, string inputName)
+      List<SchemaError> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         foreach (Regex pattern in patterns)
         {
           if(pattern.Match(inputString).Length == inputString.Length)
@@ -326,11 +328,11 @@ namespace SchemaForge.Crucible
         }
         if (patterns.Length == 1)
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} is not an exact match to pattern {patterns[0]}"));
+          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} is not an exact match to pattern {patterns[0]}"));
         }
         else
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} is not an exact match to any pattern: {string.Join<Regex>(" ", patterns)}"));
+          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} is not an exact match to any pattern: {string.Join<Regex>(" ", patterns)}"));
         }
         return internalErrorList;
       }
@@ -344,12 +346,12 @@ namespace SchemaForge.Crucible
     /// <returns>Function that ensures the length of a string is at least <paramref name="lowerBound"/>.</returns>
     public static Constraint<string> ConstrainStringLengthLowerBound(int lowerBound)
     {
-      List<Error> InnerMethod(string inputString, string inputName)
+      List<SchemaError> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         if (inputString.Length < lowerBound)
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} must have a length of at least {lowerBound}. Actual length: {inputString.Length}"));
+          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} must have a length of at least {lowerBound}. Actual length: {inputString.Length}"));
         }
         return internalErrorList;
       }
@@ -369,12 +371,12 @@ namespace SchemaForge.Crucible
       {
         throw new ArgumentException($"{nameof(ConstrainStringLength)} lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: {upperBound}");
       }
-      List<Error> InnerMethod(string inputString, string inputName)
+      List<SchemaError> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         if (inputString.Length < lowerBound || inputString.Length > upperBound)
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} must have a length of at least {lowerBound} and at most {upperBound}. Actual length: {inputString.Length}"));
+          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} must have a length of at least {lowerBound} and at most {upperBound}. Actual length: {inputString.Length}"));
         }
         return internalErrorList;
       }
@@ -388,12 +390,12 @@ namespace SchemaForge.Crucible
     /// <returns>Function that ensures the length of a string is less than or equal to <paramref name="upperBound"/>.</returns>
     public static Constraint<string> ConstrainStringLengthUpperBound(int upperBound)
     {
-      List<Error> InnerMethod(string inputString, string inputName)
+      List<SchemaError> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         if (inputString.Length > upperBound)
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} must have a length no longer than {upperBound}. Actual length: {inputString.Length}"));
+          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} must have a length no longer than {upperBound}. Actual length: {inputString.Length}"));
         }
         return internalErrorList;
       }
@@ -401,7 +403,7 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
-    /// Ensures that the token's value does not contain any of <paramref name="forbiddenSubstrings"/>.
+    /// Ensures that the <see cref="Field"/>'s value does not contain any of <paramref name="forbiddenSubstrings"/>.
     /// </summary>
     /// <param name="forbiddenSubstrings">Strings that cannot occur in the input string.</param>
     /// <exception cref="ArgumentException">Throws ArgumentException if no strings are passed.</exception>
@@ -412,9 +414,9 @@ namespace SchemaForge.Crucible
       {
         throw new ArgumentException($"{nameof(ForbidSubstrings)} must have at least one parameter.");
       }
-      List<Error> InnerMethod(string inputString, string inputName)
+      List<SchemaError> InnerMethod(string inputString, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         bool containsForbidden = false;
         foreach (string forbiddenSubstring in forbiddenSubstrings)
         {
@@ -426,7 +428,7 @@ namespace SchemaForge.Crucible
         }
         if (containsForbidden)
         {
-          internalErrorList.Add(new Error($"Token {inputName} with value {inputString} contains at least one of a forbidden substring: {string.Join(" ", forbiddenSubstrings)}"));
+          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} contains at least one of a forbidden substring: {string.Join(" ", forbiddenSubstrings)}"));
         }
         return internalErrorList;
       }
@@ -444,13 +446,13 @@ namespace SchemaForge.Crucible
     /// <returns>Constraint ensuring an enumerable has at least <paramref name="lowerBound"/> items.</returns>
     public static Constraint<T> ConstrainCollectionCountLowerBound<T>(int lowerBound) where T: IEnumerable
     {
-      List<Error> InnerMethod(T inputArray, string inputName)
+      List<SchemaError> InnerMethod(T inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         int count = inputArray.Count();
         if (count < lowerBound)
         {
-          internalErrorList.Add(new Error($"Collection {inputName} contains {count} values, but must contain at least {lowerBound} values."));
+          internalErrorList.Add(new SchemaError($"Collection {inputName} contains {count} values, but must contain at least {lowerBound} values."));
         }
         return internalErrorList;
       }
@@ -470,13 +472,13 @@ namespace SchemaForge.Crucible
       {
         throw new ArgumentException($"{nameof(ConstrainCollectionCount)} lowerBound must be less than or equal to upperBound. Passed lowerBound: {lowerBound} Passed upperBound: " + upperBound);
       }
-      List<Error> InnerMethod(T inputArray, string inputName)
+      List<SchemaError> InnerMethod(T inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         int count = inputArray.Count();
         if (count < lowerBound || count > upperBound)
         {
-          internalErrorList.Add(new Error($"Collection {inputName} contains {count} values, but must contain between {lowerBound} and {upperBound} values."));
+          internalErrorList.Add(new SchemaError($"Collection {inputName} contains {count} values, but must contain between {lowerBound} and {upperBound} values."));
         }
         return internalErrorList;
       }
@@ -490,13 +492,13 @@ namespace SchemaForge.Crucible
     /// <returns>Constraint ensuring an enumerable has at least <paramref name="upperBound"/> items.</returns>
     public static Constraint<T> ConstrainCollectionCountUpperBound<T>(int upperBound) where T : IEnumerable
     {
-      List<Error> InnerMethod(T inputArray, string inputName)
+      List<SchemaError> InnerMethod(T inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         int count = inputArray.Count();
         if (count > upperBound)
         {
-          internalErrorList.Add(new Error($"Collection {inputName} contains {count} values, but must contain fewer than {upperBound} values."));
+          internalErrorList.Add(new SchemaError($"Collection {inputName} contains {count} values, but must contain fewer than {upperBound} values."));
         }
         return internalErrorList;
       }
@@ -506,14 +508,14 @@ namespace SchemaForge.Crucible
     /// <summary>
     /// Encapsulates the process of typechecking and applying all passed constraints.
     /// </summary>
-    /// <typeparam name="TValueType">Expected type of the token value being evaluated.</typeparam>
+    /// <typeparam name="TValueType">Expected type of the <see cref="Field"/> value being evaluated.</typeparam>
     /// <param name="inputToken">Input <see cref="JToken"/>.</param>
-    /// <param name="tokenName">Name of the input <see cref="JToken"/>.</param>
-    /// <param name="constraints">Constraints to apply to the input token.</param>
+    /// <param name="fieldName">Name of the input <see cref="JToken"/>.</param>
+    /// <param name="constraints">Constraints to apply to the input <see cref="Field"/> value.</param>
     /// <returns>List{Error} generated by applying all of the constraints.</returns>
-    private static List<Error> ApplyConstraintsHelper<TValueType>(JToken inputToken, string tokenName, Constraint<TValueType>[] constraints)
+    private static List<SchemaError> ApplyConstraintsHelper<TValueType>(JToken inputToken, string fieldName, Constraint<TValueType>[] constraints)
     {
-      List<Error> internalErrorList = new();
+      List<SchemaError> internalErrorList = new List<SchemaError>();
       try
       {
         if (constraints.Exists())
@@ -521,7 +523,7 @@ namespace SchemaForge.Crucible
           TValueType castValue = inputToken.Value<TValueType>();
           foreach (Constraint<TValueType> constraint in constraints)
           {
-            internalErrorList.AddRange(constraint.Function(castValue, tokenName));
+            internalErrorList.AddRange(constraint.Function(castValue, fieldName));
           }
         }
         return internalErrorList;
@@ -540,9 +542,9 @@ namespace SchemaForge.Crucible
     /// <returns>Function ensuring that all items in the target <see cref="JArray"/> are of type <typeparamref name="TElementType"/> and pass all provided constraints.</returns>
     public static Constraint<JArray> ApplyConstraintsToJArray<TElementType>(params Constraint<TElementType>[] constraints)
     {
-      List<Error> InnerMethod(JArray inputArray, string inputName)
+      List<SchemaError> InnerMethod(JArray inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         foreach(JToken token in inputArray)
         {
           try
@@ -551,13 +553,13 @@ namespace SchemaForge.Crucible
           }
           catch
           {
-            internalErrorList.Add(new Error($"Value {token} in array {inputName} is an incorrect type. Expected value type: {typeof(TElementType).Name}"));
+            internalErrorList.Add(new SchemaError($"Value {token} in array {inputName} is an incorrect type. Expected value type: {typeof(TElementType).Name}"));
           }
         }
         return internalErrorList;
       }
-      JArray constraintArray = new();
-      constraintArray.Add(ConfigToken.GetConstraintObject(constraints));
+      JArray constraintArray = new JArray();
+      constraintArray.Add(Field.GetConstraintObject(constraints));
       return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
 
@@ -566,23 +568,23 @@ namespace SchemaForge.Crucible
     /// <typeparamref name="TElementType1"/> or <typeparamref name="TElementType2"/>
     /// and applies all constraints on the type to which the element corresponds.
     /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraintsToJArray{string, int}
-    /// will NEVER treat the passed token as an int!
+    /// will NEVER treat the passed value as an int!
     /// </summary>
-    /// <typeparam name="TElementType1">First type to check against the token value
+    /// <typeparam name="TElementType1">First type to check against the <see cref="Field"/>'s value
     /// in the returned function.</typeparam>
-    /// <typeparam name="TElementType2">Second type to check against the token value
+    /// <typeparam name="TElementType2">Second type to check against the <see cref="Field"/>'s value
     /// in the returned function.</typeparam>
     /// <param name="constraintsIfTElementType1">Constraints to execute if cast to
     /// <typeparamref name="TElementType1"/> is successful.</param>
     /// <param name="constraintsIfTElementType2">Constraints to execute if cast to
     /// <typeparamref name="TElementType2"/> is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints.
-    /// Can be used in the constructor of a ConfigToken.</returns>
+    /// Can be used in the constructor of a <see cref="Field"/>.</returns>
     public static Constraint<JArray> ApplyConstraintsToJArray<TElementType1,TElementType2>(Constraint<TElementType1>[] constraintsIfTElementType1 = null, Constraint<TElementType2>[] constraintsIfTElementType2 = null)
     {
-      List<Error> InnerMethod(JArray inputArray, string inputName)
+      List<SchemaError> InnerMethod(JArray inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         foreach (JToken token in inputArray)
         {
           try
@@ -597,15 +599,15 @@ namespace SchemaForge.Crucible
             }
             catch
             {
-              internalErrorList.Add(new Error($"Token {token} in collection {inputName} is an incorrect type. Expected one of: {typeof(TElementType1).Name}, {typeof(TElementType2).Name}"));
+              internalErrorList.Add(new SchemaError($"Value {token} in collection {inputName} is an incorrect type. Expected one of: {typeof(TElementType1).Name}, {typeof(TElementType2).Name}"));
             }
           }
         }
         return internalErrorList;
       }
-      JArray constraintArray = new();
-      constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfTElementType1));
-      constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfTElementType2));
+      JArray constraintArray = new JArray();
+      constraintArray.Add(Field.GetConstraintObject(constraintsIfTElementType1));
+      constraintArray.Add(Field.GetConstraintObject(constraintsIfTElementType2));
       return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
 
@@ -615,13 +617,13 @@ namespace SchemaForge.Crucible
     /// or <typeparamref name="TElementType3"/>
     /// and applies all constraints on the type to which the element corresponds.
     /// WARNING: Casts will be attempted IN ORDER. For example, ApplyConstraintsToJArray{string, int}
-    /// will NEVER treat the passed token as an int!
+    /// will NEVER treat the passed value as an int!
     /// </summary>
-    /// <typeparam name="TElementType1">First type to check against the token value
+    /// <typeparam name="TElementType1">First type to check against the value value
     /// in the returned function.</typeparam>
-    /// <typeparam name="TElementType2">Second type to check against the token value
+    /// <typeparam name="TElementType2">Second type to check against the value value
     /// in the returned function.</typeparam>
-    /// <typeparam name="TElementType3">Third type to check against the token value
+    /// <typeparam name="TElementType3">Third type to check against the value value
     /// in the returned function.</typeparam>
     /// <param name="constraintsIfT1">Constraints to execute if cast to
     /// <typeparamref name="TElementType1"/> is successful.</param>
@@ -630,12 +632,12 @@ namespace SchemaForge.Crucible
     /// <param name="constraintsIfT3">Constraints to execute if cast to
     /// <typeparamref name="TElementType3"/> is successful.</param>
     /// <returns>Composite function of the type cast and all passed constraints.
-    /// Can be used in the constructor of a ConfigToken.</returns>
+    /// Can be used in the constructor of a <see cref="Field"/>.</returns>
     public static Constraint<JArray> ApplyConstraintsToJArray<TElementType1, TElementType2, TElementType3>(Constraint<TElementType1>[] constraintsIfT1 = null, Constraint<TElementType2>[] constraintsIfT2 = null, Constraint<TElementType3>[] constraintsIfT3 = null)
     {
-      List<Error> InnerMethod(JArray inputArray, string inputName)
+      List<SchemaError> InnerMethod(JArray inputArray, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         foreach (JToken token in inputArray)
         {
           try
@@ -656,17 +658,17 @@ namespace SchemaForge.Crucible
               }
               catch
               {
-                internalErrorList.Add(new Error($"Token {token} in collection {inputName} is an incorrect type. Expected one of: {typeof(TElementType1).Name}, {typeof(TElementType2).Name}, {typeof(TElementType3).Name}"));
+                internalErrorList.Add(new SchemaError($"Value {token} in collection {inputName} is an incorrect type. Expected one of: {typeof(TElementType1).Name}, {typeof(TElementType2).Name}, {typeof(TElementType3).Name}"));
               }
             }
           }
         }
         return internalErrorList;
       }
-      JArray constraintArray = new();
-      constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfT1));
-      constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfT2));
-      constraintArray.Add(ConfigToken.GetConstraintObject(constraintsIfT3));
+      JArray constraintArray = new JArray();
+      constraintArray.Add(Field.GetConstraintObject(constraintsIfT1));
+      constraintArray.Add(Field.GetConstraintObject(constraintsIfT2));
+      constraintArray.Add(Field.GetConstraintObject(constraintsIfT3));
       return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
 
@@ -675,19 +677,48 @@ namespace SchemaForge.Crucible
     #region JObject Constraints
 
     /// <summary>
-    /// Applies a <see cref="Schema"/> to the value of this token with the <see cref="Schema.Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, bool)"/> method.
+    /// Applies a <see cref="Schema"/> to the value of this <see cref="Field"/> with the
+    /// <see cref="Schema.Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, bool)"/> method.
     /// </summary>
-    /// <param name="inputSchema">Schema object to apply to the designated object.</param>
+    /// <param name="inputSchema"><see cref="Schema"/> object to apply to the designated object.</param>
     /// <returns>Function that adds all the <see cref="List{Error}"/> generated by using the <see cref="Schema"/> to validate the passed <see cref="JObject"/></returns>
     public static Constraint<JObject> ApplySchema(Schema inputSchema)
     {
-      List<Error> InnerMethod(JObject inputJson, string inputName)
+      List<SchemaError> InnerMethod(JObject inputJson, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         internalErrorList.AddRange(inputSchema.Validate(inputJson, new JObjectTranslator(), $"inner object {inputName}"));
         return internalErrorList;
       }
       return new Constraint<JObject>(InnerMethod, new JProperty(nameof(ApplySchema), inputSchema.ToString()));
+    }
+
+    /// <summary>
+    /// Applies a <see cref="Schema"/> to the value of this <see cref="Field"/> with the
+    /// <see cref="Schema.Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, bool)"/> method. 
+    /// This overload will apply a different <see cref="Schema"/> to sub-objects based on 
+    /// the value of the the specified <paramref name="typeField"/>.
+    /// </summary>
+    /// <param name="typeField">Name of the <see cref="Field"/> that indicates the <see cref="Schema"/> that should be used for this sub-object.</param>
+    /// <param name="typeMap">Dictionary mapping type names to the <see cref="Schema"/> that should be used for each type.</param>
+    /// <returns>Function that adds all the <see cref="List{Error}"/> generated by using the <see cref="Schema"/> to validate the passed <see cref="JObject"/></returns>
+    public static Constraint<JObject> ApplySchema(string typeField, Dictionary<string, Schema> typeMap)
+    {
+      List<SchemaError> InnerMethod(JObject inputJson, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        string type = inputJson[typeField].ToString();
+        if(typeMap.ContainsKey(type))
+        {
+          internalErrorList.AddRange(typeMap[type].Validate(inputJson, new JObjectTranslator(), $"inner object {inputName}"));
+        }
+        else
+        {
+          internalErrorList.Add(new SchemaError($"Type {type} is not a valid type for field {typeField}"));
+        }
+        return internalErrorList;
+      }
+      return new Constraint<JObject>(InnerMethod, new JProperty(nameof(ApplySchema), typeMap.ToString()));
     }
 
     #endregion
@@ -703,7 +734,7 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="formats">Formats in the <see cref="DateTime"/> Custom Format
     /// Specifier format; e.g., "yyyy-MM-dd", "ddd MMMM, yyyy"</param>
-    /// <returns>A function ensuring that the token value is in one of the provided
+    /// <returns>A function ensuring that the <see cref="Field"/>'s value is in one of the provided
     /// Custom Format Specifier <paramref name="formats"/>.</returns>
     public static Constraint<DateTime> ConstrainDateTimeFormat(params string[] formats)
     {
@@ -711,9 +742,9 @@ namespace SchemaForge.Crucible
       {
         Conversions.RegisterDateTimeFormat(format);
       }
-      List<Error> InnerMethod(string inputValue, string inputName)
+      List<SchemaError> InnerMethod(string inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
+        List<SchemaError> internalErrorList = new List<SchemaError>();
         foreach(string format in formats)
         {
           if(DateTime.TryParseExact(inputValue, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _))
@@ -722,7 +753,7 @@ namespace SchemaForge.Crucible
           }
         }
         
-        internalErrorList.Add(new Error($"Input {inputName} with value {inputValue} is not in a valid DateTime format. Valid DateTime formats: {formats.Join(", ")}"));
+        internalErrorList.Add(new SchemaError($"Input {inputName} with value {inputValue} is not in a valid DateTime format. Valid DateTime formats: {formats.Join(", ")}"));
 
         return internalErrorList;
       }
@@ -735,9 +766,9 @@ namespace SchemaForge.Crucible
 
     /// <summary>
     /// A logic constraint that will check the passed value against all
-    /// <paramref name="constraints"/> and return the <see cref="List{T}"/> of <see cref="Error"/>
+    /// <paramref name="constraints"/> and return the <see cref="List{T}"/> of <see cref="SchemaError"/>
     /// of the first constraint that does not generate fatal errors, or the
-    /// <see cref="List{T}"/> of <see cref="Error"/> of all constraints combined if none pass.
+    /// <see cref="List{T}"/> of <see cref="SchemaError"/> of all constraints combined if none pass.
     /// </summary>
     /// <typeparam name="TValueType">Value type that will be checked with
     /// constraints applying to said value type.</typeparam>
@@ -745,7 +776,7 @@ namespace SchemaForge.Crucible
     /// the value will be considered valid.</param>
     /// <exception cref="ArgumentException">Throws <see cref="ArgumentException"/>
     /// if fewer than two constraints are passed.</exception>
-    /// <returns>A function that returns the <see cref="List{T}"/> of <see cref="Error"/> resulting
+    /// <returns>A function that returns the <see cref="List{T}"/> of <see cref="SchemaError"/> resulting
     /// from checking whether or not the passed <typeparamref name="TValueType"/> passes
     /// at least one of <paramref name="constraints"/></returns>
     public static Constraint<TValueType> MatchAnyConstraint<TValueType>(params Constraint<TValueType>[] constraints)
@@ -754,13 +785,13 @@ namespace SchemaForge.Crucible
       {
         throw new ArgumentException($"{nameof(MatchAnyConstraint)} requires at least 2 constraint arguments.");
       }
-      List<Error> InnerFunction(TValueType inputValue, string inputName)
+      List<SchemaError> InnerFunction(TValueType inputValue, string inputName)
       {
-        List<Error> internalErrorList = new();
-        List<Error>[] constraintResults = new List<Error>[constraints.Length];
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        List<SchemaError>[] constraintResults = new List<SchemaError>[constraints.Length];
         for (int i = constraints.Length; i-- > 0;)
         {
-          List<Error> constraintErrorList = constraints[i].Function(inputValue, inputName);
+          List<SchemaError> constraintErrorList = constraints[i].Function(inputValue, inputName);
           if (constraintErrorList.AnyFatal())
           {
             constraintResults[i] = constraintErrorList;
@@ -769,22 +800,22 @@ namespace SchemaForge.Crucible
           {
             if (constraintErrorList.Count > 0)
             {
-              internalErrorList.Add(new Error($"{inputName} passed at least one constraint in Any clause, but generated non-fatal errors.", Severity.Info));
+              internalErrorList.Add(new SchemaError($"{inputName} passed at least one constraint in Any clause, but generated non-fatal errors.", Severity.Info));
               internalErrorList.AddRange(constraintErrorList);
-              internalErrorList.Add(new Error($"{inputName} Any clause output complete.", Severity.Info));
+              internalErrorList.Add(new SchemaError($"{inputName} Any clause output complete.", Severity.Info));
             }
             return internalErrorList;
           }
         }
-        internalErrorList.Add(new Error($"{inputName} Any clause generated fatal errors. At least one set of errors must be avoided.", Severity.Info));
+        internalErrorList.Add(new SchemaError($"{inputName} Any clause generated fatal errors. At least one set of errors must be avoided.", Severity.Info));
         for(int i=constraintResults.Length;i-- > 0;)
         {
           internalErrorList.AddRange(constraintResults[i]);
         }
-        internalErrorList.Add(new Error($"{inputName} Any clause output complete.", Severity.Info));
+        internalErrorList.Add(new SchemaError($"{inputName} Any clause output complete.", Severity.Info));
         return internalErrorList;
       }
-      JObject constraintObject = new();
+      JObject constraintObject = new JObject();
       foreach (Constraint<TValueType> constraint in constraints)
       {
         constraintObject.Add(constraint.Property);

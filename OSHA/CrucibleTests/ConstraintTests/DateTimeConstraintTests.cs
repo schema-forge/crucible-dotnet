@@ -35,7 +35,7 @@ namespace ConstraintTests
     {
       Constraint<DateTime> testConstraint = ConstrainDateTimeFormat(formatString);
 
-      Assert.Equal(expectedResult, !testConstraint.FormatFunction(dateString, "Test Token").AnyFatal());
+      Assert.Equal(expectedResult, !testConstraint.FormatFunction(dateString, "Test Field").AnyFatal());
     }
   }
 }

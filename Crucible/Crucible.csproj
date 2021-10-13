@@ -1,10 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
+
+      <files>
+          <file src="bin\Release\net5.0\Crucible.dll" target="lib\net5.0\Crucible.dll" />
+          <file src="bin\Release\netcoreapp3.1\Crucible.dll" target="lib\netcoreapp3.1\Crucible.dll" />
+      </files>
     <RootNamespace>SchemaForge.Crucible</RootNamespace>
     <AnalysisLevel>latest</AnalysisLevel>
-    <Version>0.0.2-b</Version>
+    <Version>0.0.3</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Company>SchemaForge</Company>
@@ -16,14 +21,31 @@
     <PackageTags>api, request validation, schema creation</PackageTags>
     <Description>Crucible is the primary consumable library of the SchemaForge ecosystem. It exposes Schema creation and validation.
 
-Schemas are objects used to define the structure and rules of a collection file. They hold lists of tokens, each of which defines the type of data the token must contain and all of the rules a token must follow in order to be considered valid.
+Schemas are objects used to define the structure and rules of a collection file. They hold lists of fields, each of which defines the type of data the field must contain and all of the rules a field must follow in order to be considered valid.
 
 The goal is to centralize all validation for incoming web requests or configuration files, providing an easy-to-use interface that generates helpful and specific error messages that can be passed along to end users interacting with a service that incorporates Crucible.</Description>
     <Authors>SchemaForge</Authors>
     <Copyright>2021, SchemaForge</Copyright>
-    <PackageReleaseNotes>Alpha 0.0.2-b- Fixed various XML documentation issues and included XML documentation in Nuget package.
+    <PackageReleaseNotes>Alpha 0.0.3:
 
-Alpha 0.0.1- initial release. Includes Schema objects, JObjectTranslator for applying Schema objects to Json, ConfigToken objects to define tokens, Constraint objects to define rules that the values of tokens must follow, and Error objects to contain information about issues found during Schema validation.</PackageReleaseNotes>
+[BREAKING CHANGES]
+
+Renamed ConfigToken to Field.
+Renamed Error to SchemaError.
+
+[NEW FEATURES]
+
+Added DictionaryTranslator for Dictionary&lt;string, object&gt; objects and ClassTranslator for .NET classes that use property names as field names. Added overload to ApplySchema that allows different Schemas to be applied to sub-objects depending on a designated "type" of the sub-object.
+
+Added support for .NET Core 3.1.
+
+----------
+
+Alpha 0.0.2-b- Fixed various XML documentation issues and included XML documentation in Nuget package.
+
+----------
+
+Alpha 0.0.1- initial release. Includes Schema objects, JObjectTranslator for applying Schema objects to Json, ConfigToken objects to define fields, Constraint objects to define rules that the values of fields must follow, and Error objects to contain information about issues found during Schema validation.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup>

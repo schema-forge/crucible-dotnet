@@ -37,27 +37,27 @@ namespace ConstraintTests
     [InlineData(false, 15, 7, 3)]
     public void ConstrainApplyInnerFunctionIntTests(bool expectedResult, int constrainedValue, params int[] constraints)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken<int>("TestToken", "Angry String", new Constraint<int>[] { ConstrainValueLowerBound(constraints[0]) });
-        testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
+        TestField = new Field<int>("TestField", "Angry String", new Constraint<int>[] { ConstrainValueLowerBound(constraints[0]) });
+        testResult = TestField.Validate(new JValue(constrainedValue), new JTokenTranslator());
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken<int>("TestToken", "Relaxed String", new Constraint<int>[] { ConstrainValue(constraints[0], constraints[1]) }));
+          Assert.Throws<ArgumentException>(() => new Field<int>("TestField", "Relaxed String", new Constraint<int>[] { ConstrainValue(constraints[0], constraints[1]) }));
           return;
         }
         else
         {
-          testToken = new ConfigToken<int>("TestToken", "Nervous String", new Constraint<int>[] { ConstrainValue(constraints[0], constraints[1]) });
-          testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
+          TestField = new Field<int>("TestField", "Nervous String", new Constraint<int>[] { ConstrainValue(constraints[0], constraints[1]) });
+          testResult = TestField.Validate(new JValue(constrainedValue), new JTokenTranslator());
         }
       }
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(expectedResult, testResult);
     }
 
@@ -74,7 +74,7 @@ namespace ConstraintTests
     public void ConstrainUpperBoundTests(bool expectedResult, int constrainedValue, int constraint)
     {
       Constraint<int> newConstraint = ConstrainValueUpperBound(constraint);
-      List<Error> testResult = newConstraint.Function(constrainedValue, "Test Value");
+      List<SchemaError> testResult = newConstraint.Function(constrainedValue, "Test Value");
       output.WriteLine(string.Join("\n", testResult));
       Assert.Equal(expectedResult, !testResult.AnyFatal());
     }
@@ -94,27 +94,27 @@ namespace ConstraintTests
     [InlineData(false, 15.5, 3.3, 3.2)]
     public void ConstrainValueApplyInnerFunctionDoubleTests(bool expectedResult, double constrainedValue, params double[] constraints)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
       if (constraints.Length == 1)
       {
-        testToken = new ConfigToken<double>("TestToken", "Deja Vu", new Constraint<double>[] { ConstrainValueLowerBound(constraints[0]) });
-        testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
+        TestField = new Field<double>("TestField", "Deja Vu", new Constraint<double>[] { ConstrainValueLowerBound(constraints[0]) });
+        testResult = TestField.Validate(new JValue(constrainedValue), new JTokenTranslator());
       }
       else
       {
         if (constraints[0] > constraints[1])
         {
-          Assert.Throws<ArgumentException>(() => new ConfigToken<double>("TestToken", "I think", new Constraint<double>[] { ConstrainValue(constraints[0], constraints[1]) }));
+          Assert.Throws<ArgumentException>(() => new Field<double>("TestField", "I think", new Constraint<double>[] { ConstrainValue(constraints[0], constraints[1]) }));
           return;
         }
         else
         {
-          testToken = new ConfigToken<double>("TestToken", "we've done this before", new Constraint<double>[] { ConstrainValue(constraints[0], constraints[1]) });
-          testResult = testToken.Validate(new JValue(constrainedValue), new JTokenTranslator());
+          TestField = new Field<double>("TestField", "we've done this before", new Constraint<double>[] { ConstrainValue(constraints[0], constraints[1]) });
+          testResult = TestField.Validate(new JValue(constrainedValue), new JTokenTranslator());
         }
       }
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -128,11 +128,11 @@ namespace ConstraintTests
     [MemberData(nameof(ConstrainValueIntDomainData))]
     public void ConstrainValueApplyInnerFunctionIntDomainTests(bool expectedResult, int constrainedValue, params (int, int)[] domains)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
-      testToken = new ConfigToken<int>("TestToken", "Deja Vu", new Constraint<int>[] { ConstrainValue(domains) });
-      testResult = testToken.Validate(new JValue(constrainedValue),new JTokenTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      TestField = new Field<int>("TestField", "Deja Vu", new Constraint<int>[] { ConstrainValue(domains) });
+      testResult = TestField.Validate(new JValue(constrainedValue),new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -161,11 +161,11 @@ namespace ConstraintTests
     [MemberData(nameof(ConstrainValueDoubleDomainData))]
     public void ConstrainValueApplyInnerFunctionDoubleDomainTests(bool expectedResult, int constrainedValue, params (double, double)[] domains)
     {
-      ConfigToken testToken;
+      Field TestField;
       bool testResult;
-      testToken = new ConfigToken<double>("TestToken", "Deja Vu", new Constraint<double>[] { ConstrainValue(domains) });
-      testResult = testToken.Validate(new JValue(constrainedValue),new JTokenTranslator());
-      output.WriteLine(string.Join('\n', testToken.ErrorList));
+      TestField = new Field<double>("TestField", "Deja Vu", new Constraint<double>[] { ConstrainValue(domains) });
+      testResult = TestField.Validate(new JValue(constrainedValue),new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
     }
 
@@ -187,7 +187,7 @@ namespace ConstraintTests
     /// Ensures that passing a domain with a higher upper bound than a lower bound will throw an exception. Invalid inputs will be punished.
     /// </summary>
     [Fact]
-    public void ConstrainNumericDomain_InvalidBounds() => Assert.Throws<ArgumentException>(() => new ConfigToken<int>("TestToken", "Doomed Token", new Constraint<int>[] { ConstrainValue((15, 13)) }));
+    public void ConstrainNumericDomain_InvalidBounds() => Assert.Throws<ArgumentException>(() => new Field<int>("TestField", "Doomed Value", new Constraint<int>[] { ConstrainValue((15, 13)) }));
 
     /// <summary>
     /// Ensures that the JProperty passed back from the constraint function with lower bound is as expected.
@@ -251,7 +251,7 @@ namespace ConstraintTests
       Constraint<double> testConstraint = ConstrainDigits<double>(arg);
       JProperty expectedProperty = new("ConstrainDigits", arg);
       Assert.Equal(expectedProperty, testConstraint.Property);
-      Assert.Equal(expected, !testConstraint.FormatFunction(constrainedValue.ToString(), "Test Token").AnyFatal());
+      Assert.Equal(expected, !testConstraint.FormatFunction(constrainedValue.ToString(), "Test Field").AnyFatal());
     }
   }
 }

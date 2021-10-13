@@ -17,28 +17,8 @@ namespace SchemaForge.Crucible
   /// </summary>
   public class JObjectTranslator : ISchemaTranslator<JObject>
   {
-    readonly Dictionary<string, string> TypeMap = new()
-    {
-      { "Byte", "Number" },
-      { "SByte", "Number" },
-      { "Single", "Number" },
-      { "Double", "Number" },
-      { "Decimal", "Number" },
-      { "Int16", "Number" },
-      { "UInt16", "Number" },
-      { "Int32", "Number" },
-      { "UInt32", "Number" },
-      { "Int64", "Number" },
-      { "UInt64", "Number" },
-      { "JObject", "Object" },
-      { "Boolean", "Boolean" },
-      { "JArray", "Array" },
-      { "DateTime", "String" },
-      { "String", "String" },
-      { "Char", "String" }
-    };
     /// <inheritdoc/>
-    public bool TryCastToken<TCastType>(JObject collection, string valueName, out TCastType outputValue)
+    public bool TryCastValue<TCastType>(JObject collection, string valueName, out TCastType outputValue)
     {
       if (typeof(TCastType) == typeof(DateTime))
       {
@@ -63,9 +43,9 @@ namespace SchemaForge.Crucible
       }
     }
     /// <inheritdoc/>
-    public bool TokenIsNullOrEmpty(JObject collection, string valueName) => collection[valueName].IsNullOrEmpty();
+    public bool FieldValueIsNullOrEmpty(JObject collection, string valueName) => collection[valueName].IsNullOrEmpty();
     /// <inheritdoc/>
-    public JObject InsertToken<TDefaultValueType>(JObject collection, string valueName, TDefaultValueType newValue)
+    public JObject InsertFieldValue<TDefaultValueType>(JObject collection, string valueName, TDefaultValueType newValue)
     {
       collection.Add(valueName, new JValue(newValue));
       return collection;
@@ -77,6 +57,6 @@ namespace SchemaForge.Crucible
     /// <inheritdoc/>
     public string CollectionValueToString(JObject collection, string valueName) => collection[valueName].ToString();
     /// <inheritdoc/>
-    public string GetEquivalentType(string cSharpType) => $"Json " + (TypeMap.ContainsKey(cSharpType) ? TypeMap[cSharpType] : cSharpType.Contains("[]") ? "array" : "null");
+    public string GetEquivalentType(string cSharpType) => Conversions.GetEquivalentJsonType(cSharpType);
   }
 }
