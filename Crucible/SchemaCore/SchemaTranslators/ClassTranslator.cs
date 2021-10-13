@@ -50,9 +50,9 @@ namespace SchemaForge.Crucible
     /// <returns>New object with value inserted.</returns>
     public object InsertFieldValue<TDefaultValueType>(object collection, string valueName, TDefaultValueType newValue)
     {
+      PropertyInfo valueProperty = collection.GetType().GetProperty(valueName);
       try
       {
-        PropertyInfo valueProperty = collection.GetType().GetProperty(valueName);
         if(valueProperty.PropertyType == typeof(TDefaultValueType))
         {
           valueProperty.SetValue(collection, newValue);
@@ -65,7 +65,7 @@ namespace SchemaForge.Crucible
       }
       catch
       {
-        throw new ArgumentException($"Attempted to set property {valueName} on class type {collection.GetType().FullName} to value with type {typeof(TDefaultValueType).FullName}");
+        throw new ArgumentException($"Attempted to set property {valueName} of type {valueProperty.GetType().FullName} on class type {collection.GetType().FullName} to value with type {typeof(TDefaultValueType).FullName}. There is no existing conversion from {valueProperty.GetType().FullName} to {typeof(TDefaultValueType).FullName}.");
       }
     }
     /// <inheritdoc/>
@@ -83,13 +83,22 @@ namespace SchemaForge.Crucible
       PropertyInfo valueProperty = collection.GetType().GetProperty(valueName);
       object value = valueProperty.GetValue(collection);
       Type valueType = valueProperty.PropertyType;
-      Type castType = typeof(TCastType);
 
-      return InnerTryCastValue(value, valueType, castType, out outputValue);
+      return InnerTryCastValue(value, valueType, out outputValue);
     }
 
-    private bool InnerTryCastValue<TCastType>(object value, Type valueType, Type castType, out TCastType outputValue)
+    /// <summary>
+    /// Performs the bulk of TryCastValue's work. Included as a separate method
+    /// to allow calling itself when dealing with IEnumerables that need their constituent values casted to something else.
+    /// </summary>
+    /// <typeparam name="TCastType">Type to which <paramref name="value"/> will be cast.</typeparam>
+    /// <param name="value">Value to be converted.</param>
+    /// <param name="valueType">Original type of <paramref name="value"/>.</param>
+    /// <param name="outputValue"><paramref name="value"/> as <typeparamref name="TCastType"/></param>
+    /// <returns>Bool indicating if cast was successful.</returns>
+    private bool InnerTryCastValue<TCastType>(object value, Type valueType, out TCastType outputValue)
     {
+      Type castType = typeof(TCastType);
       if (castType == valueType)
       {
         outputValue = (TCastType)value;
@@ -97,14 +106,14 @@ namespace SchemaForge.Crucible
       }
       else if (castType == typeof(string))
       {
-        outputValue = (TCastType)(object)value.ToString();
+        outputValue = (TCastType)(object)value.ToString(); // This syntax is required because, even though we're in an
+                                                           //   If statement that enforces the rule that TCastType must be DateTime, the compiler is silly.
         return true;
       }
       else if (castType == typeof(DateTime))
       {
         bool result = Conversions.TryConvertDateTime(value.ToString(), out DateTime outDateTime);
-        outputValue = (TCastType)(object)outDateTime; // This syntax is required because, even though we're in an
-                                                      //   If statement that enforces the rule that TCastType must be DateTime, the compiler is silly.
+        outputValue = (TCastType)(object)outDateTime;
         return result;
       }
       else if (castType == typeof(JObject))
@@ -164,14 +173,14 @@ namespace SchemaForge.Crucible
               object returnValue = Activator.CreateInstance(castType);
               MethodInfo add = returnValue.GetType().GetMethod("Add");
               
-              MethodInfo tryCastType = this.GetType().GetMethod("InnerTryCastValue",BindingFlags.NonPublic | BindingFlags.Instance);
+              MethodInfo tryCastType = this.GetType().GetMethod(nameof(InnerTryCastValue),BindingFlags.NonPublic | BindingFlags.Instance);
               MethodInfo castToInnerType = tryCastType.MakeGenericMethod(genericArguments[0]);
               while ((bool)moveNext.Invoke(enumerator, null))
               {
                 object currentValue = current.GetValue(enumerator);
                 Type currentValueType = currentValue.GetType();
                 object innerConvertedValue = null;
-                object[] args = new object[] { currentValue, currentValueType, genericArguments[0], innerConvertedValue };
+                object[] args = new object[] { currentValue, currentValueType, innerConvertedValue };
                 castToInnerType.Invoke(this, args);
                 add.Invoke(returnValue, new object[] { args[3] });
               }
@@ -199,14 +208,7 @@ namespace SchemaForge.Crucible
           }
           catch
           {
-            outputValue = default;
-            return false;
           }
-        }
-        else
-        {
-          outputValue = default;
-          return false;
         }
       }
       else
@@ -218,10 +220,10 @@ namespace SchemaForge.Crucible
         }
         catch
         {
-          outputValue = default;
-          return false;
         }
       }
+      outputValue = default;
+      return false;
     }
   }
 }

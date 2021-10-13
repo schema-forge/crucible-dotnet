@@ -33,12 +33,12 @@ namespace SchemaForge.Crucible
 
     /// <summary>
     /// Extracts a value from <paramref name="collection"/> with the designation
-    /// <paramref name="valueName"/> and determines whether this value is null or empty.
+    /// <paramref name="fieldName"/> and determines whether this value is null or empty.
     /// </summary>
     /// <param name="collection">The collection from which to extract the value.</param>
-    /// <param name="valueName">The string designator for the value to be extracted.</param>
+    /// <param name="fieldName">The key for the value to be extracted.</param>
     /// <returns>bool indicating if the value is null or empty.</returns>
-    public bool FieldValueIsNullOrEmpty(TCollectionType collection, string valueName);
+    public bool FieldValueIsNullOrEmpty(TCollectionType collection, string fieldName);
 
     /// <summary>
     /// Inserts <paramref name="newValue"/> into <paramref name="collection"/>

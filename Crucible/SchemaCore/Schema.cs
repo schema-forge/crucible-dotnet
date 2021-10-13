@@ -171,7 +171,7 @@ namespace SchemaForge.Crucible
     /// "Validation for <paramref name="name"/> failed."
     /// will be added to ErrorList on validation failure.</param>
     /// <param name="allowUnrecognized">If false, unrecognized <see cref="Field"/>s (that is,
-    /// <see cref="Field"/>s present in the object being validated but not in the Schema) will raise
+    /// <see cref="Field"/>s present in the object being validated but not in the <see cref="Schema"/>) will raise
     /// a <see cref="Severity.Fatal"/> error. If true, unrecognized <see cref="Field"/>s will
     /// raise a <see cref="Severity.Info"/> error.</param>
     public virtual List<SchemaError> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, bool allowUnrecognized = false)
