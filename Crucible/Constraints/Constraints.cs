@@ -321,7 +321,7 @@ namespace SchemaForge.Crucible
       List<SchemaError> InnerMethod(T inputValue, string inputName)
       {
         List<SchemaError> internalErrorList = new List<SchemaError>();
-        if (forbiddenValues.Contains(inputValue)) //Returns false if inputValue is not in provided list
+        if (forbiddenValues.Contains(inputValue))
         {
           internalErrorList.Add(new SchemaError($"Input {inputName} with value {inputValue} is invalid. Value must not be any of: {string.Join(", ", forbiddenValues)}"));
         }
