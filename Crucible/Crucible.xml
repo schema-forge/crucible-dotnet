@@ -1126,6 +1126,11 @@
             <exception cref="T:System.ArgumentException">Throws ArgumentException if attempting to remove a <see cref="T:SchemaForge.Crucible.Field"/> not already in the set.</exception>
             <param name="fieldNames">List of <see cref="T:SchemaForge.Crucible.Field"/> names to remove; corresponds to <see cref="P:SchemaForge.Crucible.Field.FieldName"/>.</param>
         </member>
+        <member name="M:SchemaForge.Crucible.Schema.RemoveAllFields">
+            <summary>
+            Removes all <see cref="T:SchemaForge.Crucible.Field"/>s from the <see cref="T:SchemaForge.Crucible.Schema"/>.
+            </summary>
+        </member>
         <member name="M:SchemaForge.Crucible.Schema.Count">
             <summary>
             Returns the number of <see cref="T:SchemaForge.Crucible.Field"/>s contained in the <see cref="T:SchemaForge.Crucible.Schema"/>.
@@ -1136,6 +1141,13 @@
             <summary>
             Removes all errors from this <see cref="T:SchemaForge.Crucible.Schema"/>'s <see cref="P:SchemaForge.Crucible.Schema.ErrorList"/>.
             </summary>
+        </member>
+        <member name="M:SchemaForge.Crucible.Schema.GetFieldEnumerator">
+            <summary>
+            Retrieves an <see cref="T:System.Collections.IEnumerator"/> for all <see cref="T:SchemaForge.Crucible.Field"/>s present in
+            <see cref="F:SchemaForge.Crucible.Schema.Fields"/>.
+            </summary>
+            <returns>An <see cref="T:System.Collections.IEnumerator"/> for all values of <see cref="F:SchemaForge.Crucible.Schema.Fields"/>.</returns>
         </member>
         <member name="M:SchemaForge.Crucible.Schema.Validate``1(``0,SchemaForge.Crucible.ISchemaTranslator{``0},System.String,System.Boolean,System.Boolean)">
             <summary>
