@@ -152,6 +152,11 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
+    /// Removes all <see cref="Field"/>s from the <see cref="Schema"/>.
+    /// </summary>
+    public void RemoveAllFields() => Fields.Clear();
+
+    /// <summary>
     /// Returns the number of <see cref="Field"/>s contained in the <see cref="Schema"/>.
     /// </summary>
     /// <returns>The number of <see cref="Field"/>s contained in the <see cref="Schema"/>.</returns>
@@ -161,6 +166,13 @@ namespace SchemaForge.Crucible
     /// Removes all errors from this <see cref="Schema"/>'s <see cref="ErrorList"/>.
     /// </summary>
     public void ClearErrors() => ErrorList.Clear();
+
+    /// <summary>
+    /// Retrieves an <see cref="IEnumerator"/> for all <see cref="Field"/>s present in
+    /// <see cref="Fields"/>.
+    /// </summary>
+    /// <returns>An <see cref="IEnumerator"/> for all values of <see cref="Fields"/>.</returns>
+    public IEnumerator<Field> GetFieldEnumerator() => Fields.Values.GetEnumerator();
 
     /// <summary>
     /// Checks <paramref name="collection"/> using the set of <see cref="Fields"/>.
