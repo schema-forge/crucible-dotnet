@@ -26,7 +26,7 @@ namespace SchemaForge.Crucible
   {
     /// <summary>
     /// Set of <see cref="Field"/>s to use when a collection is passed to
-    /// <see cref="Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, bool)"/>.
+    /// <see cref="Validate{TCollectionType}(TCollectionType, ISchemaTranslator{TCollectionType}, string, bool, bool)"/>.
     /// </summary>
     private readonly Dictionary<string, Field> Fields = new Dictionary<string, Field>();
     /// <summary>
@@ -158,6 +158,11 @@ namespace SchemaForge.Crucible
     public int Count() => Fields.Count;
 
     /// <summary>
+    /// Removes all errors from this <see cref="Schema"/>'s <see cref="ErrorList"/>.
+    /// </summary>
+    public void ClearErrors() => ErrorList.Clear();
+
+    /// <summary>
     /// Checks <paramref name="collection"/> using the set of <see cref="Fields"/>.
     /// If name and type are provided, the message
     /// "Validation for <paramref name="name"/> failed."
@@ -174,7 +179,8 @@ namespace SchemaForge.Crucible
     /// <see cref="Field"/>s present in the object being validated but not in the <see cref="Schema"/>) will raise
     /// a <see cref="Severity.Fatal"/> error. If true, unrecognized <see cref="Field"/>s will
     /// raise a <see cref="Severity.Info"/> error.</param>
-    public virtual List<SchemaError> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, bool allowUnrecognized = false)
+    /// <param name="infoOnMissingOptional">If true, missing optional fields will generate a <see cref="Severity.Info"/> level <see cref="SchemaError"/>.</param>
+    public virtual List<SchemaError> Validate<TCollectionType>(TCollectionType collection, ISchemaTranslator<TCollectionType> translator, string name = null, bool allowUnrecognized = false, bool infoOnMissingOptional = false)
     {
       string message = " ";
       // This option is included in case a sub-collection is being validated; this
@@ -204,7 +210,10 @@ namespace SchemaForge.Crucible
           }
           else
           {
-            ErrorList.Add(new SchemaError($"Input collection is missing optional field {field.FieldName}",Severity.Info));
+            if(infoOnMissingOptional)
+            {
+              ErrorList.Add(new SchemaError($"Input collection is missing optional field {field.FieldName}", Severity.Info));
+            }
           }
         }
         else if (!field.Validate(collection,translator))
