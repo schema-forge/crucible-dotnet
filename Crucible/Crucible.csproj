@@ -27,7 +27,19 @@ Schemas are objects used to define the structure and rules of a collection file.
 The goal is to centralize all validation for incoming web requests or configuration files, providing an easy-to-use interface that generates helpful and specific error messages that can be passed along to end users interacting with a service that incorporates Crucible.</Description>
     <Authors>SchemaForge</Authors>
     <Copyright>2021, SchemaForge</Copyright>
-    <PackageReleaseNotes>Alpha 0.0.3:
+    <PackageReleaseNotes>Alpha 0.0.4:
+
+[NEW FEATURES]
+
+Added support for .NET 6.0.
+
+Added new methods to Schema class: RemoveAllFields, ClearErrors, GetFieldEnumerator
+
+Added new parameter to Schema.Validate method: infoOnMissingOptional. If set to true, adds an Info severity warning about all missing optional fields.
+
+----------
+
+Alpha 0.0.3:
 
 [BREAKING CHANGES]
 
@@ -36,7 +48,7 @@ Renamed Error to SchemaError.
 
 [NEW FEATURES]
 
-Added DictionaryTranslator for Dictionary&lt;string, object&gt; objects and ClassTranslator for .NET classes that use property names as field names. Added overload to ApplySchema that allows different Schemas to be applied to sub-objects depending on a designated "type" of the sub-object.
+Added DictionaryTranslator for Dictionary objects and ClassTranslator for .NET classes that use property names as field names. Added overload to ApplySchema that allows different Schemas to be applied to sub-objects depending on a designated "type" of the sub-object.
 
 Added support for .NET Core 3.1.
 
