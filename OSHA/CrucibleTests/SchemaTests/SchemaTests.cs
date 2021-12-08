@@ -356,5 +356,24 @@ namespace SchemaTests
 
       Assert.True(testConfig.ContainsKey("There is hope for the movie industry") && !bool.Parse(testConfig["There is hope for the movie industry"].ToString()));
     }
+
+    /// <summary>
+    /// Ensures that the <see cref="Schema.ClearErrors"/> method works.
+    /// </summary>
+    [Fact]
+    public void ClearErrorsTest()
+    {
+      TestSchema.AddFields(new HashSet<Field>()
+      {
+          new Field<string>("August Burns Red","The commit author's favorite August Burns Red song.",new Constraint<string>[] { AllowValues("Spirit Breaker","Provision","The Wake", "Empire (Midi)") }),
+          new Field<int>("ourfathers.","The number of songs by ourfathers. the commit author has given a 5/5 rating in his music library.",required: false)
+      });
+
+      TestSchema.Validate(TestConfig, new JObjectTranslator(), "He of Many Fields");
+      output.WriteLine(string.Join('\n', TestSchema.ErrorList));
+      Assert.NotEmpty(TestSchema.ErrorList);
+      TestSchema.ClearErrors();
+      Assert.Empty(TestSchema.ErrorList);
+    }
   }
 }

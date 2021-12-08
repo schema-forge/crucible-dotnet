@@ -40,6 +40,23 @@ namespace ConstraintTests
     }
 
     /// <summary>
+    /// Ensures that ForbidValues functions with strings with two tests.
+    /// </summary>
+    /// <param name="expectedResult">Expected result from validation.</param>
+    /// <param name="constrainedString">String to test against acceptable values.</param>
+    /// <param name="forbiddenStrings">Unacceptable strings.</param>
+    [Theory]
+    [InlineData(true, "AcceptableString", "ForbiddenString", "AnotherForbiddenString", "YetAnotherForbiddenString")]
+    [InlineData(false, "ForbiddenString", "ForbiddenString", "AnotherForbiddenString", "YetAnotherForbiddenString")]
+    public void ForbidValuesInnerFunctionTest(bool expectedResult, string constrainedString, params string[] forbiddenStrings)
+    {
+      Field TestField = new Field<string>("TestField", "There Is No String", new Constraint<string>[] { ForbidValues(forbiddenStrings) });
+      bool testResult = TestField.Validate(new JValue(constrainedString), new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
+
+    /// <summary>
     /// Ensures that ConstrainStringRegex functions properly by checking the entire string and not only part of it.
     /// </summary>
     /// <param name="expectedResult">Expected result from validation.</param>
