@@ -4,7 +4,7 @@
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
 
       <files>
-          <file src="bin\Release\net6.0\Crucible.dll" target="lib\net5.0\Crucible.dll" />
+          <file src="bin\Release\net6.0\Crucible.dll" target="lib\net6.0\Crucible.dll" />
           <file src="bin\Release\net5.0\Crucible.dll" target="lib\net5.0\Crucible.dll" />
           <file src="bin\Release\netcoreapp3.1\Crucible.dll" target="lib\netcoreapp3.1\Crucible.dll" />
       </files>

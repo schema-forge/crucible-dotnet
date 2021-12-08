@@ -331,6 +331,17 @@
             from checking whether or not the passed <typeparamref name="TValueType"/> passes
             at least one of <paramref name="constraints"/></returns>
         </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ApplyConstraintsIf``1(SchemaForge.Crucible.Constraint{``0},SchemaForge.Crucible.Constraint{``0}[])">
+            <summary>
+            Applies constraints passed in <paramref name="then"/> only if the
+            <see cref="T:SchemaForge.Crucible.Field"/> passes the constraint in <paramref name="condition"/>.
+            </summary>
+            <typeparam name="TValueType"></typeparam>
+            <param name="condition"></param>
+            <param name="then"></param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentException"></exception>
+        </member>
         <member name="T:SchemaForge.Crucible.Severity">
             <summary>
             Indicates the severity of an error found while validating.
