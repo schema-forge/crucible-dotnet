@@ -151,7 +151,14 @@
             Ensure that the passed <typeparamref name="T"/> matches at least one of the values provided in <paramref name="acceptableValues"/>.
             </summary>
             <param name="acceptableValues">List of values used to build the returned function.</param>
-            <returns>Function checking to ensure that the value of the passed item is one of acceptableValues.</returns>
+            <returns>Function checking to ensure that the value of the passed item is one of <paramref name="acceptableValues"/>.</returns>
+        </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ForbidValues``1(``0[])">
+            <summary>
+            Ensure that the passed <typeparamref name="T"/> does not match any of the values provided in <paramref name="forbiddenValues"/>.
+            </summary>
+            <param name="forbiddenValues">List of values used to build the returned function.</param>
+            <returns>Function checking to ensure that the value of the passed item is not any of <paramref name="forbiddenValues"/>.</returns>
         </member>
         <member name="M:SchemaForge.Crucible.Constraints.ConstrainStringWithRegexExact(System.Text.RegularExpressions.Regex[])">
             <summary>

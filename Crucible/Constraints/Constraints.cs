@@ -293,7 +293,7 @@ namespace SchemaForge.Crucible
     /// Ensure that the passed <typeparamref name="T"/> matches at least one of the values provided in <paramref name="acceptableValues"/>.
     /// </summary>
     /// <param name="acceptableValues">List of values used to build the returned function.</param>
-    /// <returns>Function checking to ensure that the value of the passed item is one of acceptableValues.</returns>
+    /// <returns>Function checking to ensure that the value of the passed item is one of <paramref name="acceptableValues"/>.</returns>
     public static Constraint<T> AllowValues<T>(params T[] acceptableValues)
     {
       // TODO: Optimize collection for searching?
@@ -308,6 +308,26 @@ namespace SchemaForge.Crucible
         return internalErrorList;
       }
       return new Constraint<T>(InnerMethod,new JProperty(nameof(AllowValues),JArray.FromObject(acceptableValues)));
+    }
+    /// <summary>
+    /// Ensure that the passed <typeparamref name="T"/> does not match any of the values provided in <paramref name="forbiddenValues"/>.
+    /// </summary>
+    /// <param name="forbiddenValues">List of values used to build the returned function.</param>
+    /// <returns>Function checking to ensure that the value of the passed item is not any of <paramref name="forbiddenValues"/>.</returns>
+    public static Constraint<T> ForbidValues<T>(params T[] forbiddenValues)
+    {
+      // TODO: Optimize collection for searching?
+      // Switch case to reroute types to appropriate overloads?
+      List<SchemaError> InnerMethod(T inputValue, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        if (forbiddenValues.Contains(inputValue)) //Returns false if inputValue is not in provided list
+        {
+          internalErrorList.Add(new SchemaError($"Input {inputName} with value {inputValue} is invalid. Value must not be any of: {string.Join(", ", forbiddenValues)}"));
+        }
+        return internalErrorList;
+      }
+      return new Constraint<T>(InnerMethod, new JProperty(nameof(ForbidValues), JArray.FromObject(forbiddenValues)));
     }
     /// <summary>
     /// Ensures that the <see cref="Field"/> value is an exact match to at least one of the passed <paramref name="patterns"/>.
