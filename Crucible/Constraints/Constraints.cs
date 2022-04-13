@@ -779,6 +779,62 @@ namespace SchemaForge.Crucible
       return new Constraint<JObject>(InnerMethod, new JProperty(nameof(ApplySchema), typeMap.ToString()));
     }
 
+    /// <summary>
+    /// Applies all passed constraints to the keys of a given dictionary type.
+    /// </summary>
+    /// <typeparam name="TDictionaryType">Type of dictionary that is being passed. Must implement <see cref="IDictionary"/></typeparam>
+    /// <typeparam name="TKeyType">Type of the keys in the passed dictionary.</typeparam>
+    /// <param name="constraints">Constraints to apply to all keys in the dictionary.</param>
+    /// <returns>Function ensuring that all keys in the dictionary comply with all constraints passed to the function.</returns>
+    public static Constraint<TDictionaryType> ConstrainDictionaryKeys<TDictionaryType, TKeyType>(params Constraint<TKeyType>[] constraints) where TDictionaryType : IDictionary
+    {
+      List<SchemaError> InnerMethod(TDictionaryType inputDictionary, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        foreach(DictionaryEntry element in inputDictionary)
+        {
+          try
+          {
+            internalErrorList.AddRange(ApplyConstraintsHelper(element.Key.ToString(), $", a key in dictionary {inputName},", constraints));
+          }
+          catch
+          {
+            internalErrorList.Add(new SchemaError($"Key {element.Key} in dictionary {inputName} is an incorrect type. Expected value type: {typeof(TKeyType).Name}"));
+          }
+        }
+        return internalErrorList;
+      }
+      return new Constraint<TDictionaryType>(InnerMethod, new JProperty(nameof(ConstrainDictionaryKeys), "true"));
+    }
+
+    /// <summary>
+    /// Applies all passed constraints to the values of a given dictionary type.
+    /// </summary>
+    /// <typeparam name="TDictionaryType">Type of dictionary that is being passed. Must implement <see cref="IDictionary"/></typeparam>
+    /// <typeparam name="TValueType">Type of the values in the passed dictionary.</typeparam>
+    /// <param name="constraints">Constraints to apply to all keys in the dictionary.</param>
+    /// <returns>Function ensuring that all keys in the dictionary comply with all constraints passed to the function.</returns>
+    public static Constraint<TDictionaryType> ConstrainDictionaryValues<TDictionaryType, TValueType>(params Constraint<TValueType>[] constraints) where TDictionaryType : IDictionary
+    {
+      List<SchemaError> InnerMethod(TDictionaryType inputDictionary, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        foreach (DictionaryEntry element in inputDictionary)
+        {
+          try
+          {
+            internalErrorList.AddRange(ApplyConstraintsHelper(element.Value.ToString(), $", a value in dictionary {inputName},", constraints));
+          }
+          catch
+          {
+            internalErrorList.Add(new SchemaError($"Value {element.Value} in dictionary {inputName} is an incorrect type. Expected value type: {typeof(TValueType).Name}"));
+          }
+        }
+        return internalErrorList;
+      }
+      return new Constraint<TDictionaryType>(InnerMethod, new JProperty(nameof(ConstrainDictionaryValues), "true"));
+    }
+
     #endregion
 
     #region Datetime Constraints
