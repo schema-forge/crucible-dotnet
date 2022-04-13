@@ -475,7 +475,7 @@ namespace SchemaForge.Crucible
 
     #endregion
 
-    #region JArray Constraints
+    #region Collection Constraints
 
     /// <summary>
     /// Constrains the number of items in an <see cref="IEnumerable"/> object with a lower bound.
@@ -541,6 +541,26 @@ namespace SchemaForge.Crucible
         return internalErrorList;
       }
       return new Constraint<T>(InnerMethod, new JProperty(nameof(ConstrainCollectionCountUpperBound), upperBound));
+    }
+
+    /// <summary>
+    /// Constrains the number of items in an <see cref="IEnumerable"/> object with an exact value.
+    /// </summary>
+    /// <param name="exactBound">Number of items in the target <see cref="IEnumerable"/>.</param>
+    /// <returns>Constraint ensuring an enumerable has exactly <paramref name="exactBound"/> items.</returns>
+    public static Constraint<T> ConstrainCollectionCountExact<T>(int exactBound) where T : IEnumerable
+    {
+      List<SchemaError> InnerMethod(T inputArray, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        int count = inputArray.Count();
+        if (count != exactBound)
+        {
+          internalErrorList.Add(new SchemaError($"Collection {inputName} contains {count} values, but must contain exactly {exactBound} values."));
+        }
+        return internalErrorList;
+      }
+      return new Constraint<T>(InnerMethod, new JProperty(nameof(ConstrainCollectionCountExact), exactBound));
     }
 
     /// <summary>

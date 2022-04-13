@@ -227,6 +227,13 @@
             <param name="upperBound">Minimum number of items in the target <see cref="T:System.Collections.IEnumerable"/>.</param>
             <returns>Constraint ensuring an enumerable has at least <paramref name="upperBound"/> items.</returns>
         </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ConstrainCollectionCountExact``1(System.Int32)">
+            <summary>
+            Constrains the number of items in an <see cref="T:System.Collections.IEnumerable"/> object with an exact value.
+            </summary>
+            <param name="exactBound">Number of items in the target <see cref="T:System.Collections.IEnumerable"/>.</param>
+            <returns>Constraint ensuring an enumerable has exactly <paramref name="exactBound"/> items.</returns>
+        </member>
         <member name="M:SchemaForge.Crucible.Constraints.ApplyConstraintsHelper``1(Newtonsoft.Json.Linq.JToken,System.String,SchemaForge.Crucible.Constraint{``0}[])">
             <summary>
             Encapsulates the process of typechecking and applying all passed constraints.
