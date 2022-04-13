@@ -198,6 +198,12 @@
             <exception cref="T:System.ArgumentException">Throws ArgumentException if no strings are passed.</exception>
             <returns>Function that ensures the input string does not contain any of <paramref name="forbiddenSubstrings"/>.</returns>
         </member>
+        <member name="M:SchemaForge.Crucible.Constraints.ForbidWhiteSpace">
+            <summary>
+            Ensures that the <see cref="T:SchemaForge.Crucible.Field"/>'s value does not contain any white space.
+            </summary>
+            <returns>Function that ensures the input string does not contain white space.</returns>
+        </member>
         <member name="M:SchemaForge.Crucible.Constraints.ConstrainCollectionCountLowerBound``1(System.Int32)">
             <summary>
             Constrains the number of items in an <see cref="T:System.Collections.IEnumerable"/> object with a lower bound.
@@ -330,17 +336,6 @@
             <returns>A function that returns the <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:SchemaForge.Crucible.SchemaError"/> resulting
             from checking whether or not the passed <typeparamref name="TValueType"/> passes
             at least one of <paramref name="constraints"/></returns>
-        </member>
-        <member name="M:SchemaForge.Crucible.Constraints.ApplyConstraintsIf``1(SchemaForge.Crucible.Constraint{``0},SchemaForge.Crucible.Constraint{``0}[])">
-            <summary>
-            Applies constraints passed in <paramref name="then"/> only if the
-            <see cref="T:SchemaForge.Crucible.Field"/> passes the constraint in <paramref name="condition"/>.
-            </summary>
-            <typeparam name="TValueType"></typeparam>
-            <param name="condition"></param>
-            <param name="then"></param>
-            <returns></returns>
-            <exception cref="T:System.ArgumentException"></exception>
         </member>
         <member name="T:SchemaForge.Crucible.Severity">
             <summary>

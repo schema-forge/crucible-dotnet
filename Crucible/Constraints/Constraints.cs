@@ -437,22 +437,40 @@ namespace SchemaForge.Crucible
       List<SchemaError> InnerMethod(string inputString, string inputName)
       {
         List<SchemaError> internalErrorList = new List<SchemaError>();
-        bool containsForbidden = false;
         foreach (string forbiddenSubstring in forbiddenSubstrings)
         {
           if (inputString.IndexOf(forbiddenSubstring) != -1)
           {
-            containsForbidden = true;
+            internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} contains at least one of a forbidden substring: {string.Join(" ", forbiddenSubstrings)}"));
             break;
           }
-        }
-        if (containsForbidden)
-        {
-          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} contains at least one of a forbidden substring: {string.Join(" ", forbiddenSubstrings)}"));
         }
         return internalErrorList;
       }
       return new Constraint<string>(InnerMethod, new JProperty(nameof(ForbidSubstrings),JArray.FromObject(forbiddenSubstrings.ToArray())));
+    }
+
+    /// <summary>
+    /// Ensures that the <see cref="Field"/>'s value does not contain any white space.
+    /// </summary>
+    /// <returns>Function that ensures the input string does not contain white space.</returns>
+    public static Constraint<string> ForbidWhiteSpace()
+    {
+      List<SchemaError> InnerMethod(string inputString, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        char[] charArray = inputString.ToCharArray(); // Converting to char array and traversing the array backwards is faster. Don't ask, it's voodoo.
+        for (int i = charArray.Length - 1; i >= 0; i--)
+        {
+          if (char.IsWhiteSpace(charArray[i]))
+          {
+            internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} cannot contain whitespace."));
+            break;
+          }
+        }
+        return internalErrorList;
+      }
+      return new Constraint<string>(InnerMethod, new JProperty(nameof(ForbidWhiteSpace), "true"));
     }
 
     #endregion
