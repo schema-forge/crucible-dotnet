@@ -121,5 +121,89 @@ namespace ConstraintTests
       Schema metaSchema = new(new Field<JObject>("SubObject", "Either a fruit or a luxury good. Choose wisely.",new Constraint<JObject>[] { ApplySchema("Type", typeMap) }));
       Assert.Equal(expectedResult, !metaSchema.Validate(JObject.Parse(testJson), new JObjectTranslator()).AnyFatal());
     }
+
+    Dictionary<int, string> constrainKeysDictionary = new()
+    {
+      { 35, "Record" },
+      { 14, "Another Record" }
+    };
+
+    [Fact]
+    public void ApplyConstraintsToDictionaryKeysTestValid()
+    {
+      Field<Dictionary<int,string>> testField = new("TestObject", "The object of your desire.", constraintsIfType1: new Constraint<Dictionary<int, string>>[] { ConstrainDictionaryKeys<Dictionary<int, string>, int>(ConstrainValue(5, 50)) });
+      bool testResult = testField.Validate(constrainKeysDictionary, new ObjectTranslator());
+      output.WriteLine(string.Join('\n', testField.ErrorList));
+      Assert.True(testResult);
+    }
+
+    [Fact]
+    public void ApplyConstraintsToDictionaryKeysTestInvalid()
+    {
+      Field<Dictionary<int, string>> testField = new("TestObject", "The object of your desire.", constraintsIfType1: new Constraint<Dictionary<int, string>>[] { ConstrainDictionaryKeys<Dictionary<int, string>, int>(ConstrainValue(5, 10)) });
+      bool testResult = testField.Validate(constrainKeysDictionary, new ObjectTranslator());
+      output.WriteLine(string.Join('\n', testField.ErrorList));
+      Assert.False(testResult);
+    }
+
+    [Fact]
+    public void ApplyConstraintsToDictionaryValuesTestValid()
+    {
+      Field<Dictionary<int, string>> testField = new("TestObject", "The object of your desire.", constraintsIfType1: new Constraint<Dictionary<int, string>>[] { ConstrainDictionaryValues<Dictionary<int, string>, string>() });
+      bool testResult = testField.Validate(constrainKeysDictionary, new ObjectTranslator());
+      output.WriteLine(string.Join('\n', testField.ErrorList));
+      Assert.True(testResult);
+    }
+
+    [Fact]
+    public void ApplyConstraintsToDictionaryValuesTestInvalid()
+    {
+      Field<Dictionary<int, string>> testField = new("TestObject", "The object of your desire.", constraintsIfType1: new Constraint<Dictionary<int, string>>[] { ConstrainDictionaryValues<Dictionary<int, string>, string>(ForbidWhiteSpace()) });
+      bool testResult = testField.Validate(constrainKeysDictionary, new ObjectTranslator());
+      output.WriteLine(string.Join('\n', testField.ErrorList));
+      Assert.False(testResult);
+    }
+
+    JObject constrainKeysJObject = new()
+    {
+      { "35", "Record" },
+      { "14", "Another Record" }
+    };
+
+    [Fact]
+    public void ApplyConstraintsToJObjectKeysTestValid()
+    {
+      Field<JObject> testField = new("TestObject", "The JObject of your desire.", constraintsIfType1: new Constraint<JObject>[] { ConstrainJObjectKeys(ConstrainValue(5, 50)) });
+      bool testResult = testField.Validate(constrainKeysJObject, new ObjectTranslator());
+      output.WriteLine(string.Join('\n', testField.ErrorList));
+      Assert.True(testResult);
+    }
+
+    [Fact]
+    public void ApplyConstraintsToJObjectKeysTestInvalid()
+    {
+      Field<JObject> testField = new("TestObject", "The JObject of your desire.", constraintsIfType1: new Constraint<JObject>[] { ConstrainJObjectKeys(ConstrainValue(5, 10)) });
+      bool testResult = testField.Validate(constrainKeysJObject, new ObjectTranslator());
+      output.WriteLine(string.Join('\n', testField.ErrorList));
+      Assert.False(testResult);
+    }
+
+    [Fact]
+    public void ApplyConstraintsToJObjectValuesTestValid()
+    {
+      Field<JObject> testField = new("TestObject", "The JObject of your desire.", constraintsIfType1: new Constraint<JObject>[] { ConstrainJObjectValues<string>() });
+      bool testResult = testField.Validate(constrainKeysJObject, new ObjectTranslator());
+      output.WriteLine(string.Join('\n', testField.ErrorList));
+      Assert.True(testResult);
+    }
+
+    [Fact]
+    public void ApplyConstraintsToJObjectValuesTestInvalid()
+    {
+      Field<JObject> testField = new("TestObject", "The JObject of your desire.", constraintsIfType1: new Constraint<JObject>[] { ConstrainJObjectValues(ForbidWhiteSpace()) });
+      bool testResult = testField.Validate(constrainKeysJObject, new ObjectTranslator());
+      output.WriteLine(string.Join('\n', testField.ErrorList));
+      Assert.False(testResult);
+    }
   }
 }

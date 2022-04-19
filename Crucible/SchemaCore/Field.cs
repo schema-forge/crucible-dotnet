@@ -286,7 +286,7 @@ namespace SchemaForge.Crucible
     /// <param name="inputName">Name of the Field. This will be used to search the user config when validating.</param>
     /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the Field's value if it can be cast to <typeparamref name="Type1"/>.</param>
-    /// <param name="required">If true, not detecting this Field when applying a Schema is a <see cref="Severity.Fatal"/>
+    /// <param name="required">If true, not detecting this <see cref="Field"/> when applying a Schema is a <see cref="Severity.Fatal"/> error.
     /// If false, not detecting this Field when applying a schema raises no error.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
@@ -442,7 +442,7 @@ namespace SchemaForge.Crucible
     /// <param name="inputDescription">String that will be shown to the user in the event of a validation error.</param>
     /// <param name="constraintsIfType1">Constraints that will be applied to the Field's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="constraintsIfType2">Constraints that will be applied to the Field's value if it can be cast to <typeparamref name="Type2"/>.</param>
-    /// <param name="required">If true, not detecting this Field when applying a Schema is a <see cref="Severity.Fatal"/>
+    /// <param name="required">If true, not detecting this <see cref="Field"/> when applying a Schema is a <see cref="Severity.Fatal"/> error.
     /// If false, not detecting this Field when applying a schema raises no error.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>
@@ -627,7 +627,7 @@ namespace SchemaForge.Crucible
     /// <param name="constraintsIfType1">Constraints that will be applied to the Field's value if it can be cast to <typeparamref name="Type1"/>.</param>
     /// <param name="constraintsIfType2">Constraints that will be applied to the Field's value if it can be cast to <typeparamref name="Type2"/>.</param>
     /// <param name="constraintsIfType3">Constraints that will be applied to the Field's value if it can be cast to <typeparamref name="Type3"/>.</param>
-    /// <param name="required">If true, not detecting this Field when applying a Schema is a <see cref="Severity.Fatal"/>
+    /// <param name="required">If true, not detecting this <see cref="Field"/> when applying a Schema is a <see cref="Severity.Fatal"/> error.
     /// If false, not detecting this Field when applying a schema raises no error.</param>
     /// <param name="allowNull">If false, detecting a null or empty value is a <see cref="Severity.Fatal"/>
     /// If true, detecting a null or empty value is a <see cref="Severity.Warning"/></param>

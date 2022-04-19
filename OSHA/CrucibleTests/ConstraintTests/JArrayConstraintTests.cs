@@ -79,12 +79,31 @@ namespace ConstraintTests
     /// <param name="upperBound">Upper bound to pass to <see cref="ConstrainCollectionCountUpperBound{T}(int)"/></param>
     [Theory]
     [InlineData(true, "{'TestArray':[1,'fish']}", 2)] // Equal to upper.
-    [InlineData(false, "{'TestArray':['beat','up','my','grandmother']}", 2)] // Too many.s
+    [InlineData(false, "{'TestArray':['beat','up','my','grandmother']}", 2)] // Too many.
     public void ConstrainCollectionCountUpperBoundTests(bool expectedResult, string constrainedJson, int upperBound)
     {
       Field TestField;
       bool testResult;
       TestField = new Field<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCountUpperBound<JArray>(upperBound) });
+      testResult = TestField.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
+
+    /// <summary>
+    /// Tests for <see cref="ConstrainCollectionCountExact{T}(int)"/> on JArray.
+    /// </summary>
+    /// <param name="expectedResult">Expected validation result.</param>
+    /// <param name="constrainedJson">Json containing the array that will be tested.</param>
+    /// <param name="upperBound">Upper bound to pass to <see cref="ConstrainCollectionCountUpperBound{T}(int)"/></param>
+    [Theory]
+    [InlineData(true, "{'TestArray':[1,'fish']}", 2)] // Equal to exact.
+    [InlineData(false, "{'TestArray':['beat','up','my','grandmother']}", 2)] // Too many.
+    public void ConstrainCollectionCountExact(bool expectedResult, string constrainedJson, int upperBound)
+    {
+      Field TestField;
+      bool testResult;
+      TestField = new Field<JArray>("TestArray", "Eat the ice cream.", new Constraint<JArray>[] { ConstrainCollectionCountExact<JArray>(upperBound) });
       testResult = TestField.Validate(JObject.Parse(constrainedJson), new JObjectTranslator());
       output.WriteLine(string.Join('\n', TestField.ErrorList));
       Assert.Equal(testResult, expectedResult);
