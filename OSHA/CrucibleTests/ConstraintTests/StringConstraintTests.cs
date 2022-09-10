@@ -182,6 +182,18 @@ namespace ConstraintTests
       }
     }
 
+    [Theory]
+    [InlineData(true, "GoodString")]
+    [InlineData(false, " Bad String")]
+    [InlineData(false, "AnotherBad\nString")]
+    public void ForbidWhiteSpaceInnerFunctionTest(bool expectedResult, string constrainedString)
+    {
+      Field<string> TestField = new("TestField", "Deo Dona Nobis Pacem", new Constraint<string>[] { ForbidWhiteSpace() });
+      bool testResult = TestField.Validate(new JValue(constrainedString), new JTokenTranslator());
+      output.WriteLine(string.Join('\n', TestField.ErrorList));
+      Assert.Equal(testResult, expectedResult);
+    }
+
     /// <summary>
     /// Ensures that the AllowValues constraint passes the expected JProperty.
     /// </summary>

@@ -38,6 +38,28 @@ namespace OSHA.TestUtilities
     public List<string> GetCollectionKeys(JToken collection) => throw new NotImplementedException("A JToken does not always have keys.");
     public string GetEquivalentType(string cSharpType) => cSharpType;
   }
+  internal class ObjectTranslator :ISchemaTranslator<Object>
+  {
+    public bool TryCastValue<TCastType>(object collection, string valueName, out TCastType newValue)
+    {
+      try
+      {
+        newValue = (TCastType)Convert.ChangeType(collection,typeof(TCastType));
+        return true;
+      }
+      catch
+      {
+        newValue = default;
+        return false;
+      }
+    }
+    public bool FieldValueIsNullOrEmpty(object collection, string valueName) => false;
+    public object InsertFieldValue<TDefaultValueType>(object collection, string valueName, TDefaultValueType newValue) => throw new NotImplementedException("Cannot insert a value into an object. Use DictionaryTranslator instead.");
+    public bool CollectionContains(object collection, string valueName) => true;
+    public string CollectionValueToString(object collection, string valueName) => collection.ToString();
+    public List<string> GetCollectionKeys(object collection) => throw new NotImplementedException("An object does not always have keys.");
+    public string GetEquivalentType(string cSharpType) => cSharpType;
+  }
   public class TestUtilities
   {
     public static Schema GetTestSchema()

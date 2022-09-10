@@ -437,27 +437,45 @@ namespace SchemaForge.Crucible
       List<SchemaError> InnerMethod(string inputString, string inputName)
       {
         List<SchemaError> internalErrorList = new List<SchemaError>();
-        bool containsForbidden = false;
         foreach (string forbiddenSubstring in forbiddenSubstrings)
         {
           if (inputString.IndexOf(forbiddenSubstring) != -1)
           {
-            containsForbidden = true;
+            internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} contains at least one of a forbidden substring: {string.Join(" ", forbiddenSubstrings)}"));
             break;
           }
-        }
-        if (containsForbidden)
-        {
-          internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} contains at least one of a forbidden substring: {string.Join(" ", forbiddenSubstrings)}"));
         }
         return internalErrorList;
       }
       return new Constraint<string>(InnerMethod, new JProperty(nameof(ForbidSubstrings),JArray.FromObject(forbiddenSubstrings.ToArray())));
     }
 
+    /// <summary>
+    /// Ensures that the <see cref="Field"/>'s value does not contain any white space.
+    /// </summary>
+    /// <returns>Function that ensures the input string does not contain white space.</returns>
+    public static Constraint<string> ForbidWhiteSpace()
+    {
+      List<SchemaError> InnerMethod(string inputString, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        char[] charArray = inputString.ToCharArray(); // Converting to char array and traversing the array backwards is faster. Don't ask, it's voodoo.
+        for (int i = charArray.Length - 1; i >= 0; i--)
+        {
+          if (char.IsWhiteSpace(charArray[i]))
+          {
+            internalErrorList.Add(new SchemaError($"Field {inputName} with value {inputString} cannot contain whitespace."));
+            break;
+          }
+        }
+        return internalErrorList;
+      }
+      return new Constraint<string>(InnerMethod, new JProperty(nameof(ForbidWhiteSpace), "true"));
+    }
+
     #endregion
 
-    #region JArray Constraints
+    #region Collection Constraints
 
     /// <summary>
     /// Constrains the number of items in an <see cref="IEnumerable"/> object with a lower bound.
@@ -526,6 +544,26 @@ namespace SchemaForge.Crucible
     }
 
     /// <summary>
+    /// Constrains the number of items in an <see cref="IEnumerable"/> object with an exact value.
+    /// </summary>
+    /// <param name="exactBound">Number of items in the target <see cref="IEnumerable"/>.</param>
+    /// <returns>Constraint ensuring an enumerable has exactly <paramref name="exactBound"/> items.</returns>
+    public static Constraint<T> ConstrainCollectionCountExact<T>(int exactBound) where T : IEnumerable
+    {
+      List<SchemaError> InnerMethod(T inputArray, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        int count = inputArray.Count();
+        if (count != exactBound)
+        {
+          internalErrorList.Add(new SchemaError($"Collection {inputName} contains {count} values, but must contain exactly {exactBound} values."));
+        }
+        return internalErrorList;
+      }
+      return new Constraint<T>(InnerMethod, new JProperty(nameof(ConstrainCollectionCountExact), exactBound));
+    }
+
+    /// <summary>
     /// Encapsulates the process of typechecking and applying all passed constraints.
     /// </summary>
     /// <typeparam name="TValueType">Expected type of the <see cref="Field"/> value being evaluated.</typeparam>
@@ -578,8 +616,10 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      JArray constraintArray = new JArray();
-      constraintArray.Add(Field.GetConstraintObject(constraints));
+      JArray constraintArray = new JArray
+      {
+        Field.GetConstraintObject(constraints)
+      };
       return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
 
@@ -625,9 +665,11 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      JArray constraintArray = new JArray();
-      constraintArray.Add(Field.GetConstraintObject(constraintsIfTElementType1));
-      constraintArray.Add(Field.GetConstraintObject(constraintsIfTElementType2));
+      JArray constraintArray = new JArray
+      {
+        Field.GetConstraintObject(constraintsIfTElementType1),
+        Field.GetConstraintObject(constraintsIfTElementType2)
+      };
       return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
 
@@ -685,10 +727,12 @@ namespace SchemaForge.Crucible
         }
         return internalErrorList;
       }
-      JArray constraintArray = new JArray();
-      constraintArray.Add(Field.GetConstraintObject(constraintsIfT1));
-      constraintArray.Add(Field.GetConstraintObject(constraintsIfT2));
-      constraintArray.Add(Field.GetConstraintObject(constraintsIfT3));
+      JArray constraintArray = new JArray
+      {
+        Field.GetConstraintObject(constraintsIfT1),
+        Field.GetConstraintObject(constraintsIfT2),
+        Field.GetConstraintObject(constraintsIfT3)
+      };
       return new Constraint<JArray>(InnerMethod, new JProperty(nameof(ApplyConstraintsToJArray), constraintArray));
     }
 
@@ -739,6 +783,116 @@ namespace SchemaForge.Crucible
         return internalErrorList;
       }
       return new Constraint<JObject>(InnerMethod, new JProperty(nameof(ApplySchema), typeMap.ToString()));
+    }
+
+    /// <summary>
+    /// Applies all passed constraints to the keys of a given dictionary type.
+    /// </summary>
+    /// <typeparam name="TDictionaryType">Type of dictionary that is being passed. Must implement <see cref="IDictionary"/></typeparam>
+    /// <typeparam name="TKeyType">Type of the keys in the passed dictionary.</typeparam>
+    /// <param name="constraints">Constraints to apply to all keys in the dictionary.</param>
+    /// <returns>Function ensuring that all keys in the dictionary comply with all constraints passed to the function.</returns>
+    public static Constraint<TDictionaryType> ConstrainDictionaryKeys<TDictionaryType, TKeyType>(params Constraint<TKeyType>[] constraints) where TDictionaryType : IDictionary
+    {
+      List<SchemaError> InnerMethod(TDictionaryType inputDictionary, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        foreach(DictionaryEntry element in inputDictionary)
+        {
+          try
+          {
+            internalErrorList.AddRange(ApplyConstraintsHelper(element.Key.ToString(), $"{inputName}'s key", constraints));
+          }
+          catch
+          {
+            internalErrorList.Add(new SchemaError($"Key {element.Key} in dictionary {inputName} is an incorrect type. Expected key type: {typeof(TKeyType).Name}"));
+          }
+        }
+        return internalErrorList;
+      }
+      return new Constraint<TDictionaryType>(InnerMethod, new JProperty(nameof(ConstrainDictionaryKeys), "true"));
+    }
+
+    /// <summary>
+    /// Applies all passed constraints to the keys of a given JObject.
+    /// </summary>
+    /// <typeparam name="TKeyType">Type of the keys in the passed JObject.</typeparam>
+    /// <param name="constraints">Constraints to apply to all keys in the JObject.</param>
+    /// <returns>Function ensuring that all keys in the JObject comply with all constraints passed to the function.</returns>
+    public static Constraint<JObject> ConstrainJObjectKeys<TKeyType>(params Constraint<TKeyType>[] constraints)
+    {
+      List<SchemaError> InnerMethod(JObject inputDictionary, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        foreach (KeyValuePair<string, JToken> element in inputDictionary)
+        {
+          try
+          {
+            internalErrorList.AddRange(ApplyConstraintsHelper(element.Key.ToString(), $"{inputName}'s key", constraints));
+          }
+          catch
+          {
+            internalErrorList.Add(new SchemaError($"Key {element.Key} in JObject {inputName} is an incorrect type. Expected key type: {typeof(TKeyType).Name}"));
+          }
+        }
+        return internalErrorList;
+      }
+      return new Constraint<JObject>(InnerMethod, new JProperty(nameof(ConstrainDictionaryKeys), "true"));
+    }
+
+    /// <summary>
+    /// Applies all passed constraints to the values of a given dictionary type.
+    /// </summary>
+    /// <typeparam name="TDictionaryType">Type of dictionary that is being passed.</typeparam>
+    /// <typeparam name="TValueType">Type of the values in the passed dictionary.</typeparam>
+    /// <param name="constraints">Constraints to apply to all keys in the dictionary.</param>
+    /// <returns>Function ensuring that all keys in the dictionary comply with all constraints passed to the function.</returns>
+    public static Constraint<TDictionaryType> ConstrainDictionaryValues<TDictionaryType, TValueType>(params Constraint<TValueType>[] constraints) where TDictionaryType : IDictionary
+    {
+      List<SchemaError> InnerMethod(TDictionaryType inputDictionary, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        foreach (DictionaryEntry element in inputDictionary)
+        {
+          try
+          {
+            internalErrorList.AddRange(ApplyConstraintsHelper(element.Value.ToString(), $"{inputName}'s key {element.Key}", constraints));
+          }
+          catch
+          {
+            internalErrorList.Add(new SchemaError($"Value {element.Value} with key {element.Key} in dictionary {inputName} is an incorrect type. Expected value type: {typeof(TValueType).Name}"));
+          }
+        }
+        return internalErrorList;
+      }
+      return new Constraint<TDictionaryType>(InnerMethod, new JProperty(nameof(ConstrainDictionaryValues), "true"));
+    }
+
+    /// <summary>
+    /// Applies all passed constraints to the values of a given JObject.
+    /// </summary>
+    /// <typeparam name="TValueType">Type of the values in the passed JObject.</typeparam>
+    /// <param name="constraints">Constraints to apply to all keys in the JObject.</param>
+    /// <returns>Function ensuring that all keys in the JObject comply with all constraints passed to the function.</returns>
+    public static Constraint<JObject> ConstrainJObjectValues<TValueType>(params Constraint<TValueType>[] constraints)
+    {
+      List<SchemaError> InnerMethod(JObject inputDictionary, string inputName)
+      {
+        List<SchemaError> internalErrorList = new List<SchemaError>();
+        foreach (KeyValuePair<string, JToken> element in inputDictionary)
+        {
+          try
+          {
+            internalErrorList.AddRange(ApplyConstraintsHelper(element.Value.ToString(), $"{inputName}'s key {element.Key}", constraints));
+          }
+          catch
+          {
+            internalErrorList.Add(new SchemaError($"Value {element.Value} with key {element.Key} in dictionary {inputName} is an incorrect type. Expected value type: {typeof(TValueType).Name}"));
+          }
+        }
+        return internalErrorList;
+      }
+      return new Constraint<JObject>(InnerMethod, new JProperty(nameof(ConstrainDictionaryValues), "true"));
     }
 
     #endregion

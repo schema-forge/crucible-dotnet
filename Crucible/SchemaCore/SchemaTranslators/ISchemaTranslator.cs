@@ -29,7 +29,7 @@ namespace SchemaForge.Crucible
     /// <returns>(bool, <typeparamref name="TCastType"/>) where bool indicates
     /// success of the cast and <typeparamref name="TCastType"/> is the cast
     /// value if successful, default otherwise.</returns>
-    public bool TryCastValue<TCastType>(TCollectionType collection, string valueName, out TCastType outputValue);
+    bool TryCastValue<TCastType>(TCollectionType collection, string valueName, out TCastType outputValue);
 
     /// <summary>
     /// Extracts a value from <paramref name="collection"/> with the designation
@@ -38,7 +38,7 @@ namespace SchemaForge.Crucible
     /// <param name="collection">The collection from which to extract the value.</param>
     /// <param name="fieldName">The key for the value to be extracted.</param>
     /// <returns>bool indicating if the value is null or empty.</returns>
-    public bool FieldValueIsNullOrEmpty(TCollectionType collection, string fieldName);
+    bool FieldValueIsNullOrEmpty(TCollectionType collection, string fieldName);
 
     /// <summary>
     /// Inserts <paramref name="newValue"/> into <paramref name="collection"/>
@@ -50,7 +50,7 @@ namespace SchemaForge.Crucible
     /// <param name="valueName">The string designator for the value to be extracted.</param>
     /// <param name="newValue">The new value to be inserted.</param>
     /// <returns>New <typeparamref name="TCollectionType"/> with value inserted.</returns>
-    public TCollectionType InsertFieldValue<TDefaultValueType>(TCollectionType collection, string valueName, TDefaultValueType newValue);
+    TCollectionType InsertFieldValue<TDefaultValueType>(TCollectionType collection, string valueName, TDefaultValueType newValue);
 
     /// <summary>
     /// Searches <paramref name="collection"/> for a value with string designation <paramref name="valueName"/>
@@ -58,7 +58,7 @@ namespace SchemaForge.Crucible
     /// <param name="collection">The collection from which to extract the value.</param>
     /// <param name="valueName">The string designator for the value to be extracted.</param>
     /// <returns>bool indicating whether or not <paramref name="collection"/> contains a value with string designation <paramref name="valueName"/></returns>
-    public bool CollectionContains(TCollectionType collection, string valueName);
+    bool CollectionContains(TCollectionType collection, string valueName);
 
     /// <summary>
     /// Extracts a value from <paramref name="collection"/> with the designation
@@ -67,14 +67,14 @@ namespace SchemaForge.Crucible
     /// <param name="collection">The collection from which to extract the value.</param>
     /// <param name="valueName">The string designator for the value to be extracted.</param>
     /// <returns>string representation of <paramref name="valueName"/> extracted from <paramref name="collection"/></returns>
-    public string CollectionValueToString(TCollectionType collection, string valueName);
+    string CollectionValueToString(TCollectionType collection, string valueName);
 
     /// <summary>
     /// Extracts a list of all string representations of <see cref="Field"/>s inside <paramref name="collection"/>.
     /// </summary>
     /// <param name="collection">The collection from which to extract all keys.</param>
     /// <returns>List{string} containing all collection keys.</returns>
-    public List<string> GetCollectionKeys(TCollectionType collection);
+    List<string> GetCollectionKeys(TCollectionType collection);
 
     /// <summary>
     /// Takes the name of a valid .NET data type and translates it to the
@@ -82,6 +82,6 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="cSharpType">Name of a valid .NET data type.</param>
     /// <returns>Name of the corresponding type in <typeparamref name="TCollectionType"/></returns>
-    public string GetEquivalentType(string cSharpType);
+    string GetEquivalentType(string cSharpType);
   }
 }
