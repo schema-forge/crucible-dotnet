@@ -68,7 +68,7 @@ namespace SchemaForge.Crucible.Utilities
 
     /// <summary>
     /// Attempts to convert the input string to <see cref="DateTime"/>; first, it
-    /// attempts to use <see cref="DateTime.TryParse(string?, out DateTime)"/>.
+    /// attempts to use <see cref="DateTime.TryParse(string, out DateTime)"/>.
     /// If this fails, it will try each <see cref="DateTimeFormats"/>.
     /// To add a new format, use <see cref="RegisterDateTimeFormat(string)"/>
     /// </summary>

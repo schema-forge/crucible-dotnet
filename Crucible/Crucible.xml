@@ -466,7 +466,7 @@
         </member>
         <member name="M:SchemaForge.Crucible.Extensions.IEnumerableExtensions.Join``1(System.Collections.Generic.IEnumerable{``0},System.Char)">
             <summary>
-            Performs a <see cref="M:System.String.Join``1(System.Char,System.Collections.Generic.IEnumerable{``0})"/> operation
+            Performs a <see cref="M:System.String.Join``1(System.String,System.Collections.Generic.IEnumerable{``0})"/> operation
             on enumerable using the given <see cref="T:System.Char"/> seperator.
             <see cref="M:System.Object.ToString"/> is called on each item.
             </summary>

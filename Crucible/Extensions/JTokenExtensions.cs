@@ -25,17 +25,25 @@ namespace SchemaForge.Crucible.Extensions
       }
       else
       {
-        return token.Type switch
+        switch(token.Type)
         {
-          JTokenType.String => string.IsNullOrWhiteSpace(token.ToString()),
-          JTokenType.Array => ((JArray)token).Count == 0,
-          JTokenType.Object => ((JObject)token).Count == 0,
-          JTokenType.Null => true,
-          JTokenType.Undefined => true,
-          JTokenType.None => string.IsNullOrWhiteSpace(token.ToString()),
-          JTokenType.Property => ((JProperty)token).Name.IsNullOrEmpty() || ((JProperty)token).Value.IsNullOrEmpty(),
-          _ => false
-        };
+          case JTokenType.Null:
+            return true;
+          case JTokenType.String:
+            return string.IsNullOrWhiteSpace(token.ToString());
+          case JTokenType.Array:
+            return ((JArray)token).Count == 0;
+          case JTokenType.Object:
+            return ((JObject)token).Count == 0;
+          case JTokenType.Undefined:
+            return true;
+          case JTokenType.None:
+            return string.IsNullOrWhiteSpace(token.ToString());
+          case JTokenType.Property:
+            return ((JProperty)token).Name.IsNullOrEmpty() || ((JProperty)token).Value.IsNullOrEmpty();
+          default:
+            return false;
+        }
       }
     }
 
@@ -58,14 +66,19 @@ namespace SchemaForge.Crucible.Extensions
       }
       else
       {
-        return token.Type switch
+        switch (token.Type)
         {
-          JTokenType.String => token.ToString().Contains(item.ToString()),
-          JTokenType.Array => ((JArray)token).Contains(item),
-          JTokenType.Object => ((JObject)token).ContainsKey(item.ToString()),
-          JTokenType.Property => ((JProperty)token).Value.Contains(item),
-          _ => false
-        };
+          case JTokenType.String:
+            return token.ToString().Contains(item.ToString());
+          case JTokenType.Array:
+            return ((JArray)token).Contains(item);
+          case JTokenType.Object:
+            return ((JObject)token).ContainsKey(item.ToString());
+          case JTokenType.Property:
+            return ((JProperty)token).Value.Contains(item);
+          default:
+            return false;
+        }
       }
     }
 
@@ -87,11 +100,11 @@ namespace SchemaForge.Crucible.Extensions
       Therefore, if the attempted conversion fails, the value should not be part of the final list to search, which is why TryConvert returns a tuple, the first item of which indicates if the conversion was a success.
 
       */
-      static bool TryConvert(JToken input, out T output)
+      bool TryConvert(JToken convertInput, out T output)
       {
         try
         {
-          output = input.ToObject<T>();
+          output = convertInput.ToObject<T>();
           return true;
         }
         catch

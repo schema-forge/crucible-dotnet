@@ -69,10 +69,10 @@ namespace SchemaForge.Crucible
         List<int> argsInt = new List<int>();
         foreach (string stringArg in argString)
         {
-          if (stringArg.Contains('.') && !EndsInZeroHelper(stringArg))
-          {
-            throw new ArgumentException($"Error encountered while parsing value {stringArg}: Value is not parseable to int without loss of information.");
-          }
+          //if (stringArg.Contains('.') && !EndsInZeroHelper(stringArg))
+          //{
+          //  throw new ArgumentException($"Error encountered while parsing value {stringArg}: Value is not parseable to int without loss of information.");
+          //}
           if (int.TryParse(stringArg, out int intArg))
           {
             argsInt.Add(intArg);
@@ -193,7 +193,7 @@ namespace SchemaForge.Crucible
     /// </summary>
     /// <param name="inputString">String to check.</param>
     /// <returns>Bool indicating if the decimal places are all zero.</returns>
-    private static bool EndsInZeroHelper(string inputString) => inputString.Replace("0", "")[^1] == '.';
+    private static bool EndsInZeroHelper(string inputString) => inputString.Replace("0", "").Last() == '.';
 
   }
 }
